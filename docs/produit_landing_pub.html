@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Page Produit Optimisée Pub & Commande Directe — E-Commerce Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased min-h-screen flex flex-col">
+
+  <!-- ADMIN SIMULATOR BAR (Démontre le bouton 'Copier le lien') -->
+  <div class="bg-slate-900 text-white px-4 py-3 border-b border-slate-800 text-sm">
+    <div class="max-w-4xl mx-auto flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-2">
+        <span class="bg-blue-600 text-xs font-bold px-2.5 py-0.5 rounded-full">Vue Administrateur</span>
+        <span class="text-slate-300 text-xs">Quand vous ajoutez ce produit dans votre tableau de bord :</span>
+      </div>
+      <button onclick="copyProductLink()" id="copyBtn" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded-lg transition shadow-sm active:scale-95">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+        <span id="copyBtnText">Copier le lien pour la pub</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- STORE CLEAN NAVBAR -->
+  <header class="bg-white border-b border-slate-200 py-4 px-6 sticky top-0 z-40 shadow-xs">
+    <div class="max-w-4xl mx-auto flex justify-between items-center">
+      <div class="flex items-center gap-2">
+        <span class="text-xl font-extrabold text-slate-900 tracking-tight">🛍️ Boutique Officielle</span>
+      </div>
+      <div class="flex items-center gap-3 text-xs font-semibold text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-full border border-emerald-200">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        <span>Stock disponible • Expédition 24h</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN PRODUCT LANDING (Ce que le client voit en cliquant sur la pub) -->
+  <main class="max-w-4xl mx-auto px-4 py-8 flex-1">
+
+    <!-- Fil d'ariane & Badge de pub -->
+    <div class="flex justify-between items-center mb-6">
+      <div class="text-xs text-slate-500">Accueil / Horlogerie / Montre Chronographe</div>
+      <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-md">Offre Spéciale Réseaux Sociaux</span>
+    </div>
+
+    <!-- Layout 2 Colonnes Produit -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start mb-12">
+      <!-- Image Principale -->
+      <div class="bg-white p-3 rounded-2xl border border-slate-200 shadow-sm">
+        <div class="rounded-xl overflow-hidden aspect-square bg-slate-100 relative">
+          <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800&auto=format&fit=crop" alt="Montre" class="w-full h-full object-cover">
+          <span class="absolute top-3 left-3 bg-slate-900/80 backdrop-blur-md text-white text-xs font-bold px-3 py-1 rounded-full">
+            Écrin offert inclus
+          </span>
+        </div>
+      </div>
+
+      <!-- Détails Clés & Prix -->
+      <div class="flex flex-col">
+        <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Horlogerie</span>
+        <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 mt-1 mb-2">
+          Montre Chronographe Automatique 316L
+        </h1>
+
+        <!-- Avis / Étoiles -->
+        <div class="flex items-center gap-2 mb-4">
+          <div class="flex text-amber-400 text-sm">★★★★★</div>
+          <span class="text-xs font-semibold text-slate-600">(48 avis vérifiés)</span>
+        </div>
+
+        <!-- Prix & Économie -->
+        <div class="flex items-baseline gap-3 mb-6 bg-slate-50 p-4 rounded-xl border border-slate-100">
+          <span class="text-3xl font-black text-slate-900">189.00 €</span>
+          <span class="text-sm text-slate-400 line-through">249.00 €</span>
+          <span class="text-xs font-bold bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded">-24% de réduction</span>
+        </div>
+
+        <!-- Description Rapide -->
+        <p class="text-sm text-slate-600 leading-relaxed mb-6">
+          Boîtier en acier inoxydable 316L résistant aux chocs, verre minéral inrayable, mouvement automatique sans pile et bracelet en cuir véritable. Livrée dans son coffret luxe.
+        </p>
+
+        <!-- Points de Réassurance Rapides -->
+        <div class="grid grid-cols-2 gap-3 mb-6 text-xs text-slate-600">
+          <div class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-slate-200">
+            <span>🚚</span> <span>Livraison suivie 48h</span>
+          </div>
+          <div class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-slate-200">
+            <span>📦</span> <span>Colis protégé antichoc</span>
+          </div>
+          <div class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-slate-200">
+            <span>🛡️</span> <span>Garantie 2 ans incluse</span>
+          </div>
+          <div class="flex items-center gap-2 bg-white p-2.5 rounded-lg border border-slate-200">
+            <span>📞</span> <span>Confirmation par SMS</span>
+          </div>
+        </div>
+
+        <!-- Bouton d'ancrage direct vers le formulaire -->
+        <a href="#commande-rapide" class="w-full text-center bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition transform active:scale-98 flex items-center justify-center gap-2">
+          <span>Commander et être livré(e)</span>
+          <span>↓</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- ==========================================
+         LE FORMULAIRE DE COMMANDE DIRECTE INTÉGRÉ
+         ========================================== -->
+    <div id="commande-rapide" class="bg-white rounded-2xl border-2 border-blue-500 p-6 sm:p-8 shadow-lg">
+      <div class="text-center mb-8">
+        <span class="bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider">
+          Formulaire de Livraison Directe
+        </span>
+        <h2 class="text-2xl font-black text-slate-900 mt-2">
+          Renseignez vos informations pour recevoir votre colis
+        </h2>
+        <p class="text-slate-500 text-sm mt-1">
+          Aucun paiement par carte bancaire requis en ligne. Vous validez votre commande en 1 minute.
+        </p>
+      </div>
+
+      <form id="orderForm" onsubmit="handleOrderSubmit(event)">
+        <div class="space-y-6">
+
+          <!-- 1. Coordonnées -->
+          <div>
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">1</span>
+              Vos Coordonnées
+            </h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Nom et Prénom *</label>
+                <input type="text" required placeholder="ex: Thomas Martin" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Numéro de Téléphone (Pour le livreur) *</label>
+                <input type="tel" required placeholder="06 12 34 56 78" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+              </div>
+            </div>
+          </div>
+
+          <!-- 2. Adresse de Livraison -->
+          <div>
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">2</span>
+              Adresse de Livraison Physique
+            </h3>
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-slate-700 mb-1">Adresse (Rue, Numéro, Bâtiment) *</label>
+                <input type="text" required placeholder="14 Rue des Fleurs, Bâtiment C" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Code Postal *</label>
+                  <input type="text" required placeholder="69002" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-slate-700 mb-1">Ville *</label>
+                  <input type="text" required placeholder="Lyon" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:outline-none text-sm">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Choix du Transporteur -->
+          <div>
+            <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-3 flex items-center gap-2">
+              <span class="w-5 h-5 rounded-full bg-blue-600 text-white text-xs flex items-center justify-center font-bold">3</span>
+              Mode de Livraison
+            </h3>
+            <div class="space-y-2.5">
+              <label class="flex items-center justify-between p-3.5 border-2 border-blue-600 rounded-xl bg-blue-50/50 cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <input type="radio" name="carrier" checked class="text-blue-600 focus:ring-blue-500">
+                  <div>
+                    <div class="font-bold text-sm text-slate-900">Colissimo Domicile 48h (Remis en boîte aux lettres)</div>
+                    <div class="text-xs text-slate-500">Numéro de suivi envoyé par SMS dès expédition</div>
+                  </div>
+                </div>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">LIVRAISON GRATUITE</span>
+              </label>
+
+              <label class="flex items-center justify-between p-3.5 border border-slate-200 rounded-xl hover:bg-slate-50 cursor-pointer">
+                <div class="flex items-center gap-3">
+                  <input type="radio" name="carrier" class="text-blue-600 focus:ring-blue-500">
+                  <div>
+                    <div class="font-semibold text-sm text-slate-800">Point Relais Mondial Relay (3-4 jours)</div>
+                    <div class="text-xs text-slate-500">Retrait dans le commerce le plus proche</div>
+                  </div>
+                </div>
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2.5 py-1 rounded-full">GRATUIT</span>
+              </label>
+            </div>
+          </div>
+
+          <!-- Récapitulatif & Bouton de Validation -->
+          <div class="pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4">
+            <div>
+              <div class="text-xs text-slate-500">Total à payer à la confirmation :</div>
+              <div class="text-2xl font-black text-slate-900">189.00 € <span class="text-xs font-normal text-slate-500">(Livraison offerte)</span></div>
+            </div>
+
+            <button type="submit" class="w-full sm:w-auto bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold px-8 py-4 rounded-xl shadow-lg transition active:scale-95 text-base flex items-center justify-center gap-2">
+              <span>✓ Confirmer ma commande</span>
+            </button>
+          </div>
+
+        </div>
+      </form>
+
+      <!-- Message de Confirmation Immédiate -->
+      <div id="successNotice" class="hidden mt-6 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl p-6 text-center">
+        <div class="text-3xl mb-2">🎉</div>
+        <h4 class="text-lg font-bold">Commande validée avec succès !</h4>
+        <p class="text-sm text-emerald-700 mt-1">
+          Votre commande a été transmise immédiatement au vendeur. Votre colis sera préparé sous 24h et vous recevrez un SMS de suivi.
+        </p>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="bg-white border-t border-slate-200 py-6 text-center text-xs text-slate-400">
+    Boutique Officielle — Page optimisée pour les campagnes publicitaires directes.
+  </footer>
+
+  <script>
+    function copyProductLink() {
+      // Simule la copie du lien direct de publicité
+      const dummyUrl = window.location.href;
+      navigator.clipboard.writeText(dummyUrl).then(() => {
+        const btnText = document.getElementById('copyBtnText');
+        const btn = document.getElementById('copyBtn');
+        btnText.innerText = '✓ Lien copié ! Prêt pour Facebook / WhatsApp / TikTok';
+        btn.classList.remove('bg-blue-600');
+        btn.classList.add('bg-emerald-600');
+        setTimeout(() => {
+          btnText.innerText = 'Copier le lien pour la pub';
+          btn.classList.remove('bg-emerald-600');
+          btn.classList.add('bg-blue-600');
+        }, 3000);
+      });
+    }
+
+    function handleOrderSubmit(e) {
+      e.preventDefault();
+      document.getElementById('successNotice').classList.remove('hidden');
+      document.getElementById('successNotice').scrollIntoView({ behavior: 'smooth' });
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="fr" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animations sur les Textes au Défilement — E-Commerce Pro</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: '#2563eb',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Word-by-word scroll highlight */
+    .word-highlight {
+      color: #94a3b8;
+      transition: color 0.3s ease;
+    }
+    .word-highlight.lit {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    /* Mask reveal */
+    .mask-line-wrap {
+      overflow: hidden;
+      display: inline-block;
+    }
+    .mask-text {
+      display: inline-block;
+      transform: translateY(110%);
+      transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mask-text.revealed {
+      transform: translateY(0%);
+    }
+
+    /* Kinetic text */
+    .kinetic-track-left {
+      white-space: nowrap;
+      will-change: transform;
+      transition: transform 0.1s linear;
+    }
+    .kinetic-track-right {
+      white-space: nowrap;
+      will-change: transform;
+      transition: transform 0.1s linear;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-900 font-sans antialiased">
+
+  <!-- Sticky Top Header -->
+  <header class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-slate-200 py-4 px-6 flex justify-between items-center">
+    <div class="flex items-center gap-3">
+      <span class="text-xl font-bold tracking-tight">🛍️ Laboratoire Animations Textes</span>
+      <span class="text-xs font-semibold bg-blue-100 text-blue-700 px-3 py-1 rounded-full">Tailwind CSS Activé</span>
+    </div>
+    <div class="flex gap-2">
+      <a href="#anim-highlight" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200">1. Texte qui s'allume</a>
+      <a href="#anim-mask" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200">2. Sortie de masque</a>
+      <a href="#anim-kinetic" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200">3. Texte cinétique géant</a>
+      <a href="#anim-counter" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200">4. Chiffres qui grimpent</a>
+      <a href="#anim-typewriter" class="text-xs font-semibold px-3 py-1.5 rounded-lg bg-slate-100 hover:bg-slate-200">5. Machine à écrire</a>
+    </div>
+  </header>
+
+  <div class="max-w-5xl mx-auto px-6 py-12">
+
+    <!-- INTRO -->
+    <div class="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm text-center mb-16">
+      <h1 class="text-3xl font-extrabold text-slate-900 mb-3">Quelle animation de texte aviez-vous en tête ?</h1>
+      <p class="text-slate-600 max-w-2xl mx-auto">
+        Faites défiler cette page vers le bas : testez chacune des 5 animations de texte les plus courantes sur le web moderne.
+      </p>
+    </div>
+
+    <!-- ==========================================
+         ANIMATION 1: TEXTE QUI S'ALLUME AU DÉFILEMENT (WORD HIGHLIGHT)
+         ========================================== -->
+    <section id="anim-highlight" class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm mb-20">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-8">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Animation 1 (Très tendance style Linear / Apple / Notion)</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1">Le texte qui s'allume mot par mot au défilement</h2>
+        </div>
+        <span class="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1 rounded-full">Scrollez doucement dessus ↓</span>
+      </div>
+
+      <div class="py-12 px-6 bg-slate-50 rounded-xl border border-slate-100">
+        <p id="highlightParagraph" class="text-3xl sm:text-4xl font-semibold leading-relaxed text-slate-300 transition-all">
+          <span class="word-highlight">Chaque</span>
+          <span class="word-highlight">produit</span>
+          <span class="word-highlight">physique</span>
+          <span class="word-highlight">est</span>
+          <span class="word-highlight">sélectionné</span>
+          <span class="word-highlight">avec</span>
+          <span class="word-highlight">soin.</span>
+          <span class="word-highlight">Nous</span>
+          <span class="word-highlight">vérifions</span>
+          <span class="word-highlight">la</span>
+          <span class="word-highlight">qualité,</span>
+          <span class="word-highlight">nous</span>
+          <span class="word-highlight">emballons</span>
+          <span class="word-highlight">avec</span>
+          <span class="word-highlight">attention</span>
+          <span class="word-highlight">et</span>
+          <span class="word-highlight">nous</span>
+          <span class="word-highlight">expédions</span>
+          <span class="word-highlight">directement</span>
+          <span class="word-highlight">chez</span>
+          <span class="word-highlight">vous</span>
+          <span class="word-highlight">en</span>
+          <span class="word-highlight">24</span>
+          <span class="word-highlight">heures.</span>
+        </p>
+      </div>
+      <p class="text-xs text-slate-500 mt-4 text-center">
+        💡 <em>Comment ça marche : les mots sont gris clair au départ et deviennent noir intense au fur et à mesure que vous descendez la page.</em>
+      </p>
+    </section>
+
+    <!-- ==========================================
+         ANIMATION 2: SPLIT-TEXT MASK REVEAL (LE TEXTE QUI SORT DU SOL)
+         ========================================== -->
+    <section id="anim-mask" class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm mb-20">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-8">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-indigo-600">Animation 2 (Style Awwwards / Studio Design)</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1">L'effet de masque : les mots sortent du sol</h2>
+        </div>
+        <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full">Re-scrollez pour déclencher</span>
+      </div>
+
+      <div class="py-16 text-center bg-slate-900 text-white rounded-xl">
+        <h3 class="text-4xl sm:text-5xl font-extrabold tracking-tight">
+          <div class="mask-line-wrap"><span class="mask-text">Des articles</span></div>
+          <div class="mask-line-wrap"><span class="mask-text text-blue-400">bien pensés,</span></div>
+          <div class="mask-line-wrap"><span class="mask-text">livrés sans friction.</span></div>
+        </h3>
+        <p class="mt-6 text-slate-400 max-w-lg mx-auto">
+          <div class="mask-line-wrap"><span class="mask-text text-sm">Une expérience fluide de la commande jusqu'à votre porte.</span></div>
+        </p>
+        <button onclick="triggerMask()" class="mt-8 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-semibold transition">
+          Rejouer l'animation de sortie
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 mt-4 text-center">
+        💡 <em>Comment ça marche : les mots montent d'une ligne invisible comme si un rideau se levait.</em>
+      </p>
+    </section>
+
+    <!-- ==========================================
+         ANIMATION 3: KINETIC PARALLAX TEXT (TEXTE GÉANT QUI GLISSE AU SCROLL)
+         ========================================== -->
+    <section id="anim-kinetic" class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm mb-20 overflow-hidden">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-8">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-600">Animation 3 (Style Nike / Balenciaga / Off-White)</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1">Le texte cinétique géant qui glisse au scroll</h2>
+        </div>
+        <span class="bg-purple-50 text-purple-700 text-xs font-bold px-3 py-1 rounded-full">Faites défiler haut/bas</span>
+      </div>
+
+      <div class="py-12 bg-slate-100 rounded-xl overflow-hidden border border-slate-200 flex flex-col gap-4">
+        <!-- Ligne 1 : glisse à gauche -->
+        <div id="kineticTrack1" class="kinetic-track-left text-5xl sm:text-7xl font-black text-slate-300 uppercase tracking-tighter">
+          AUTHENTIQUE • EXPÉDITION 24H • QUALITÉ PHYSIQUE • STOCK RÉEL • DIRECT FABRICANT •
+        </div>
+        <!-- Ligne 2 : glisse à droite -->
+        <div id="kineticTrack2" class="kinetic-track-right text-5xl sm:text-7xl font-black text-blue-600/30 uppercase tracking-tighter">
+          NOUVELLE COLLECTION • TESTÉ & APPROUVÉ • EMBALLAGE RENFORCÉ • SATISFACTION 100% •
+        </div>
+      </div>
+      <p class="text-xs text-slate-500 mt-4 text-center">
+        💡 <em>Comment ça marche : lorsque vous défilez vers le bas, les mots géants glissent automatiquement vers la gauche et la droite à des vitesses opposées.</em>
+      </p>
+    </section>
+
+    <!-- ==========================================
+         ANIMATION 4: CHIFFRES QUI S'INCRÉMENTENT AU SCROLL (NUMBER COUNTERS)
+         ========================================== -->
+    <section id="anim-counter" class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm mb-20">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-8">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-emerald-600">Animation 4 (Rassurance & Chiffres Clés)</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1">Les compteurs de chiffres qui défilent en direct</h2>
+        </div>
+        <span class="bg-emerald-50 text-emerald-700 text-xs font-bold px-3 py-1 rounded-full">S'active à l'arrivée</span>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 py-8">
+        <div class="bg-slate-50 border border-slate-100 rounded-xl p-6 text-center">
+          <div class="text-4xl sm:text-5xl font-black text-slate-900 counter" data-target="24">0</div>
+          <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mt-2">Heures d'expédition</div>
+          <p class="text-xs text-slate-500 mt-1">Colis préparé le jour même</p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-100 rounded-xl p-6 text-center">
+          <div class="text-4xl sm:text-5xl font-black text-slate-900 counter" data-target="1500">0</div>
+          <div class="text-xs font-bold text-blue-600 uppercase tracking-wider mt-2">Colis déjà livrés</div>
+          <p class="text-xs text-slate-500 mt-1">Dans toute la France</p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-100 rounded-xl p-6 text-center">
+          <div class="text-4xl sm:text-5xl font-black text-slate-900 counter" data-target="100">0</div>
+          <div class="text-xs font-bold text-purple-600 uppercase tracking-wider mt-2">% Stocks réels garantis</div>
+          <p class="text-xs text-slate-500 mt-1">Aucune mauvaise surprise</p>
+        </div>
+      </div>
+      <p class="text-xs text-slate-500 mt-4 text-center">
+        💡 <em>Comment ça marche : dès que cette section arrive à l'écran, les chiffres tournent à toute vitesse jusqu'à leur vraie valeur.</em>
+      </p>
+    </section>
+
+    <!-- ==========================================
+         ANIMATION 5: MACHINE À ÉCRIRE / MOTS QUI CHANGENT AUTOMATIQUEMENT
+         ========================================== -->
+    <section id="anim-typewriter" class="bg-white rounded-2xl border border-slate-200 p-8 shadow-sm mb-20">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-8">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-amber-600">Animation 5 (Dynamisme & Titres accrocheurs)</span>
+          <h2 class="text-2xl font-bold text-slate-900 mt-1">Le mot-clé qui s'écrit et change automatiquement</h2>
+        </div>
+        <span class="bg-amber-50 text-amber-700 text-xs font-bold px-3 py-1 rounded-full">Animation automatique</span>
+      </div>
+
+      <div class="py-16 text-center bg-slate-50 rounded-xl border border-slate-100">
+        <h3 class="text-3xl sm:text-4xl font-extrabold text-slate-900">
+          Trouvez l'article parfait pour vos <br>
+          <span id="typewriterText" class="text-blue-600 border-r-2 border-blue-600 pr-1 animate-pulse">besoins quotidiens</span>
+        </h3>
+        <p class="text-slate-500 text-sm mt-4">Le mot en couleur s'efface et se réécrit en boucle.</p>
+      </div>
+      <p class="text-xs text-slate-500 mt-4 text-center">
+        💡 <em>Comment ça marche : le mot clé tape lettre par lettre, puis s'efface pour écrire le mot suivant.</em>
+      </p>
+    </section>
+
+  </div>
+
+  <footer class="text-center py-10 text-xs text-slate-400 border-t border-slate-200">
+    Laboratoire des Textes • Développé avec Tailwind CSS pour votre boutique e-commerce.
+  </footer>
+
+  <script>
+    // 1. Word-by-word scroll highlight
+    const words = document.querySelectorAll('.word-highlight');
+    window.addEventListener('scroll', () => {
+      const section = document.getElementById('anim-highlight');
+      const rect = section.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+
+      // Fraction of section visible
+      const progress = Math.min(Math.max((windowHeight - rect.top) / (windowHeight + rect.height * 0.5), 0), 1);
+      const litCount = Math.floor(progress * words.length * 1.3);
+
+      words.forEach((w, idx) => {
+        if (idx < litCount) {
+          w.classList.add('lit');
+        } else {
+          w.classList.remove('lit');
+        }
+      });
+    });
+
+    // 2. Mask reveal with IntersectionObserver
+    function triggerMask() {
+      const maskTexts = document.querySelectorAll('.mask-text');
+      maskTexts.forEach((el, i) => {
+        el.classList.remove('revealed');
+        setTimeout(() => el.classList.add('revealed'), i * 150 + 50);
+      });
+    }
+
+    const maskObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          triggerMask();
+        }
+      });
+    }, { threshold: 0.3 });
+    maskObserver.observe(document.getElementById('anim-mask'));
+
+    // 3. Kinetic Parallax Text
+    window.addEventListener('scroll', () => {
+      const scrollY = window.pageYOffset;
+      const t1 = document.getElementById('kineticTrack1');
+      const t2 = document.getElementById('kineticTrack2');
+      if (t1 && t2) {
+        t1.style.transform = `translateX(-${scrollY * 0.25}px)`;
+        t2.style.transform = `translateX(${scrollY * 0.25 - 200}px)`;
+      }
+    });
+
+    // 4. Counter Animation
+    const counterObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          document.querySelectorAll('.counter').forEach(c => {
+            const target = +c.getAttribute('data-target');
+            let count = 0;
+            const step = Math.ceil(target / 40);
+            const timer = setInterval(() => {
+              count += step;
+              if (count >= target) {
+                c.innerText = target + (target === 100 ? '%' : '+');
+                clearInterval(timer);
+              } else {
+                c.innerText = count;
+              }
+            }, 30);
+          });
+        }
+      });
+    }, { threshold: 0.4 });
+    counterObserver.observe(document.getElementById('anim-counter'));
+
+    // 5. Typewriter Effect
+    const wordsList = ["besoins quotidiens", "déplacements urbains", "moments de détente", "envies du moment"];
+    let wordIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    const typewriterEl = document.getElementById('typewriterText');
+
+    function type() {
+      const currentWord = wordsList[wordIndex];
+      if (isDeleting) {
+        typewriterEl.textContent = currentWord.substring(0, charIndex - 1);
+        charIndex--;
+      } else {
+        typewriterEl.textContent = currentWord.substring(0, charIndex + 1);
+        charIndex++;
+      }
+
+      let speed = isDeleting ? 40 : 80;
+
+      if (!isDeleting && charIndex === currentWord.length) {
+        speed = 1800; // pause at end
+        isDeleting = true;
+      } else if (isDeleting && charIndex === 0) {
+        isDeleting = false;
+        wordIndex = (wordIndex + 1) % wordsList.length;
+        speed = 400;
+      }
+
+      setTimeout(type, speed);
+    }
+    type();
+  </script>
+
+</body>
+</html>

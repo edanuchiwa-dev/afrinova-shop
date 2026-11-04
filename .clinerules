@@ -1,0 +1,22 @@
+# Instructions pour Cline — Lead Frontend & UI 🎨
+
+Bienvenue Cline ! Le client a officiellement **validé la maquette et la direction artistique** pour notre projet e-commerce d'équipe.
+
+## Spécifications Validées par le Client :
+1. **Framework de style** : **Tailwind CSS v4** (déjà installé et configuré dans le projet).
+2. **Parcours Mobile Storytelling** :
+   * En-tête sobre sans bandeaux superflus.
+   * Hero avec mot clé qui change en machine à écrire (`Typewriter`).
+   * Titre qui monte du bas (`Split-text mask reveal`).
+   * Paragraphe d'engagement qui s'allume mot par mot au défilement (`Word-by-word scroll highlight`).
+   * Compteurs de chiffres dynamiques (24h, 1500+ colis, 100% garanti).
+   * Arrivée sur les catégories et la grille de produits en 2 colonnes mobile.
+3. **Fiche Produit (Option 2 Validée)** :
+   * Grandes photos nettes, prix, avis, sélecteur de variantes.
+   * **Formulaire de livraison directe compact intégré directement sous le produit** (Nom, Téléphone, Adresse, Ville, Colissimo/Relais).
+   * Aucune carte bancaire requise.
+   * Barre d'action rapide flottante en bas sur mobile pour défiler directement au formulaire.
+4. **Administration** :
+   * Bouton 1-clic **« Copier le lien pour la pub »** à côté de chaque article dans le tableau de bord pour faciliter le partage direct sur TikTok/Facebook/WhatsApp.
+
+Consulte [`TASKS_BOARD.md`](./TASKS_BOARD.md) pour voir tes tâches assignées (`@Cline`) et démarre la Phase 3 dès que prêt !

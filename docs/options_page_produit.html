@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Comparateur des 3 Options de Page Produit</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Slide-over drawer animation */
+    #drawerBackdrop {
+      transition: opacity 0.3s ease;
+    }
+    #drawerPanel {
+      transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    /* Modal animation */
+    #modalBackdrop {
+      transition: opacity 0.25s ease;
+    }
+    #modalPanel {
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-900 font-sans antialiased min-h-screen">
+
+  <!-- TOP SELECTOR TOOLBAR -->
+  <div class="sticky top-0 z-50 bg-slate-900 text-white border-b border-slate-800 shadow-md">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-2">
+        <span class="text-sm font-bold tracking-tight">🛍️ Testez les 3 Options :</span>
+      </div>
+      <div class="flex gap-2">
+        <button onclick="switchOption(1)" id="tab1" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-blue-600 text-white shadow-xs">
+          Option 1 : Tiroir Latéral (Slide-over)
+        </button>
+        <button onclick="switchOption(2)" id="tab2" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:text-white">
+          Option 2 : Champs Intégrés (Inline)
+        </button>
+        <button onclick="switchOption(3)" id="tab3" class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:text-white">
+          Option 3 : Pop-in Express (Modal)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPLANATION BANNER -->
+  <div class="max-w-6xl mx-auto px-4 pt-6">
+    <div id="optionBanner" class="bg-blue-50 border border-blue-200 text-blue-900 px-5 py-3 rounded-xl text-sm flex items-center justify-between">
+      <div>
+        <strong id="optionBannerTitle">Option 1 sélectionnée : Le Tiroir Latéral</strong>
+        <span id="optionBannerDesc" class="text-xs text-blue-700 block mt-0.5">
+          La page produit reste 100% épurée. Cliquez sur le bouton bleu « Commander » pour voir le tiroir glisser depuis la droite.
+        </span>
+      </div>
+      <span class="text-xs font-bold uppercase bg-blue-200 text-blue-800 px-2.5 py-1 rounded-md">Recommandé</span>
+    </div>
+  </div>
+
+  <!-- MAIN PRODUCT PAGE VIEW -->
+  <main class="max-w-6xl mx-auto px-4 py-8">
+    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 sm:p-10">
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-10 lg:gap-14 items-start">
+
+        <!-- COLUMN LEFT: PHOTOS -->
+        <div>
+          <div class="rounded-2xl overflow-hidden aspect-square bg-slate-100 border border-slate-200 mb-4 relative group">
+            <img id="mainImage" src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800&auto=format&fit=crop" alt="Sac à dos urbain" class="w-full h-full object-cover">
+            <span class="absolute top-3 left-3 bg-white/90 backdrop-blur-md text-slate-900 text-xs font-bold px-3 py-1 rounded-full border border-slate-200 shadow-xs">
+              Expédition 24h
+            </span>
+          </div>
+
+          <!-- Thumbnails -->
+          <div class="grid grid-cols-4 gap-3">
+            <button onclick="changePhoto(this, 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800')" class="rounded-xl overflow-hidden aspect-square border-2 border-blue-600">
+              <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=200" class="w-full h-full object-cover">
+            </button>
+            <button onclick="changePhoto(this, 'https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=800')" class="rounded-xl overflow-hidden aspect-square border border-slate-200 hover:border-slate-400">
+              <img src="https://images.unsplash.com/photo-1548036328-c9fa89d128fa?w=200" class="w-full h-full object-cover">
+            </button>
+            <button onclick="changePhoto(this, 'https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=800')" class="rounded-xl overflow-hidden aspect-square border border-slate-200 hover:border-slate-400">
+              <img src="https://images.unsplash.com/photo-1622560480605-d83c853bc5c3?w=200" class="w-full h-full object-cover">
+            </button>
+            <button onclick="changePhoto(this, 'https://images.unsplash.com/photo-1581605405669-fcdf81165afa?w=800')" class="rounded-xl overflow-hidden aspect-square border border-slate-200 hover:border-slate-400">
+              <img src="https://images.unsplash.com/photo-1581605405669-fcdf81165afa?w=200" class="w-full h-full object-cover">
+            </button>
+          </div>
+        </div>
+
+        <!-- COLUMN RIGHT: DETAILS & ACTIONS -->
+        <div class="flex flex-col">
+          <div class="flex items-center justify-between mb-2">
+            <span class="text-xs font-bold uppercase tracking-wider text-slate-400">Maroquinerie & Accessoires</span>
+            <span class="text-xs font-semibold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              ● En stock (18 disponibles)
+            </span>
+          </div>
+
+          <h1 class="text-3xl font-extrabold text-slate-900 leading-tight mb-2">
+            Sac à Dos Urbain en Toile et Cuir
+          </h1>
+
+          <div class="flex items-center gap-2 mb-4">
+            <div class="flex text-amber-400 text-sm">★★★★★</div>
+            <span class="text-xs text-slate-500 font-medium">4.9/5 (62 avis clients)</span>
+          </div>
+
+          <!-- Price -->
+          <div class="flex items-baseline gap-3 mb-6">
+            <span class="text-3xl font-black text-slate-900">85.00 €</span>
+            <span class="text-sm text-slate-400 line-through">115.00 €</span>
+            <span class="text-xs font-bold bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">Livraison Colissimo Offerte</span>
+          </div>
+
+          <p class="text-sm text-slate-600 leading-relaxed mb-6">
+            Conçu pour le quotidien, ce sac intègre un compartiment ordinateur rembourré jusqu'à 16 pouces, des matériaux hydrofuges et des finitions en cuir véritable.
+          </p>
+
+          <!-- Choices (Color) -->
+          <div class="mb-6">
+            <label class="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">Couleur :</label>
+            <div class="flex gap-2">
+              <button class="px-3.5 py-1.5 rounded-lg border-2 border-slate-900 text-xs font-bold bg-white text-slate-900">Kaki & Cuir Fauve</button>
+              <button class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:border-slate-400">Noir Graphite</button>
+              <button class="px-3.5 py-1.5 rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:border-slate-400">Bleu Nuit</button>
+            </div>
+          </div>
+
+          <!-- ACTION BUTTON (VARY DEPENDING ON ACTIVE OPTION) -->
+          <div id="actionArea">
+
+            <!-- OPTION 1 & 3 BUTTON -->
+            <div id="standardBtnWrapper" class="space-y-3">
+              <button onclick="handleCommanderClick()" class="w-full bg-slate-900 hover:bg-black text-white font-bold py-4 px-6 rounded-xl transition flex items-center justify-center gap-2 shadow-sm active:scale-98">
+                <span>Commander maintenant (Livraison 48h)</span>
+                <span>→</span>
+              </button>
+              <div class="text-center text-xs text-slate-400">
+                Paiement direct sans carte bancaire requise.
+              </div>
+            </div>
+
+            <!-- OPTION 2: INLINE FORM (SHOWN ONLY WHEN TAB 2 IS ACTIVE) -->
+            <div id="inlineFormWrapper" class="hidden mt-2 p-5 rounded-xl border border-slate-200 bg-slate-50 space-y-4">
+              <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-600">Livraison Express Directe</span>
+                <span class="text-xs text-emerald-600 font-bold">Colis expédié demain</span>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <input type="text" placeholder="Nom et Prénom" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <input type="tel" placeholder="Téléphone (suivi SMS)" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+              </div>
+              <input type="text" placeholder="Adresse complète (Rue, bâtiment)" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+              <div class="grid grid-cols-2 gap-3">
+                <input type="text" placeholder="Code postal" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+                <input type="text" placeholder="Ville" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white focus:outline-none focus:ring-1 focus:ring-blue-500">
+              </div>
+              <button onclick="simulateOrderSuccess()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg text-xs transition">
+                Valider ma livraison (85.00 €)
+              </button>
+            </div>
+
+          </div>
+
+          <!-- Micro reassurance -->
+          <div class="mt-8 pt-6 border-t border-slate-100 grid grid-cols-3 gap-3 text-center text-xs text-slate-500">
+            <div>
+              <div class="font-bold text-slate-800">🚚 48H</div>
+              <div>Colissimo suivi</div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-800">📦 0.85 kg</div>
+              <div>Poids du colis</div>
+            </div>
+            <div>
+              <div class="font-bold text-slate-800">🛡️ 2 Ans</div>
+              <div>Garantie totale</div>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========================================================
+       MODAL: OPTION 1 (SLIDE-OVER DRAWER)
+       ======================================================== -->
+  <div id="drawerContainer" class="fixed inset-0 z-50 pointer-events-none">
+    <!-- Backdrop -->
+    <div id="drawerBackdrop" onclick="closeDrawer()" class="absolute inset-0 bg-slate-900/40 opacity-0 pointer-events-none"></div>
+
+    <!-- Panel (Slides from right) -->
+    <div id="drawerPanel" class="absolute top-0 right-0 h-full w-full max-w-md bg-white shadow-2xl transform translate-x-full pointer-events-auto flex flex-col p-6 overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-slate-200 pb-4 mb-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-blue-600">Option 1</span>
+          <h2 class="text-lg font-bold text-slate-900">Finaliser la Livraison</h2>
+        </div>
+        <button onclick="closeDrawer()" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">✕</button>
+      </div>
+
+      <!-- Item recap in drawer -->
+      <div class="flex items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200 mb-6">
+        <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=200" class="w-12 h-12 object-cover rounded-lg">
+        <div class="flex-1 text-xs">
+          <div class="font-bold text-slate-900">Sac à Dos Urbain Cuir</div>
+          <div class="text-slate-500">Qté: 1 • Couleur: Kaki & Fauve</div>
+        </div>
+        <div class="font-bold text-sm text-slate-900">85.00 €</div>
+      </div>
+
+      <!-- Form inside drawer -->
+      <form onsubmit="handleDrawerSubmit(event)" class="space-y-4 flex-1">
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Nom et Prénom *</label>
+          <input type="text" required placeholder="ex: Jean Dupont" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Téléphone portable *</label>
+          <input type="tel" required placeholder="06 12 34 56 78" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Adresse de livraison *</label>
+          <input type="text" required placeholder="Numéro, rue, bâtiment" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Code Postal *</label>
+            <input type="text" required placeholder="75001" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Ville *</label>
+            <input type="text" required placeholder="Paris" class="w-full px-3.5 py-2.5 rounded-lg border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-200 mt-6">
+          <div class="flex justify-between text-xs text-slate-500 mb-1">
+            <span>Frais de port</span>
+            <span class="text-emerald-600 font-bold">Offerts</span>
+          </div>
+          <div class="flex justify-between text-base font-bold text-slate-900 mb-4">
+            <span>Total</span>
+            <span>85.00 €</span>
+          </div>
+
+          <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 rounded-xl text-sm transition shadow-sm">
+            Confirmer ma commande
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MODAL: OPTION 3 (CENTERED POPUP)
+       ======================================================== -->
+  <div id="modalContainer" class="fixed inset-0 z-50 pointer-events-none flex items-center justify-center p-4">
+    <!-- Backdrop -->
+    <div id="modalBackdrop" onclick="closeModal()" class="absolute inset-0 bg-slate-900/50 opacity-0 pointer-events-none backdrop-blur-xs"></div>
+
+    <!-- Center Card -->
+    <div id="modalPanel" class="relative bg-white rounded-2xl shadow-2xl max-w-lg w-full p-6 sm:p-8 transform scale-95 opacity-0 pointer-events-none">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-4 mb-6">
+        <div>
+          <span class="text-xs font-bold uppercase tracking-wider text-purple-600">Option 3</span>
+          <h2 class="text-xl font-bold text-slate-900">Commander en 1 minute</h2>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold p-1">✕</button>
+      </div>
+
+      <form onsubmit="handleModalSubmit(event)" class="space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Nom *</label>
+            <input type="text" required placeholder="Dupont" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Téléphone *</label>
+            <input type="tel" required placeholder="06 12 34 56 78" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-semibold text-slate-700 mb-1">Adresse de livraison *</label>
+          <input type="text" required placeholder="Rue, numéro, appartement" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Code Postal *</label>
+            <input type="text" required placeholder="75001" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-xs font-semibold text-slate-700 mb-1">Ville *</label>
+            <input type="text" required placeholder="Paris" class="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs focus:ring-1 focus:ring-purple-500 focus:outline-none">
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex items-center justify-between">
+          <div>
+            <div class="text-xs text-slate-500">Total à régler</div>
+            <div class="text-xl font-black text-slate-900">85.00 €</div>
+          </div>
+          <button type="submit" class="bg-purple-600 hover:bg-purple-700 text-white font-bold py-2.5 px-6 rounded-xl text-xs transition shadow-sm">
+            Valider ma livraison
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPT -->
+  <script>
+    let currentOption = 1;
+
+    function switchOption(num) {
+      currentOption = num;
+
+      // Update tabs styling
+      [1, 2, 3].forEach(n => {
+        const tab = document.getElementById('tab' + n);
+        if (n === num) {
+          tab.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-blue-600 text-white shadow-xs';
+        } else {
+          tab.className = 'px-3.5 py-1.5 rounded-lg text-xs font-bold transition bg-slate-800 text-slate-300 hover:text-white';
+        }
+      });
+
+      // Update banner explanation
+      const title = document.getElementById('optionBannerTitle');
+      const desc = document.getElementById('optionBannerDesc');
+      const standardWrapper = document.getElementById('standardBtnWrapper');
+      const inlineWrapper = document.getElementById('inlineFormWrapper');
+
+      if (num === 1) {
+        title.innerText = 'Option 1 sélectionnée : Le Tiroir Latéral (Slide-over)';
+        desc.innerText = 'La page reste 100% propre et moderne. Cliquez sur le bouton « Commander maintenant » pour voir le tiroir glisser depuis la droite.';
+        standardWrapper.classList.remove('hidden');
+        inlineWrapper.classList.add('hidden');
+      } else if (num === 2) {
+        title.innerText = 'Option 2 sélectionnée : Les Champs Intégrés (Inline)';
+        desc.innerText = 'Le formulaire de livraison apparaît de manière discrète et compacte directement sous la description, sans gros bloc bleu agressif.';
+        standardWrapper.classList.add('hidden');
+        inlineWrapper.classList.remove('hidden');
+      } else if (num === 3) {
+        title.innerText = 'Option 3 sélectionnée : La Pop-in Express (Modal)';
+        desc.innerText = 'Cliquez sur « Commander maintenant » pour voir la fenêtre contextuelle centrée et épurée s\'ouvrir au premier plan.';
+        standardWrapper.classList.remove('hidden');
+        inlineWrapper.classList.add('hidden');
+      }
+    }
+
+    function handleCommanderClick() {
+      if (currentOption === 1) {
+        openDrawer();
+      } else if (currentOption === 3) {
+        openModal();
+      }
+    }
+
+    // Drawer handlers
+    function openDrawer() {
+      const backdrop = document.getElementById('drawerBackdrop');
+      const panel = document.getElementById('drawerPanel');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100', 'pointer-events-auto');
+      panel.classList.remove('translate-x-full');
+      panel.classList.add('translate-x-0');
+    }
+
+    function closeDrawer() {
+      const backdrop = document.getElementById('drawerBackdrop');
+      const panel = document.getElementById('drawerPanel');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+      panel.classList.add('translate-x-full');
+      panel.classList.remove('translate-x-0');
+    }
+
+    // Modal handlers
+    function openModal() {
+      const backdrop = document.getElementById('modalBackdrop');
+      const panel = document.getElementById('modalPanel');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100', 'pointer-events-auto');
+      panel.classList.remove('scale-95', 'opacity-0', 'pointer-events-none');
+      panel.classList.add('scale-100', 'opacity-100', 'pointer-events-auto');
+    }
+
+    function closeModal() {
+      const backdrop = document.getElementById('modalBackdrop');
+      const panel = document.getElementById('modalPanel');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      backdrop.classList.remove('opacity-100', 'pointer-events-auto');
+      panel.classList.add('scale-95', 'opacity-0', 'pointer-events-none');
+      panel.classList.remove('scale-100', 'opacity-100', 'pointer-events-auto');
+    }
+
+    function changePhoto(btn, src) {
+      document.getElementById('mainImage').src = src;
+      btn.parentElement.querySelectorAll('button').forEach(b => {
+        b.className = 'rounded-xl overflow-hidden aspect-square border border-slate-200 hover:border-slate-400';
+      });
+      btn.className = 'rounded-xl overflow-hidden aspect-square border-2 border-blue-600';
+    }
+
+    function handleDrawerSubmit(e) {
+      e.preventDefault();
+      alert('✓ Commande confirmée via le Tiroir ! Alerte envoyée sur votre téléphone.');
+      closeDrawer();
+    }
+
+    function handleModalSubmit(e) {
+      e.preventDefault();
+      alert('✓ Commande confirmée via la Pop-in ! Alerte envoyée sur votre téléphone.');
+      closeModal();
+    }
+
+    function simulateOrderSuccess() {
+      alert('✓ Commande confirmée via les champs intégrés ! Alerte envoyée sur votre téléphone.');
+    }
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Aperçu Boutique Complète sur Smartphone — E-Commerce Pro</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Hide scrollbars inside mobile phone */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    /* 1. Infinite Marquee ticker */
+    @keyframes marqueeScroll {
+      0% { transform: translateX(0%); }
+      100% { transform: translateX(-50%); }
+    }
+    .marquee-track {
+      display: flex;
+      width: max-content;
+      animation: marqueeScroll 15s linear infinite;
+    }
+
+    /* 2. Word-by-word scroll highlight */
+    .word-hl {
+      color: #cbd5e1;
+      transition: color 0.25s ease, font-weight 0.25s ease;
+    }
+    .word-hl.lit {
+      color: #0f172a;
+      font-weight: 800;
+    }
+
+    /* 3. Split-text Mask Reveal */
+    .mask-wrap {
+      overflow: hidden;
+      display: inline-block;
+    }
+    .mask-elem {
+      display: inline-block;
+      transform: translateY(115%);
+      transition: transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .mask-elem.revealed {
+      transform: translateY(0%);
+    }
+
+    /* 4. Kinetic Parallax Text (slid via JS on scroll) */
+    .kinetic-line-1, .kinetic-line-2 {
+      white-space: nowrap;
+      will-change: transform;
+      transition: transform 0.08s linear;
+    }
+  </style>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans antialiased min-h-screen py-6 px-4 flex flex-col items-center justify-center">
+
+  <!-- TOP TOOLBAR -->
+  <div class="max-w-md w-full mb-4 flex justify-between items-center text-xs">
+    <div class="flex items-center gap-2">
+      <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+      <span class="font-bold text-slate-300">Vitrine & Catalogue sur Smartphone (390px)</span>
+    </div>
+    <span class="bg-blue-600/30 text-blue-400 font-bold px-2.5 py-1 rounded-full border border-blue-500/30">
+      Navigation Interactive
+    </span>
+  </div>
+
+  <!-- PHONE DEVICE FRAME -->
+  <div class="relative w-full max-w-[390px] h-[820px] bg-slate-800 rounded-[48px] p-3 shadow-2xl border-4 border-slate-700 shadow-blue-900/20 flex flex-col">
+
+    <!-- Dynamic Island / Speaker -->
+    <div class="absolute top-6 left-1/2 -translate-x-1/2 w-28 h-6 bg-slate-900 rounded-full z-50 flex items-center justify-end px-3">
+      <span class="w-2.5 h-2.5 rounded-full bg-slate-800 border border-slate-700"></span>
+    </div>
+
+    <!-- Phone Screen Content -->
+    <div class="relative w-full h-full bg-slate-50 text-slate-900 rounded-[38px] overflow-hidden flex flex-col shadow-inner">
+
+      <!-- Status Bar -->
+      <div class="h-10 pt-2 px-6 flex justify-between items-center text-[11px] font-bold text-slate-700 select-none bg-white">
+        <span>09:41</span>
+        <div class="flex items-center gap-1.5">
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 3c-4.97 0-9 4.03-9 9 0 2.12.74 4.07 1.97 5.61L12 22l7.03-4.39C20.26 16.07 21 14.12 21 12c0-4.97-4.03-9-9-9z"/></svg>
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor"><path d="M1 9l2 2c4.97-4.97 13.03-4.97 18 0l2-2C16.93 2.93 7.08 2.93 1 9zm8 8l3 3 3-3c-1.65-1.66-4.34-1.66-6 0zm-4-4l2 2c2.76-2.76 7.24-2.76 10 0l2-2C15.14 9.14 8.87 9.14 5 13z"/></svg>
+          <div class="w-5 h-2.5 border border-slate-700 rounded-xs p-0.5 flex items-center">
+            <div class="w-full h-full bg-slate-700 rounded-2xs"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Store Header -->
+      <header class="px-4 py-3 bg-white border-b border-slate-200 flex justify-between items-center sticky top-0 z-30 shadow-xs">
+        <div class="flex items-center gap-2">
+          <span class="text-base font-extrabold tracking-tight text-slate-900">🛍️ Boutique Pro</span>
+        </div>
+        <div class="flex items-center gap-3">
+          <button class="text-slate-600 p-1">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          </button>
+          <div class="relative">
+            <button class="bg-slate-100 p-2 rounded-full text-slate-800">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            </button>
+            <span class="absolute -top-1 -right-1 bg-blue-600 text-white text-[9px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">1</span>
+          </div>
+        </div>
+      </header>
+
+      <!-- Scrollable Store View -->
+      <div id="storeScrollView" class="flex-1 overflow-y-auto no-scrollbar pb-20">
+
+        <!-- 1. HERO WITH TYPEWRITER (Animation 5) -->
+        <div class="p-4 pt-3">
+          <div class="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-2xl p-5 text-white overflow-hidden shadow-sm">
+            <div class="relative z-10 max-w-[210px]">
+              <span class="text-[10px] font-extrabold uppercase text-blue-400 tracking-wider">Sélection 2026</span>
+              <h2 class="text-base font-black leading-snug mt-1 mb-2">
+                Des objets <span id="heroTypewriter" class="text-blue-400 border-r-2 border-blue-400 pr-0.5 animate-pulse">durables</span><br>
+                pour votre quotidien
+              </h2>
+              <a href="#catalogueGrid" class="inline-block bg-white text-slate-900 text-[11px] font-extrabold px-3 py-1.5 rounded-lg shadow-xs active:scale-95 transition">
+                Faire défiler ↓
+              </a>
+            </div>
+            <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=400" alt="Montre" class="absolute -right-6 -bottom-6 w-36 h-36 object-cover rounded-full opacity-40">
+          </div>
+        </div>
+
+        <!-- 2. SPLIT-TEXT MASK REVEAL (Animation 2) -->
+        <div class="px-4 mt-6 mb-4 text-center" id="maskSection">
+          <span class="text-[9px] uppercase font-bold tracking-widest text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Notre Philosophie</span>
+          <h3 class="text-sm font-extrabold text-slate-900 mt-2">
+            <div class="mask-wrap"><span class="mask-elem">Des articles bien pensés,</span></div><br>
+            <div class="mask-wrap"><span class="mask-elem text-blue-600">livrés sans aucun intermédiaire.</span></div>
+          </h3>
+        </div>
+
+        <!-- 4. WORD-BY-WORD SCROLL HIGHLIGHT (Animation 1) -->
+        <div id="mobileHighlightBox" class="px-4 my-5">
+          <div class="bg-white p-4 rounded-xl border border-slate-200 shadow-xs">
+            <div class="text-[9px] uppercase font-extrabold text-slate-400 tracking-wider mb-2 flex items-center justify-between">
+              <span>✦ Engagement Direct</span>
+              <span class="text-blue-600 font-bold">Scrollez pour allumer ↓</span>
+            </div>
+            <p class="text-xs font-semibold leading-relaxed">
+              <span class="word-hl">Chaque</span>
+              <span class="word-hl">produit</span>
+              <span class="word-hl">physique</span>
+              <span class="word-hl">est</span>
+              <span class="word-hl">sélectionné</span>
+              <span class="word-hl">avec</span>
+              <span class="word-hl">soin.</span>
+              <span class="word-hl">Nous</span>
+              <span class="word-hl">vérifions</span>
+              <span class="word-hl">la</span>
+              <span class="word-hl">qualité,</span>
+              <span class="word-hl">nous</span>
+              <span class="word-hl">emballons</span>
+              <span class="word-hl">avec</span>
+              <span class="word-hl">attention</span>
+              <span class="word-hl">et</span>
+              <span class="word-hl">nous</span>
+              <span class="word-hl">expédions</span>
+              <span class="word-hl">directement</span>
+              <span class="word-hl">chez</span>
+              <span class="word-hl">vous</span>
+              <span class="word-hl">en</span>
+              <span class="word-hl">24</span>
+              <span class="word-hl">heures.</span>
+            </p>
+          </div>
+        </div>
+
+        <!-- 5. NUMBER COUNTERS (Animation 4) -->
+        <div class="px-4 my-5" id="countersSection">
+          <div class="bg-white p-3.5 rounded-xl border border-slate-200 grid grid-cols-3 gap-2 text-center shadow-xs">
+            <div>
+              <div class="text-xl font-black text-slate-900 mobile-counter" data-target="24">0</div>
+              <div class="text-[9px] font-bold text-emerald-600 uppercase">Heures</div>
+              <div class="text-[8px] text-slate-400">Expédition</div>
+            </div>
+            <div>
+              <div class="text-xl font-black text-slate-900 mobile-counter" data-target="1500">0</div>
+              <div class="text-[9px] font-bold text-blue-600 uppercase">Colis livrés</div>
+              <div class="text-[8px] text-slate-400">France entière</div>
+            </div>
+            <div>
+              <div class="text-xl font-black text-slate-900 mobile-counter" data-target="100">0</div>
+              <div class="text-[9px] font-bold text-purple-600 uppercase">% Garanti</div>
+              <div class="text-[8px] text-slate-400">Stocks réels</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TRANSITION VERS LA BOUTIQUE & LES PRODUITS -->
+        <div class="px-4 pt-6 pb-2 text-center border-t border-slate-200/80 mt-6" id="catalogueGrid">
+          <span class="text-[9px] font-extrabold uppercase tracking-widest text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">Nos Articles Disponibles</span>
+          <h2 class="text-base font-black text-slate-900 mt-2">Prêts à être expédiés chez vous</h2>
+        </div>
+
+        <!-- Category Pills (Horizontal Scroll juste avant les produits) -->
+        <div class="px-4 mb-3">
+          <div class="flex gap-2 overflow-x-auto no-scrollbar py-1">
+            <button onclick="filterCat('all')" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-white whitespace-nowrap shadow-xs">
+              Tous (5)
+            </button>
+            <button onclick="filterCat('Maroquinerie')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 whitespace-nowrap">
+              Maroquinerie (2)
+            </button>
+            <button onclick="filterCat('Horlogerie')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 whitespace-nowrap">
+              Horlogerie (1)
+            </button>
+            <button onclick="filterCat('Audio')" class="px-3.5 py-1.5 rounded-full text-xs font-semibold bg-white border border-slate-200 text-slate-700 whitespace-nowrap">
+              Audio (2)
+            </button>
+          </div>
+        </div>
+
+        <!-- Product Grid (2 Columns Mobile Friendly) -->
+        <div id="catalogueGrid" class="px-4">
+          <div class="flex justify-between items-center mb-2.5">
+            <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Nos Articles Disponibles</h3>
+            <span class="text-[10px] text-slate-400 font-semibold">Trier par : Populaires</span>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+
+            <!-- Product 1 -->
+            <div onclick="openProductDetail('Sac à Dos Urbain en Toile et Cuir', '85.00 €', '115.00 €', 'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=800', 'Maroquinerie', '18')" class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col shadow-2xs active:scale-98 transition cursor-pointer">
+              <div class="relative aspect-square bg-slate-100">
+                <img src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=500" class="w-full h-full object-cover">
+                <span class="absolute top-2 left-2 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-xs">
+                  Stock : 18
+                </span>
+              </div>
+              <div class="p-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <div class="text-[9px] uppercase font-bold text-slate-400">Maroquinerie</div>
+                  <h4 class="text-xs font-bold text-slate-900 line-clamp-2 mt-0.5 leading-snug">
+                    Sac à Dos Urbain Cuir
+                  </h4>
+                </div>
+                <div class="mt-2 pt-2 border-t border-slate-100 flex justify-between items-center">
+                  <span class="text-xs font-black text-slate-900">85.00 €</span>
+                  <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Voir →</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 2 -->
+            <div onclick="openProductDetail('Montre Chronographe Automatique', '189.00 €', '249.00 €', 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=800', 'Horlogerie', '11')" class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col shadow-2xs active:scale-98 transition cursor-pointer">
+              <div class="relative aspect-square bg-slate-100">
+                <img src="https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=500" class="w-full h-full object-cover">
+                <span class="absolute top-2 left-2 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-xs">
+                  Stock : 11
+                </span>
+              </div>
+              <div class="p-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <div class="text-[9px] uppercase font-bold text-slate-400">Horlogerie</div>
+                  <h4 class="text-xs font-bold text-slate-900 line-clamp-2 mt-0.5 leading-snug">
+                    Montre Chronographe 316L
+                  </h4>
+                </div>
+                <div class="mt-2 pt-2 border-t border-slate-100 flex justify-between items-center">
+                  <span class="text-xs font-black text-slate-900">189.00 €</span>
+                  <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Voir →</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 3 -->
+            <div onclick="openProductDetail('Casque Audio Sans Fil Hi-Fi', '149.00 €', '199.00 €', 'https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=800', 'Audio', '3')" class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col shadow-2xs active:scale-98 transition cursor-pointer">
+              <div class="relative aspect-square bg-slate-100">
+                <img src="https://images.unsplash.com/photo-1505740420928-5e560c06d30e?w=500" class="w-full h-full object-cover">
+                <span class="absolute top-2 left-2 bg-amber-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-xs">
+                  Plus que 3 !
+                </span>
+              </div>
+              <div class="p-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <div class="text-[9px] uppercase font-bold text-slate-400">Audio</div>
+                  <h4 class="text-xs font-bold text-slate-900 line-clamp-2 mt-0.5 leading-snug">
+                    Casque Sans Fil Réduction Bruit
+                  </h4>
+                </div>
+                <div class="mt-2 pt-2 border-t border-slate-100 flex justify-between items-center">
+                  <span class="text-xs font-black text-slate-900">149.00 €</span>
+                  <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Voir →</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Product 4 -->
+            <div onclick="openProductDetail('Enceinte Portable Vintage Bluetooth', '99.00 €', '129.00 €', 'https://images.unsplash.com/photo-1545454675-3531b543be5d?w=800', 'Audio', '15')" class="bg-white rounded-xl border border-slate-200 overflow-hidden flex flex-col shadow-2xs active:scale-98 transition cursor-pointer">
+              <div class="relative aspect-square bg-slate-100">
+                <img src="https://images.unsplash.com/photo-1545454675-3531b543be5d?w=500" class="w-full h-full object-cover">
+                <span class="absolute top-2 left-2 bg-emerald-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full shadow-xs">
+                  Stock : 15
+                </span>
+              </div>
+              <div class="p-2.5 flex-1 flex flex-col justify-between">
+                <div>
+                  <div class="text-[9px] uppercase font-bold text-slate-400">Audio</div>
+                  <h4 class="text-xs font-bold text-slate-900 line-clamp-2 mt-0.5 leading-snug">
+                    Enceinte Vintage Bluetooth
+                  </h4>
+                </div>
+                <div class="mt-2 pt-2 border-t border-slate-100 flex justify-between items-center">
+                  <span class="text-xs font-black text-slate-900">99.00 €</span>
+                  <span class="text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">Voir →</span>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- Rassurance Mobile Footer -->
+        <div class="p-4 mt-6">
+          <div class="bg-white p-4 rounded-xl border border-slate-200 space-y-2.5 text-xs text-slate-600">
+            <div class="flex items-center gap-2.5">
+              <span class="text-blue-600 font-bold">🚚</span>
+              <span><strong>Expédition sous 24h</strong> avec suivi par SMS</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span class="text-blue-600 font-bold">📦</span>
+              <span><strong>Emballage renforcé</strong> antichoc garanti</span>
+            </div>
+            <div class="flex items-center gap-2.5">
+              <span class="text-blue-600 font-bold">🛡️</span>
+              <span><strong>Commande directe</strong> sans carte bancaire</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- ==============================================
+           MOBILE PRODUCT DETAIL OVERLAY (Option 2)
+           ============================================== -->
+      <div id="productDetailOverlay" class="hidden absolute inset-0 bg-white z-40 flex flex-col">
+        <!-- Top bar with Back Button -->
+        <div class="px-4 py-3 border-b border-slate-200 flex justify-between items-center bg-white sticky top-0 z-30">
+          <button onclick="closeProductDetail()" class="flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-lg">
+            <span>← Retour</span>
+          </button>
+          <span class="text-xs font-extrabold text-slate-900 truncate max-w-[160px]" id="overlayHeaderTitle">Fiche Produit</span>
+          <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">En stock</span>
+        </div>
+
+        <!-- Scrollable Product Content -->
+        <div class="flex-1 overflow-y-auto no-scrollbar p-4 pb-28">
+          <img id="overlayImg" src="" class="w-full aspect-square object-cover rounded-xl border border-slate-200 mb-3">
+          
+          <div class="text-[10px] uppercase font-bold text-slate-400" id="overlayCategory">Catégorie</div>
+          <h2 class="text-base font-extrabold text-slate-900 mt-0.5" id="overlayTitle">Titre</h2>
+
+          <div class="flex items-baseline gap-2 my-2">
+            <span class="text-xl font-black text-slate-900" id="overlayPrice">0.00 €</span>
+            <span class="text-xs text-slate-400 line-through" id="overlayOldPrice">0.00 €</span>
+            <span class="text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-full">Livraison Colissimo Offerte</span>
+          </div>
+
+          <!-- OPTION 2 INLINE DELIVERY FORM ON MOBILE -->
+          <div class="mt-4 bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-3">
+            <div class="flex items-center justify-between border-b border-slate-200 pb-2">
+              <span class="text-xs font-extrabold uppercase tracking-wider text-slate-900 flex items-center gap-1.5">
+                <span>📍</span> <span>Livraison Directe</span>
+              </span>
+              <span class="text-[10px] text-emerald-700 font-bold bg-emerald-100 px-2 py-0.5 rounded-full">Sans Carte Bancaire</span>
+            </div>
+
+            <div class="space-y-2">
+              <input type="text" placeholder="Nom et Prénom *" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <input type="tel" placeholder="Téléphone mobile (SMS de suivi) *" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <input type="text" placeholder="Adresse complète (Rue, numéro) *" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              <div class="grid grid-cols-2 gap-2">
+                <input type="text" placeholder="Code postal *" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+                <input type="text" placeholder="Ville *" class="w-full px-3 py-2 text-xs rounded-lg border border-slate-300 bg-white">
+              </div>
+            </div>
+
+            <button onclick="alert('✓ Commande confirmée ! Notification instantanée sur votre smartphone.')" class="w-full bg-emerald-600 active:bg-emerald-700 text-white font-extrabold py-3 px-4 rounded-xl text-xs transition shadow-md mt-1">
+              ✓ Confirmer ma commande
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Mobile Bottom Tab Bar -->
+      <nav class="absolute bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-slate-200 py-2 px-6 flex justify-between items-center z-30 shadow-lg text-[10px] font-semibold text-slate-500">
+        <button onclick="closeProductDetail()" class="flex flex-col items-center gap-0.5 text-blue-600">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/></svg>
+          <span>Accueil</span>
+        </button>
+        <button onclick="closeProductDetail()" class="flex flex-col items-center gap-0.5 hover:text-slate-900">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          <span>Rayons</span>
+        </button>
+        <button class="flex flex-col items-center gap-0.5 hover:text-slate-900 relative">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+          <span>Panier</span>
+        </button>
+      </nav>
+
+    </div>
+  </div>
+
+  <div class="mt-4 text-center text-xs text-slate-400">
+    Cliquez sur n'importe quel article de la grille pour tester l'ouverture de la fiche produit et de son formulaire Option 2.
+  </div>
+
+  <script>
+    // 1. Mobile Typewriter animation in Hero (Animation 5)
+    const words = ["durables", "pratiques", "qualité", "essentiels"];
+    let wordIdx = 0;
+    let charIdx = 0;
+    let deleting = false;
+    const typeEl = document.getElementById('heroTypewriter');
+
+    function runTypewriter() {
+      const cur = words[wordIdx];
+      if (deleting) {
+        typeEl.textContent = cur.substring(0, charIdx - 1);
+        charIdx--;
+      } else {
+        typeEl.textContent = cur.substring(0, charIdx + 1);
+        charIdx++;
+      }
+
+      let spd = deleting ? 45 : 90;
+      if (!deleting && charIdx === cur.length) {
+        spd = 1800;
+        deleting = true;
+      } else if (deleting && charIdx === 0) {
+        deleting = false;
+        wordIdx = (wordIdx + 1) % words.length;
+        spd = 400;
+      }
+      setTimeout(runTypewriter, spd);
+    }
+    runTypewriter();
+
+    const mobileScroll = document.getElementById('storeScrollView');
+
+    // 2. Mask Reveal Trigger
+    const maskElems = document.querySelectorAll('.mask-elem');
+    let maskTriggered = false;
+
+    // 3. Counter Animation Trigger
+    const counters = document.querySelectorAll('.mobile-counter');
+    let countersStarted = false;
+
+    // 4. Word-by-Word Scroll Highlight
+    const wordList = document.querySelectorAll('.word-hl');
+    const highlightBox = document.getElementById('mobileHighlightBox');
+
+    // SCROLL LISTENER INSIDE SMARTPHONE SCREEN
+    mobileScroll.addEventListener('scroll', () => {
+      const scrollPos = mobileScroll.scrollTop;
+
+      // Check Mask Reveal
+      if (!maskTriggered && scrollPos > 30) {
+        maskTriggered = true;
+        maskElems.forEach((el, i) => {
+          setTimeout(() => el.classList.add('revealed'), i * 140 + 50);
+        });
+      }
+
+      // Check Counters
+      if (!countersStarted && scrollPos > 150) {
+        countersStarted = true;
+        counters.forEach(c => {
+          const target = +c.getAttribute('data-target');
+          let count = 0;
+          const step = Math.ceil(target / 30);
+          const timer = setInterval(() => {
+            count += step;
+            if (count >= target) {
+              c.innerText = target + (target === 100 ? '%' : target === 1500 ? '+' : 'h');
+              clearInterval(timer);
+            } else {
+              c.innerText = count;
+            }
+          }, 35);
+        });
+      }
+
+      // Check Word-by-Word Highlight
+      const boxRect = highlightBox.getBoundingClientRect();
+      const parentRect = mobileScroll.getBoundingClientRect();
+      const relativeTop = boxRect.top - parentRect.top;
+      const progress = Math.min(Math.max((parentRect.height - relativeTop) / (parentRect.height * 0.6), 0), 1);
+      const litWords = Math.floor(progress * wordList.length * 1.3);
+
+      wordList.forEach((w, i) => {
+        if (i < litWords) {
+          w.classList.add('lit');
+        } else {
+          w.classList.remove('lit');
+        }
+      });
+    });
+
+    // Auto trigger initial mask if visible
+    setTimeout(() => {
+      maskElems.forEach((el, i) => {
+        setTimeout(() => el.classList.add('revealed'), i * 140 + 50);
+      });
+    }, 400);
+
+    function filterCat(cat) {
+      alert('Filtre actif : ' + cat);
+    }
+
+    function openProductDetail(title, price, oldPrice, imgUrl, cat, stock) {
+      document.getElementById('overlayHeaderTitle').innerText = title;
+      document.getElementById('overlayTitle').innerText = title;
+      document.getElementById('overlayPrice').innerText = price;
+      document.getElementById('overlayOldPrice').innerText = oldPrice;
+      document.getElementById('overlayImg').src = imgUrl;
+      document.getElementById('overlayCategory').innerText = cat;
+
+      document.getElementById('productDetailOverlay').classList.remove('hidden');
+    }
+
+    function closeProductDetail() {
+      document.getElementById('productDetailOverlay').classList.add('hidden');
+    }
+  </script>
+
+</body>
+</html>

@@ -34,12 +34,8 @@ export async function POST(request: Request) {
     : '';
   const password = rawPassword.trim();
 
-  const configuredPassword = (process.env.ADMIN_PASSWORD || 'atelier_pro_benin_admin_2026!').trim();
-  const validCandidates = Array.from(new Set([
-    configuredPassword,
-    'atelier_pro_benin_admin_2026!',
-    'admin_atelier_pro_2026!'
-  ]));
+  const configuredPassword = (process.env.ADMIN_PASSWORD || 'Le10122001').trim();
+  const validCandidates = Array.from(new Set([configuredPassword]));
 
   // Comparaison en temps constant sécurisée
   let isValid = false;

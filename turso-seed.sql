@@ -1,6 +1,4 @@
-PRAGMA foreign_keys=OFF;
-BEGIN TRANSACTION;
-CREATE TABLE products (
+CREATE TABLE IF NOT EXISTS products (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL,
         slug TEXT UNIQUE NOT NULL,
@@ -17,7 +15,7 @@ INSERT INTO products VALUES(1,'Montre Chronographe','montre-chronographe','Montr
 INSERT INTO products VALUES(2,'Sacoche Cuir','sacoche-cuir','Sacoche en cuir pratique et résistante.',12900.0,9,'Maroquinerie','/images/products/sacoche-cuir.jpg',0.5,'active','2026-10-24 15:00:18',NULL,NULL,'','',1,0,1,'','','','','[]','[]','["online_store","whatsapp","ads"]');
 INSERT INTO products VALUES(3,'Casque Audio sans fil','casque-audio-sans-fil','Casque audio sans fil confortable.',14900.0,14,'Audio','/images/products/casque-audio.jpg',0.5,'active','2026-10-24 15:00:18',NULL,NULL,'','',1,0,1,'','','','','[]','[]','["online_store","whatsapp","ads"]');
 INSERT INTO products VALUES(4,'Portefeuille RFID','portefeuille-rfid','Portefeuille avec protection RFID.',4900.0,18,'Maroquinerie','/images/products/portefeuille-rfid.jpg',0.5,'active','2026-10-24 15:00:18',NULL,NULL,'','',1,0,1,'','','','','[]','[]','["online_store","whatsapp","ads"]');
-CREATE TABLE orders (
+CREATE TABLE IF NOT EXISTS orders (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         order_number TEXT UNIQUE NOT NULL,
         customer_name TEXT NOT NULL,
@@ -44,7 +42,7 @@ INSERT INTO orders VALUES(6,'CMD-20261025-5272','Bio Séro',NULL,'+2290197123456
 INSERT INTO orders VALUES(7,'CMD-20261026-1441','Bio Dossou',NULL,'+2290197223344','Livraison à Cotonou','Cotonou','','Bénin','Livraison express domicile',5900.0,1000.0,'nouvelle','','','2026-10-26 20:19:45','','','','','','','','cod');
 INSERT INTO orders VALUES(8,'CMD-20261026-3559','Sèna Houénou',NULL,'+2290197008899','Livraison à Calavi Arconville','Calavi Arconville','','Bénin','Livraison express domicile',6400.0,1500.0,'nouvelle','','','2026-10-26 21:39:19','','','','','','','','cod');
 INSERT INTO orders VALUES(11,'CMD-20261103-6618','Killer7',NULL,'+2290146482698','Livraison à Porto','Porto','','Bénin','Livraison directe à convenir avec le client',18900.0,0.0,'nouvelle','','','2026-11-03 20:48:01','','','','http://192.168.100.10:3000/admin?tab=analytics','','','','cod');
-CREATE TABLE order_items (
+CREATE TABLE IF NOT EXISTS order_items (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         order_id INTEGER NOT NULL,
         product_id INTEGER,
@@ -62,7 +60,7 @@ INSERT INTO order_items VALUES(6,6,1,'Montre Chronographe',18900.0,1,NULL);
 INSERT INTO order_items VALUES(7,7,4,'Portefeuille RFID (Offre Promotionnelle)',4900.0,1,1);
 INSERT INTO order_items VALUES(8,8,4,'Portefeuille RFID (Offre Promotionnelle)',4900.0,1,1);
 INSERT INTO order_items VALUES(11,11,1,'Montre Chronographe',18900.0,1,NULL);
-CREATE TABLE settings (
+CREATE TABLE IF NOT EXISTS settings (
         key TEXT PRIMARY KEY,
         value TEXT NOT NULL
       );
@@ -94,7 +92,7 @@ INSERT INTO settings VALUES('whatsapp_notify_last_status','Message WhatsApp tran
 INSERT INTO settings VALUES('whatsapp_notify_id_instance','710722790086');
 INSERT INTO settings VALUES('whatsapp_notify_last_sent_at','2026-11-03T20:48:02.536Z');
 INSERT INTO settings VALUES('whatsapp_notify_webhook_url','');
-CREATE TABLE whatsapp_feedbacks (
+CREATE TABLE IF NOT EXISTS whatsapp_feedbacks (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       image_url TEXT NOT NULL,
       caption TEXT,
@@ -102,7 +100,7 @@ CREATE TABLE whatsapp_feedbacks (
       status TEXT NOT NULL DEFAULT 'actif',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     );
-CREATE TABLE promotions (
+CREATE TABLE IF NOT EXISTS promotions (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       product_id INTEGER NOT NULL,
       name TEXT NOT NULL,
@@ -119,7 +117,7 @@ CREATE TABLE promotions (
       FOREIGN KEY(product_id) REFERENCES products(id) ON DELETE CASCADE
     );
 INSERT INTO promotions VALUES(1,4,'Offre Spéciale — Quantité Limitée',6100,4900,12,2,0,NULL,NULL,'active',1,'2026-10-26 20:19:31');
-CREATE TABLE page_views (
+CREATE TABLE IF NOT EXISTS page_views (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       session_id TEXT NOT NULL,
       path TEXT NOT NULL,
@@ -176,24 +174,14 @@ INSERT INTO reviews VALUES(66,NULL,4,'Wilfried B.','Porto-Novo','Articles solide
 INSERT INTO reviews VALUES(67,NULL,5,'Blandine T.','Ouidah','Livraison soignée jusqu''à Ouidah, échange fluide avec le service commercial.',NULL,'approuve','2026-10-02 14:50:00');
 INSERT INTO reviews VALUES(68,NULL,5,'Lionel K.','Cotonou','Achat en ligne simple et sans carte bancaire, je recommande cette boutique.',NULL,'approuve','2026-09-28 20:30:00');
 INSERT INTO reviews VALUES(69,NULL,5,'Aimé H.','Cotonou','Qualité au rendez-vous et respect des délais annoncés.',NULL,'approuve','2026-09-24 15:50:00');
-PRAGMA writable_schema=ON;
-CREATE TABLE IF NOT EXISTS sqlite_sequence(name,seq);
-DELETE FROM sqlite_sequence;
-INSERT INTO sqlite_sequence VALUES('products',6);
-INSERT INTO sqlite_sequence VALUES('orders',11);
-INSERT INTO sqlite_sequence VALUES('order_items',11);
-INSERT INTO sqlite_sequence VALUES('promotions',1);
-INSERT INTO sqlite_sequence VALUES('page_views',875);
-INSERT INTO sqlite_sequence VALUES('reviews',69);
-CREATE INDEX idx_orders_status_created_at ON orders(status, created_at);
-CREATE INDEX idx_order_items_order_id ON order_items(order_id);
-CREATE INDEX idx_products_slug ON products(slug);
-CREATE INDEX idx_promotions_product_status ON promotions(product_id, status);
-CREATE INDEX idx_page_views_created_at ON page_views(created_at);
-CREATE INDEX idx_page_views_heartbeat ON page_views(last_heartbeat);
-CREATE INDEX idx_page_views_session ON page_views(session_id);
-CREATE INDEX idx_page_views_ip ON page_views(ip_address);
-CREATE INDEX idx_reviews_product_status ON reviews(product_id, status);
-CREATE INDEX idx_reviews_status ON reviews(status);
-PRAGMA writable_schema=OFF;
-COMMIT;
+
+CREATE INDEX IF NOT EXISTS idx_orders_status_created_at ON orders(status, created_at);
+CREATE INDEX IF NOT EXISTS idx_order_items_order_id ON order_items(order_id);
+CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
+CREATE INDEX IF NOT EXISTS idx_promotions_product_status ON promotions(product_id, status);
+CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at);
+CREATE INDEX IF NOT EXISTS idx_page_views_heartbeat ON page_views(last_heartbeat);
+CREATE INDEX IF NOT EXISTS idx_page_views_session ON page_views(session_id);
+CREATE INDEX IF NOT EXISTS idx_page_views_ip ON page_views(ip_address);
+CREATE INDEX IF NOT EXISTS idx_reviews_product_status ON reviews(product_id, status);
+CREATE INDEX IF NOT EXISTS idx_reviews_status ON reviews(status);

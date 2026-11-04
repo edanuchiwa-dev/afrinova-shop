@@ -331,12 +331,15 @@ export default function QuantityBreaksWidget({
                     </div>
                   </div>
 
-                  {/* BLOC DROIT : PRIX TOTAL FACTURÉ TRÈS VISIBLE */}
+                  {/* BLOC DROIT : PRIX TOTAL DU LOT MAJEUR ET INCONTOURNABLE */}
                   <div className="text-right shrink-0">
                     <div className="text-[10px] uppercase font-bold text-[#73737A] tracking-wider mb-0.5">
-                      Prix Total
+                      PRIX TOTAL DU LOT
                     </div>
-                    <div className="font-heading font-black text-base sm:text-xl text-[#16171A] tracking-tight tabular-nums">
+                    <div
+                      style={{ color: isSelected ? colorStyles.accent : '#16171A' }}
+                      className="font-heading font-black text-base sm:text-xl tracking-tight tabular-nums"
+                    >
                       {formatFCFA(tier.totalPrice)}
                     </div>
                     {tier.originalTotalPrice > tier.totalPrice && (
@@ -344,7 +347,7 @@ export default function QuantityBreaksWidget({
                         {formatFCFA(tier.originalTotalPrice)}
                       </div>
                     )}
-                    <div className="text-[10px] text-[#73737A] font-medium pt-0.5 hidden sm:block">
+                    <div className="text-[10px] text-[#73737A] font-medium pt-0.5">
                       soit {formatFCFA(tier.unitPrice)} / pièce
                     </div>
                   </div>
@@ -479,8 +482,8 @@ export default function QuantityBreaksWidget({
                   </div>
 
                   <div className="text-right shrink-0">
-                    <span className="text-[9px] uppercase tracking-wider text-[#A8A29E] block">
-                      Total Facturé
+                    <span className="text-[9px] uppercase tracking-wider text-[#A8A29E] block font-bold">
+                      PRIX TOTAL DU LOT
                     </span>
                     <span
                       style={{ color: isSelected ? colorStyles.accent : '#1C1917' }}

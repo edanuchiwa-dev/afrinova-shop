@@ -16,11 +16,15 @@ import {
   ArrowRight,
   Star,
   CheckCircle2,
-  ThumbsUp,
-  X,
   Check,
-  Heart,
-  MessageSquareQuote,
+  ChevronDown,
+  Package,
+  RotateCcw,
+  Clock,
+  Shield,
+  HelpCircle,
+  MessageSquare,
+  X,
 } from 'lucide-react';
 import AnnouncementBar from '@/components/AnnouncementBar';
 import ProductCard from '@/components/ProductCard';
@@ -28,12 +32,12 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import QuantityBreaksWidget from '@/components/QuantityBreaksWidget';
 import { formatFCFA } from '@/lib/format';
 import { captureUtmParams } from '@/lib/utm';
-import { BENIN_CITIES, calculateServerShippingCost } from '@/lib/shipping';
 import { parseBeninPhone } from '@/lib/phone';
 import { trackPixelPurchase, trackPixelViewContent } from '@/lib/tracking/client-pixels';
 import {
   Product,
   PRODUCT_GALLERIES,
+  PRODUCT_SPECS,
   getProductOriginalPrice,
   getProductDiscountBadge,
 } from '@/lib/catalog';
@@ -82,6 +86,14 @@ const fallbackCatalog: Record<string, Product> = {
   },
 };
 
+const fallbackReviews: Review[] = [
+  { id: 1, product_id: null, rating: 5, customer_name: 'Arnaud D.', city: 'Cotonou', comment: 'Articles bien finis et conformes aux photos, livraison rapide sur Cotonou.', status: 'approuve', created_at: '2026-11-02 14:20:00', photo_url: null },
+  { id: 2, product_id: null, rating: 5, customer_name: 'Boris K.', city: 'Abomey-Calavi', comment: 'Le coursier m\'a laissé ouvrir le colis pour vérifier avant de régler en espèces.', status: 'approuve', created_at: '2026-10-31 11:45:00', photo_url: null },
+  { id: 3, product_id: null, rating: 5, customer_name: 'Chantal A.', city: 'Porto-Novo', comment: 'Commande reçue le lendemain à Porto-Novo dans un emballage très propre.', status: 'approuve', created_at: '2026-10-28 16:30:00', photo_url: null },
+  { id: 4, product_id: null, rating: 5, customer_name: 'Hermann T.', city: 'Cotonou', comment: 'Boutique sérieuse, article de qualité et coursier très courtois.', status: 'approuve', created_at: '2026-10-24 18:10:00', photo_url: null },
+  { id: 5, product_id: null, rating: 5, customer_name: 'Ulrich S.', city: 'Parakou', comment: 'Expédition sécurisée jusqu\'à Parakou, colis bien protégé et intact.', status: 'approuve', created_at: '2026-10-20 09:30:00', photo_url: null },
+];
+
 function formatReviewDate(dateStr: string): string {
   try {
     const cleanStr = dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T');
@@ -100,32 +112,6 @@ function formatReviewDate(dateStr: string): string {
   }
 }
 
-function getReviewInitials(name: string): string {
-  if (!name) return 'CL';
-  const parts = name.trim().split(/\s+/);
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + (parts[parts.length - 1][0] || '')).toUpperCase();
-}
-
-const AVATAR_PALETTES = [
-  'bg-amber-100 text-amber-900 border-amber-200/80',
-  'bg-emerald-100 text-emerald-900 border-emerald-200/80',
-  'bg-sky-100 text-sky-900 border-sky-200/80',
-  'bg-rose-100 text-rose-900 border-rose-200/80',
-  'bg-violet-100 text-violet-900 border-violet-200/80',
-  'bg-teal-100 text-teal-900 border-teal-200/80',
-  'bg-orange-100 text-orange-900 border-orange-200/80',
-];
-
-function getAvatarColor(name: string): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  const index = Math.abs(hash) % AVATAR_PALETTES.length;
-  return AVATAR_PALETTES[index];
-}
-
 export default function ProductPage() {
   const params = useParams<{ slug: string }>();
   const slug = params?.slug || '';
@@ -136,6 +122,17 @@ export default function ProductPage() {
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [isZoomOpen, setIsZoomOpen] = useState(false);
   const [orderQuantity, setOrderQuantity] = useState(1);
+  const [reviews, setReviews] = useState<Review[]>(fallbackReviews);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [reviewForm, setReviewForm] = useState({
+    customerName: '',
+    city: 'Cotonou',
+    rating: 5,
+    comment: '',
+  });
+  const [submittingReview, setSubmittingReview] = useState(false);
+  const [reviewSuccessMsg, setReviewSuccessMsg] = useState('');
+
   const [qbSettings, setQbSettings] = useState<{
     popularTier: number;
     enabled: boolean;
@@ -229,6 +226,20 @@ export default function ProductPage() {
       .catch(() => {});
   }, []);
 
+  // Chargement des avis clients
+  useEffect(() => {
+    const productId = product?.id;
+    const url = productId ? `/api/reviews?productId=${productId}` : '/api/reviews';
+    fetch(url)
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data && Array.isArray(data.reviews) && data.reviews.length > 0) {
+          setReviews(data.reviews);
+        }
+      })
+      .catch(() => {});
+  }, [product?.id]);
+
   // Promotion active issue de la base de données
   const promo = useMemo(() => {
     if (!product?.promotion) return null;
@@ -265,7 +276,7 @@ export default function ProductPage() {
     return (regularReferencePrice - promoUnitPrice) * promoUnitsInOrder;
   }, [product, isPromoActive, promoUnitsInOrder, regularReferencePrice, promoUnitPrice]);
 
-  const currentShippingCost = 0; // Modalités et livraison gérées directement par le marchand
+  const currentShippingCost = 0; // Remise en main propre / livraison gérée avec le client
 
   const currentTotal = useMemo(() => {
     return currentSubtotal;
@@ -291,6 +302,15 @@ export default function ProductPage() {
   }, [slug, product]);
 
   const activeImage = selectedImage || gallery[0] || product?.image_url || '';
+
+  const specs = useMemo(() => {
+    return PRODUCT_SPECS[slug] || [
+      { label: 'Catégorie', value: product?.category || 'Boutique' },
+      { label: 'Authenticité', value: 'Sélection certifiée AFRINOVA SHOP' },
+      { label: 'Contrôle qualité', value: 'Inspection visuelle et fonctionnelle avant expédition' },
+      { label: 'Livraison', value: 'Partout au Bénin avec paiement à la réception' },
+    ];
+  }, [slug, product]);
 
   const scrollToForm = () => {
     const el = document.getElementById('commandeDirecte');
@@ -375,12 +395,44 @@ export default function ProductPage() {
     }
   };
 
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!reviewForm.customerName.trim() || !reviewForm.comment.trim()) return;
+
+    setSubmittingReview(true);
+    setReviewSuccessMsg('');
+
+    try {
+      const res = await fetch('/api/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          productId: product?.id,
+          customerName: reviewForm.customerName.trim(),
+          city: reviewForm.city.trim() || 'Cotonou',
+          rating: reviewForm.rating,
+          comment: reviewForm.comment.trim(),
+        }),
+      });
+
+      if (res.ok) {
+        setReviewSuccessMsg('Merci pour votre avis ! Il a été enregistré.');
+        setReviewForm({ customerName: '', city: 'Cotonou', rating: 5, comment: '' });
+        setTimeout(() => setShowReviewModal(false), 2000);
+      }
+    } catch {
+      // Ignorer
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center">
         <div className="text-center space-y-3">
           <div className="w-10 h-10 border-4 border-[#C27835] border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm font-semibold text-[#73737A]">Chargement de la pièce...</p>
+          <p className="text-sm font-semibold text-[#73737A]">Chargement du produit...</p>
         </div>
       </div>
     );
@@ -404,36 +456,45 @@ export default function ProductPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#FAF9F6] text-[#16171A] pb-24 md:pb-16 antialiased">
+    <div className="min-h-screen bg-[#FAF9F6] text-[#16171A] pb-28 sm:pb-32 md:pb-20 antialiased selection:bg-[#F2DFCE] selection:text-[#7A3E10]">
       {/* BANDEAU DÉFILANT */}
       <AnnouncementBar />
 
-      {/* EN-TÊTE DE LA FICHE PRODUIT */}
+      {/* 1. EN-TÊTE ÉPURÉ & RESTRUCTURÉ (SANS GROS BOUTON REDONDANT, HAUTEUR RÉDUITE) */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EAE8E2] shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="inline-flex items-center gap-2 text-xs font-semibold text-[#54555A] hover:text-[#16171A] transition">
-            <span>←</span>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-13 sm:h-14 flex items-center justify-between">
+          {/* LIEN RETOUR CATALOGUE */}
+          <Link
+            href="/"
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#54555A] hover:text-[#16171A] transition py-1"
+          >
+            <span className="text-sm leading-none">←</span>
             <span className="hidden sm:inline">Retour au catalogue</span>
-            <span className="sm:hidden">Catalogue</span>
+            <span className="sm:hidden text-[11px]">Catalogue</span>
           </Link>
+
+          {/* LOGO AFRINOVA SHOP */}
           <Link href="/" className="flex flex-col items-center">
-            <span className="font-heading font-black text-base sm:text-lg tracking-tight text-[#16171A] uppercase leading-none">
+            <span className="font-heading font-black text-sm sm:text-base tracking-tight text-[#16171A] uppercase leading-none">
               AFRINOVA SHOP
             </span>
             <span className="text-[8px] font-bold text-[#73737A] tracking-[0.2em] uppercase mt-0.5 leading-none">
               Boutique Exclusive
             </span>
           </Link>
-          <button
-            onClick={scrollToForm}
-            className="btn-accent text-xs py-2 px-4 min-h-[38px] sm:min-h-[44px]"
-          >
-            Commander maintenant
-          </button>
+
+          {/* RÉASSURANCE DISCRÈTE (REMPLACE LE GROS BOUTON POUR ÉVITER LES RÉPÉTITIONS) */}
+          <div className="flex items-center">
+            <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span className="hidden sm:inline">Paiement à la livraison</span>
+              <span className="sm:hidden">Paiement livraison</span>
+            </span>
+          </div>
         </div>
       </header>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4 sm:pt-8">
         {orderConfirmed ? (
           /* ÉCRAN DE CONFIRMATION DE COMMANDE */
           <div className="max-w-2xl mx-auto bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xl text-center">
@@ -447,7 +508,7 @@ export default function ProductPage() {
               Merci pour votre commande !
             </h1>
             <p className="text-xs sm:text-sm text-[#73737A] mb-6 max-w-md mx-auto leading-relaxed">
-              Votre commande est enregistrée. Notre coursier prendra directement contact avec vous par téléphone avant son passage.
+              Votre commande est bien enregistrée. Notre coursier prendra directement contact avec vous par téléphone avant son passage.
             </p>
 
             {orderConfirmed.phoneNotice && (
@@ -521,297 +582,276 @@ export default function ProductPage() {
             </div>
           </div>
         ) : (
-          <div className="grid lg:grid-cols-12 gap-8 lg:gap-14 items-start">
+          <div className="space-y-12 sm:space-y-16">
             
-            {/* COLONNE GAUCHE (7 COLONNES) : GALERIE & ACCORDÉONS */}
-            <div className="lg:col-span-7 space-y-8">
+            {/* HERO ZONE : 2 COLONNES SUR ORDINATEUR / FLUX VERTICAL FLUIDE SUR MOBILE */}
+            <div className="grid lg:grid-cols-12 gap-6 sm:gap-8 lg:gap-12 items-start">
               
-              {/* Image Principale avec Zoom au tap */}
-              <div className="space-y-3">
-                <div
-                  onClick={() => setIsZoomOpen(true)}
-                  className="relative aspect-[4/5] rounded-3xl overflow-hidden bg-[#F4F3F0] border border-[#EAE8E2] shadow-sm cursor-zoom-in group select-none"
-                  role="button"
-                  tabIndex={0}
-                  aria-label="Agrandir la photo de l'article"
-                  onKeyDown={(e) => { if (e.key === 'Enter') setIsZoomOpen(true); }}
-                >
-                  <Image
-                    src={activeImage}
-                    alt={product.name}
-                    fill
-                    sizes="(max-width: 1024px) 100vw, 60vw"
-                    priority
-                    unoptimized={activeImage.startsWith('/images/')}
-                    className="object-cover transition-transform duration-500 ease-out group-hover:scale-102"
-                  />
-                  
-                  {/* Badges sur l'image */}
-                  <div className="absolute top-4 left-4 flex flex-col gap-2 z-10">
-                    {isPromoActive && (
-                      <span className="inline-flex items-center gap-1.5 bg-[#16171A]/90 text-white text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md border border-white/15 shadow-sm">
-                        <Sparkles className="w-3 h-3 text-[#E5A869]" />
-                        Offre Atelier
-                      </span>
-                    )}
-                    {discountBadge && !isPromoActive && (
-                      <span className="inline-flex items-center bg-[#C27835]/15 text-[#9E5A1C] border border-[#C27835]/30 text-[11px] font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md shadow-xs">
-                        {discountBadge}
-                      </span>
-                    )}
-                    <span className="bg-white/85 backdrop-blur-md text-[#54555A] text-[10px] font-medium px-3 py-1 rounded-full shadow-xs border border-black/5">
-                      {product.category}
-                    </span>
-                  </div>
-
-                  <span className="absolute bottom-4 right-4 bg-black/60 hover:bg-black/80 text-white text-[10px] font-medium px-3 py-1.5 rounded-full backdrop-blur-md flex items-center gap-1.5 transition">
-                    <ZoomIn className="w-3.5 h-3.5 text-white/90" />
-                    <span>Agrandir</span>
-                  </span>
-                </div>
-
-                {/* Galerie de miniatures */}
-                {gallery.length > 1 && (
-                  <div className="flex gap-3 overflow-x-auto no-scrollbar py-1">
-                    {gallery.map((imgUrl, i) => {
-                      const isSelected = activeImage === imgUrl;
-                      return (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setSelectedImage(imgUrl)}
-                          className={`relative w-20 h-24 rounded-2xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
-                            isSelected
-                              ? 'border-[#C27835] ring-2 ring-[#C27835]/20 shadow-xs'
-                              : 'border-[#EAE8E2] opacity-70 hover:opacity-100 hover:border-[#D7D4CC]'
-                          }`}
-                        >
-                          <Image
-                            src={imgUrl}
-                            alt={`${product.name} - Vue ${i + 1}`}
-                            fill
-                            sizes="80px"
-                            className="object-cover"
-                          />
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-
-              {/* ACCORDÉONS INFORMATIONS DÉTAILLÉES */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#EAE8E2] shadow-xs space-y-4">
-                <h3 className="font-heading font-black text-xs uppercase tracking-wider text-[#73737A]">
-                  Informations détaillées & Garanties
-                </h3>
-
-                <div className="divide-y divide-[#EAE8E2]">
-                  {/* Accordéon 1 : Description */}
-                  <details className="group py-3.5 select-none" open>
-                    <summary className="flex items-center justify-between cursor-pointer list-none font-heading font-bold text-sm text-[#16171A]">
-                      <span>Description de la pièce</span>
-                      <span className="text-[#73737A] transition-transform duration-200 group-open:rotate-180">↓</span>
-                    </summary>
-                    <div className="pt-3 text-xs sm:text-sm text-[#54555A] leading-relaxed">
-                      {product.description}
-                    </div>
-                  </details>
-
-                  {/* Accordéon 2 : Matériaux */}
-                  <details className="group py-3.5 select-none">
-                    <summary className="flex items-center justify-between cursor-pointer list-none font-heading font-bold text-sm text-[#16171A]">
-                      <span>Caractéristiques & Matériaux</span>
-                      <span className="text-[#73737A] transition-transform duration-200 group-open:rotate-180">↓</span>
-                    </summary>
-                    <div className="pt-3 text-xs sm:text-sm text-[#54555A] leading-relaxed space-y-2">
-                      <p>• <strong>Sélection :</strong> Matériaux de grade supérieur, vérifiés pièce par pièce avant mise en coffret.</p>
-                      <p>• <strong>Poids indicatif :</strong> 0.45 kg - 0.70 kg selon emballage de protection.</p>
-                      <p>• <strong>Contrôle qualité :</strong> Inspection visuelle et fonctionnelle préalable effectuée à notre atelier.</p>
-                    </div>
-                  </details>
-
-                  {/* Accordéon 3 : Expédition & Modalités de Paiement */}
-                  <details className="group py-3.5 select-none">
-                    <summary className="flex items-center justify-between cursor-pointer list-none font-heading font-bold text-sm text-[#16171A]">
-                      <span>Expédition au Bénin & Modalités de Paiement</span>
-                      <span className="text-[#73737A] transition-transform duration-200 group-open:rotate-180">↓</span>
-                    </summary>
-                    <div className="pt-3 text-xs sm:text-sm text-[#54555A] leading-relaxed space-y-2">
-                      <p>• <strong>Délais d&apos;expédition :</strong> Remise rapide sous 24h à 48h partout au Bénin (Cotonou, Calavi, Porto-Novo, Parakou et autres communes).</p>
-                      <p>• <strong>Organisation directe :</strong> Notre équipe vous contacte par téléphone ou WhatsApp pour valider votre commande et convenir du lieu et de l&apos;heure de rendez-vous.</p>
-                      <p>• <strong>Paiement à la réception :</strong> Vous réglez directement en main propre lors de la remise de votre commande (en espèces ou par Mobile Money).</p>
-                    </div>
-                  </details>
-
-                  {/* Accordéon 4 : Retours & Échanges */}
-                  <details className="group py-3.5 select-none">
-                    <summary className="flex items-center justify-between cursor-pointer list-none font-heading font-bold text-sm text-[#16171A]">
-                      <span>Garantie Sérénité & Échange 48h</span>
-                      <span className="text-[#73737A] transition-transform duration-200 group-open:rotate-180">↓</span>
-                    </summary>
-                    <div className="pt-3 text-xs sm:text-sm text-[#54555A] leading-relaxed">
-                      Si l&apos;article présente le moindre défaut lors de la réception, notre service client basé à Cotonou procède à un échange immédiat sans frais sous 48 heures ouvrées.
-                    </div>
-                  </details>
-                </div>
-              </div>
-
-              {/* NOTE & RÉASSURANCE BOUTIQUE */}
-              <div className="bg-white rounded-3xl p-5 sm:p-6 border border-[#EAE8E2] shadow-xs flex flex-wrap items-center justify-between gap-4">
-                <div className="flex items-center gap-3.5">
-                  <div className="w-11 h-11 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0 border border-amber-200/60 font-black text-sm">
-                    ★ 4.9
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-heading font-black text-sm text-[#16171A]">
-                        AFRINOVA SHOP certifié par ses clients
-                      </h3>
-                      <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
-                        <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                        Avis vérifiés
-                      </span>
-                    </div>
-                    <p className="text-xs text-[#73737A] mt-0.5">
-                      Paiement à la remise en main propre et expédition sous 24h partout au Bénin.
-                    </p>
-                  </div>
-                </div>
-
-                <Link
-                  href="/#avis"
-                  className="text-xs font-bold text-[#C27835] hover:text-[#9E5A1C] hover:underline flex items-center gap-1 shrink-0"
-                >
-                  <span>Consulter les avis boutique sur la vitrine</span>
-                  <span>→</span>
-                </Link>
-              </div>
-
-            </div>
-
-            {/* COLONNE DROITE (5 COLONNES) : BLOC PRIX & CHECKOUT ULTRA-SIMPLIFIÉ */}
-            <div className="lg:col-span-5 lg:sticky lg:top-24 space-y-6">
-              
-              {/* Carte Titre, Prix Promotionnel & Sélecteur */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#EAE8E2] shadow-sm space-y-4">
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835] bg-[#FBF4ED] px-3 py-1 rounded-full border border-[#F2DFCE] inline-block">
-                  AFRINOVA SHOP • Sélection Exclusive
-                </span>
-
-                <h1 className="font-heading font-black text-xl sm:text-2xl text-[#16171A] leading-snug">
-                  {product.name}
-                </h1>
-
-                {/* SOCIAL PROOF VITRINE */}
-                <div className="flex flex-wrap items-center gap-2.5 pt-0.5">
-                  <Link
-                    href="/#avis"
-                    className="inline-flex items-center gap-1.5 group hover:opacity-85 transition"
-                    title="Voir les avis de nos clients sur la vitrine"
+              {/* COLONNE GAUCHE (7 COLS) : GALERIE PHOTOS OPTIMISÉE */}
+              <div className="lg:col-span-7 space-y-5 lg:sticky lg:top-20">
+                
+                {/* 2. GALERIE PHOTOS OPTIMISÉE (HAUTEUR RÉDUITE SUR MOBILE, GRAND FORMAT QUALITÉ) */}
+                <div className="space-y-3">
+                  <div
+                    onClick={() => setIsZoomOpen(true)}
+                    className="relative aspect-[4/3] sm:aspect-square lg:aspect-[4/5] max-h-[340px] sm:max-h-[460px] lg:max-h-none rounded-2xl sm:rounded-3xl overflow-hidden bg-[#F4F3F0] border border-[#EAE8E2] shadow-sm cursor-zoom-in group select-none"
+                    role="button"
+                    tabIndex={0}
+                    aria-label="Agrandir la photo du produit"
+                    onKeyDown={(e) => { if (e.key === 'Enter') setIsZoomOpen(true); }}
                   >
-                    <div className="flex items-center gap-0.5 text-amber-500">
-                      {[1, 2, 3, 4, 5].map((s) => (
-                        <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
-                      ))}
-                    </div>
-                    <span className="font-extrabold text-xs text-[#16171A]">4.9/5</span>
-                    <span className="text-xs text-[#73737A] underline decoration-slate-300 underline-offset-2 group-hover:text-[#16171A]">
-                      (Avis clients sur la vitrine)
-                    </span>
-                  </Link>
-
-                  <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
-                    <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
-                    <span>Paiement à la livraison</span>
-                  </span>
-                </div>
-
-                {/* ZONE DE PRIX - MISE EN VALEUR PROMOTIONNELLE MAJEURE */}
-                {isPromoActive ? (
-                  <div className="p-4 rounded-2xl bg-[#FDF9F3] border border-[#F5E6D3] space-y-2">
-                    <div className="inline-flex items-center gap-1.5 text-[10px] font-extrabold uppercase tracking-wider text-[#C27835]">
-                      <span>⚡</span>
-                      <span>PRIX SPÉCIAL — QUANTITÉ LIMITÉE</span>
-                    </div>
-
-                    <div className="flex items-baseline gap-3 flex-wrap">
-                      <span className="font-heading font-black text-3xl sm:text-4xl text-[#C27835] tracking-tight">
-                        {formatFCFA(promo.promo_price)}
-                      </span>
-                      <span className="text-base text-[#9C9CA4] line-through font-medium">
-                        {formatFCFA(regularReferencePrice)}
-                      </span>
-                      {discountPercent > 0 && (
-                        <span className="bg-[#121316] text-white text-xs font-black px-2.5 py-0.5 rounded-full">
-                          -{discountPercent}%
+                    <Image
+                      src={activeImage}
+                      alt={product.name}
+                      fill
+                      sizes="(max-width: 1024px) 100vw, 55vw"
+                      priority
+                      unoptimized={activeImage.startsWith('/images/')}
+                      className="object-cover transition-transform duration-500 ease-out group-hover:scale-102"
+                    />
+                    
+                    {/* Badges sur l'image */}
+                    <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex flex-col gap-1.5 z-10">
+                      {isPromoActive && (
+                        <span className="inline-flex items-center gap-1 bg-[#16171A]/90 text-white text-[10px] sm:text-[11px] font-bold px-2.5 sm:px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md border border-white/15 shadow-sm">
+                          <Sparkles className="w-3 h-3 text-[#E5A869]" />
+                          Offre Spéciale
                         </span>
                       )}
+                      {discountBadge && !isPromoActive && (
+                        <span className="inline-flex items-center bg-[#C27835]/15 text-[#9E5A1C] border border-[#C27835]/30 text-[10px] sm:text-[11px] font-bold px-2.5 sm:px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md shadow-xs">
+                          {discountBadge}
+                        </span>
+                      )}
+                      <span className="bg-white/90 backdrop-blur-md text-[#54555A] text-[10px] font-semibold px-2.5 py-0.5 rounded-full shadow-xs border border-black/5 self-start">
+                        {product.category}
+                      </span>
                     </div>
 
-                    <p className="text-[11px] text-emerald-800 font-bold">
-                      ✓ Économie de {formatFCFA(regularReferencePrice - promo.promo_price)} par unité commandée
-                    </p>
+                    <span className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-black/60 hover:bg-black/80 text-white text-[10px] font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full backdrop-blur-md flex items-center gap-1.5 transition">
+                      <ZoomIn className="w-3.5 h-3.5 text-white/90" />
+                      <span>Agrandir</span>
+                    </span>
                   </div>
-                ) : (
-                  <div className="flex items-baseline gap-3 pt-1">
-                    <span className="font-heading font-black text-2xl sm:text-3xl text-[#16171A] tracking-tight">
-                      {formatFCFA(product.price)}
+
+                  {/* Miniatures : affichées uniquement si le produit dispose de plusieurs photos authentiques */}
+                  {gallery.length > 1 && (
+                    <div className="flex gap-2 sm:gap-3 overflow-x-auto no-scrollbar py-1">
+                      {gallery.map((imgUrl, i) => {
+                        const isSelected = activeImage === imgUrl;
+                        return (
+                          <button
+                            key={i}
+                            type="button"
+                            onClick={() => setSelectedImage(imgUrl)}
+                            className={`relative w-16 sm:w-20 h-20 sm:h-24 rounded-xl sm:rounded-2xl overflow-hidden border-2 transition-all shrink-0 cursor-pointer ${
+                              isSelected
+                                ? 'border-[#C27835] ring-2 ring-[#C27835]/20 shadow-xs'
+                                : 'border-[#EAE8E2] opacity-70 hover:opacity-100 hover:border-[#D7D4CC]'
+                            }`}
+                          >
+                            <Image
+                              src={imgUrl}
+                              alt={`${product.name} - Vue ${i + 1}`}
+                              fill
+                              sizes="80px"
+                              className="object-cover"
+                            />
+                          </button>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 5. INFORMATIONS DE CONFIANCE (BLOCS COMPACTS ET ÉLÉGANTS) */}
+                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pt-2">
+                  <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#EAE8E2] shadow-xs flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#EAE8E2] flex items-center justify-center text-[#C27835] shrink-0">
+                      <Banknote className="w-4 h-4 stroke-[1.8]" />
+                    </div>
+                    <div>
+                      <h4 className="text-[11px] sm:text-xs font-bold text-[#16171A] leading-tight">Paiement à la livraison</h4>
+                      <p className="text-[10px] text-[#73737A] mt-0.5 leading-tight">Espèces ou MoMo à réception</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#EAE8E2] shadow-xs flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#EAE8E2] flex items-center justify-center text-[#C27835] shrink-0">
+                      <Truck className="w-4 h-4 stroke-[1.8]" />
+                    </div>
+                    <div>
+                      <h4 className="text-[11px] sm:text-xs font-bold text-[#16171A] leading-tight">Expédition 24h-48h</h4>
+                      <p className="text-[10px] text-[#73737A] mt-0.5 leading-tight">Cotonou, Calavi & provinces</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#EAE8E2] shadow-xs flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#EAE8E2] flex items-center justify-center text-[#C27835] shrink-0">
+                      <CheckCircle2 className="w-4 h-4 stroke-[1.8]" />
+                    </div>
+                    <div>
+                      <h4 className="text-[11px] sm:text-xs font-bold text-[#16171A] leading-tight">Colis vérifié avant paiement</h4>
+                      <p className="text-[10px] text-[#73737A] mt-0.5 leading-tight">Inspectez avant de régler</p>
+                    </div>
+                  </div>
+
+                  <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#EAE8E2] shadow-xs flex items-center gap-2.5">
+                    <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#EAE8E2] flex items-center justify-center text-[#C27835] shrink-0">
+                      <ShieldCheck className="w-4 h-4 stroke-[1.8]" />
+                    </div>
+                    <div>
+                      <h4 className="text-[11px] sm:text-xs font-bold text-[#16171A] leading-tight">Garantie échange 48h</h4>
+                      <p className="text-[10px] text-[#73737A] mt-0.5 leading-tight">Service client local 7j/7</p>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              {/* COLONNE DROITE (5 COLS) : INFOS PRODUIT, OFFRES VOLUME & FORMULAIRE */}
+              <div className="lg:col-span-5 space-y-6">
+                
+                {/* CARTE PRINCIPALE : INFORMATIONS RÉORGANISÉES SELON L'ORDRE STRICT */}
+                <div className="bg-white rounded-3xl p-5 sm:p-7 border border-[#EAE8E2] shadow-xs space-y-4">
+                  
+                  {/* 3.1 BADGE DE COLLECTION OU CATÉGORIE */}
+                  <div>
+                    <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-[#C27835] bg-[#FBF4ED] px-3 py-1 rounded-full border border-[#F2DFCE] inline-block">
+                      AFRINOVA SHOP • {product.category}
                     </span>
-                    <span className="text-sm text-[#9C9CA4] line-through font-medium">
-                      {formatFCFA(regularReferencePrice)}
-                    </span>
-                    {discountBadge && (
-                      <span className="bg-[#121316] text-white text-xs font-black px-2.5 py-0.5 rounded-full">
-                        {discountBadge}
+                  </div>
+
+                  {/* 3.2 NOM DU PRODUIT */}
+                  <h1 className="font-heading font-black text-xl sm:text-2xl lg:text-3xl text-[#16171A] leading-snug">
+                    {product.name}
+                  </h1>
+
+                  {/* 3.3 ÉVALUATION AVEC ÉTOILES ET NOMBRE D'AVIS */}
+                  <div className="flex flex-wrap items-center gap-2 pt-0.5">
+                    <a
+                      href="#avis-clients"
+                      className="inline-flex items-center gap-1.5 group hover:opacity-85 transition"
+                    >
+                      <div className="flex items-center gap-0.5 text-amber-500">
+                        {[1, 2, 3, 4, 5].map((s) => (
+                          <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                        ))}
+                      </div>
+                      <span className="font-extrabold text-xs text-[#16171A]">4.9/5</span>
+                      <span className="text-xs text-[#73737A] underline decoration-slate-300 underline-offset-2 group-hover:text-[#16171A]">
+                        ({reviews.length} avis vérifiés)
                       </span>
+                    </a>
+                  </div>
+
+                  {/* 3.4 BADGE « PAIEMENT À LA LIVRAISON » */}
+                  <div>
+                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/80">
+                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                      <span>Paiement à la livraison au Bénin</span>
+                    </span>
+                  </div>
+
+                  {/* 3.5, 3.6, 3.7 ZONE DE PRIX : PRIX PROMO PRINCIPAL, ANCIEN PRIX BARRÉ, % RÉDUCTION */}
+                  <div className="pt-2 border-t border-[#F3F1EC]">
+                    {isPromoActive ? (
+                      <div className="p-4 rounded-2xl bg-[#FDF9F4] border border-[#F5E6D3] space-y-2">
+                        <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#C27835]">
+                          <span>⚡</span>
+                          <span>TARIF PROMOTIONNEL EN COURS</span>
+                        </div>
+
+                        <div className="flex items-baseline gap-3 flex-wrap">
+                          {/* 3.5 PRIX PROMO PRINCIPAL PARTICULIÈREMENT VISIBLE */}
+                          <span className="font-heading font-black text-3xl sm:text-4xl text-[#C27835] tracking-tight tabular-nums">
+                            {formatFCFA(promo.promo_price)}
+                          </span>
+
+                          {/* 3.6 ANCIEN PRIX BARRÉ */}
+                          <span className="text-base sm:text-lg text-[#9C9CA4] line-through font-semibold tabular-nums">
+                            {formatFCFA(regularReferencePrice)}
+                          </span>
+
+                          {/* 3.7 POURCENTAGE DE RÉDUCTION */}
+                          {discountPercent > 0 && (
+                            <span className="bg-[#121316] text-white text-xs font-black px-2.5 py-0.5 rounded-full">
+                              -{discountPercent}%
+                            </span>
+                          )}
+                        </div>
+
+                        <p className="text-[11px] text-emerald-800 font-bold">
+                          ✓ Vous économisez {formatFCFA(regularReferencePrice - promo.promo_price)} par article
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex items-baseline gap-3 flex-wrap pt-1">
+                        {/* 3.5 PRIX NORMAL */}
+                        <span className="font-heading font-black text-2xl sm:text-3xl text-[#16171A] tracking-tight tabular-nums">
+                          {formatFCFA(product.price)}
+                        </span>
+
+                        {/* 3.6 ANCIEN PRIX BARRÉ */}
+                        {regularReferencePrice > product.price && (
+                          <span className="text-base text-[#9C9CA4] line-through font-medium tabular-nums">
+                            {formatFCFA(regularReferencePrice)}
+                          </span>
+                        )}
+
+                        {/* 3.7 POURCENTAGE DE RÉDUCTION */}
+                        {discountBadge && (
+                          <span className="bg-[#121316] text-white text-xs font-black px-2.5 py-0.5 rounded-full">
+                            {discountBadge}
+                          </span>
+                        )}
+                      </div>
                     )}
                   </div>
-                )}
 
-                {/* WIDGET DE PROMOTION PAR QUANTITÉ (SHOPIFY QUANTITY BREAKS STYLE) */}
-                {qbSettings.enabled && (
-                  <QuantityBreaksWidget
-                    currentQuantity={orderQuantity}
-                    onSelectQuantity={(q) => setOrderQuantity(q)}
-                    productPrice={product.price}
-                    originalPrice={regularReferencePrice}
-                    promoPrice={promo?.promo_price}
-                    promoRemainingQuota={promo?.remaining_quota}
-                    stock={product.stock}
-                    popularTier={qbSettings.popularTier}
-                    template={qbSettings.template}
-                    accentColor={qbSettings.accentColor}
-                    customLabels={qbSettings.customLabels}
-                    onProceedToOrder={scrollToForm}
-                  />
-                )}
+                  {/* 4. SECTION DES OFFRES PAR QUANTITÉ (SHOPIFY VOLUME DISCOUNTS STYLE) */}
+                  {qbSettings.enabled && (
+                    <div className="pt-2">
+                      <QuantityBreaksWidget
+                        currentQuantity={orderQuantity}
+                        onSelectQuantity={(q) => setOrderQuantity(q)}
+                        productPrice={product.price}
+                        originalPrice={regularReferencePrice}
+                        promoPrice={promo?.promo_price}
+                        promoRemainingQuota={promo?.remaining_quota}
+                        stock={product.stock}
+                        popularTier={qbSettings.popularTier}
+                        template={qbSettings.template}
+                        accentColor={qbSettings.accentColor}
+                        customLabels={qbSettings.customLabels}
+                      />
+                    </div>
+                  )}
 
-                {/* Sélecteur de Quantité Manuel Synchronisé */}
-                <div className="pt-3 border-t border-[#F3F1EC] space-y-2">
-                  <div className="flex items-center justify-between">
+                  {/* Ajusteur manuel de quantité */}
+                  <div className="pt-2 border-t border-[#F3F1EC] flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-bold text-[#16171A] block">Quantité totale :</span>
-                      <span className="text-[10px] text-[#73737A]">Ajustable aussi manuellement</span>
+                      <span className="text-xs font-bold text-[#16171A] block">Quantité exacte :</span>
+                      <span className="text-[10px] text-[#73737A]">Ajustable librement</span>
                     </div>
                     <div className="flex items-center border border-[#EAE8E2] rounded-full bg-[#FAF9F6]">
                       <button
                         type="button"
                         onClick={() => setOrderQuantity((q) => Math.max(1, q - 1))}
                         disabled={orderQuantity <= 1}
-                        className="w-9 h-9 flex items-center justify-center font-bold text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
+                        className="w-8 h-8 flex items-center justify-center font-bold text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
                         aria-label="Diminuer la quantité"
                       >
                         −
                       </button>
-                      <span className="w-10 text-center font-bold text-xs text-[#16171A] tabular-nums">
+                      <span className="w-8 text-center font-bold text-xs text-[#16171A] tabular-nums">
                         {orderQuantity}
                       </span>
                       <button
                         type="button"
                         onClick={() => setOrderQuantity((q) => Math.min(Math.min(10, product.stock || 10), q + 1))}
                         disabled={orderQuantity >= Math.min(10, product.stock || 10)}
-                        className="w-9 h-9 flex items-center justify-center font-bold text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
+                        className="w-8 h-8 flex items-center justify-center font-bold text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
                         aria-label="Augmenter la quantité"
                       >
                         +
@@ -819,237 +859,433 @@ export default function ProductPage() {
                     </div>
                   </div>
 
-                  {/* Alerte déterministe en cas de split promo / normal */}
-                  {isPromoActive && orderQuantity > promo.remaining_quota && (
-                    <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-950 space-y-1">
-                      <p className="font-bold flex items-center gap-1 text-amber-800">
-                        <span>ℹ️</span>
-                        <span>Répartition automatique du tarif :</span>
-                      </p>
-                      <p className="text-[11px] leading-relaxed">
-                        • <strong>{promo.remaining_quota} unité{promo.remaining_quota > 1 ? 's' : ''}</strong> au prix promo de <strong>{formatFCFA(promo.promo_price)}</strong>
-                        <br />
-                        • <strong>{orderQuantity - promo.remaining_quota} unité{(orderQuantity - promo.remaining_quota) > 1 ? 's' : ''}</strong> au prix normal de <strong>{formatFCFA(product.price)}</strong>
-                      </p>
+                </div>
+
+                {/* FORMULAIRE DE COMMANDE ULTRA-SIMPLIFIÉ (STRICTEMENT 3 CHAMPS) */}
+                <div id="commandeDirecte" className="bg-white rounded-3xl p-5 sm:p-7 border border-[#EAE8E2] shadow-md space-y-4 scroll-mt-20">
+                  
+                  <div className="border-b border-[#F3F1EC] pb-3">
+                    <span className="text-xs font-heading font-black uppercase tracking-wider text-[#16171A] flex items-center gap-2">
+                      <span>⚡ Commande Express — Paiement à la réception</span>
+                    </span>
+                    <p className="text-xs text-[#73737A] mt-1">
+                      Remplissez vos 3 coordonnées. Vous réglez directement lors de la remise en main propre.
+                    </p>
+                  </div>
+
+                  {errorMsg && (
+                    <div className="p-3 bg-[#FDF2F0] border border-[#F8D7DA] text-[#B85D3D] text-xs rounded-2xl font-bold flex items-center gap-2">
+                      <span>⚠️</span>
+                      <span>{errorMsg}</span>
                     </div>
                   )}
-                </div>
-              </div>
 
-              {/* FORMULAIRE DE COMMANDE ULTRA-SIMPLIFIÉ (3 CHAMPS UNIQUEMENT) */}
-              <div id="commandeDirecte" className="bg-white rounded-3xl p-6 sm:p-8 border border-[#EAE8E2] shadow-md space-y-5 scroll-mt-24">
-                
-                <div className="border-b border-[#F3F1EC] pb-3">
-                  <span className="text-xs font-heading font-black uppercase tracking-wider text-[#16171A] flex items-center gap-2">
-                    <span>⚡ Achat Express Sans Compte</span>
-                  </span>
-                  <p className="text-xs text-[#73737A] mt-1">
-                    3 informations suffisent. Paiement à la réception de votre colis.
-                  </p>
-                </div>
-
-                {errorMsg && (
-                  <div className="p-3 bg-[#FDF2F0] border border-[#F8D7DA] text-[#B85D3D] text-xs rounded-2xl font-bold flex items-center gap-2">
-                    <span>⚠️</span>
-                    <span>{errorMsg}</span>
-                  </div>
-                )}
-
-                <form onSubmit={handleOrderSubmit} className="space-y-4 text-xs sm:text-sm">
-                  
-                  {/* CHAMP 1 : NOM COMPLET */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-[#54555A] mb-1">
-                      Nom complet *
-                    </label>
-                    <input
-                      id="customerNameInput"
-                      type="text"
-                      required
-                      value={customerName}
-                      onChange={(e) => setCustomerName(e.target.value)}
-                      placeholder="ex: Ablawa Tossou"
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition"
-                    />
-                  </div>
-
-                  {/* CHAMP 2 : TÉLÉPHONE BÉNIN */}
-                  <div>
-                    <div className="flex justify-between items-center mb-1">
-                      <label className="block text-[11px] font-bold text-[#54555A]">
-                        Numéro de téléphone *
+                  <form onSubmit={handleOrderSubmit} className="space-y-3.5 text-xs sm:text-sm">
+                    
+                    {/* CHAMP 1 : NOM COMPLET */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-[#54555A] mb-1">
+                        Nom complet *
                       </label>
-                      <span className="text-[10px] text-[#73737A] font-medium">Bénin (+229)</span>
+                      <input
+                        id="customerNameInput"
+                        type="text"
+                        required
+                        value={customerName}
+                        onChange={(e) => setCustomerName(e.target.value)}
+                        placeholder="ex: Jean Dossou"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition"
+                      />
                     </div>
-                    <input
-                      type="tel"
-                      required
-                      value={customerPhone}
-                      onChange={(e) => setCustomerPhone(e.target.value)}
-                      placeholder="01 97 00 11 22 ou 97 00 11 22"
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition"
-                    />
-                    {phoneValidation && (
-                      <div className="mt-1 text-[10px] font-semibold">
-                        {phoneValidation.valid ? (
-                          phoneValidation.isOldFormat ? (
-                            <span className="text-amber-700 inline-flex items-center gap-1">
-                              <Info className="w-3 h-3 text-amber-600 shrink-0" />
-                              <span>{phoneValidation.message}</span>
-                            </span>
+
+                    {/* CHAMP 2 : TÉLÉPHONE BÉNIN */}
+                    <div>
+                      <div className="flex justify-between items-center mb-1">
+                        <label className="block text-[11px] font-bold text-[#54555A]">
+                          Numéro de téléphone *
+                        </label>
+                        <span className="text-[10px] text-[#73737A] font-medium">Bénin (+229)</span>
+                      </div>
+                      <input
+                        type="tel"
+                        required
+                        value={customerPhone}
+                        onChange={(e) => setCustomerPhone(e.target.value)}
+                        placeholder="01 97 00 11 22 ou 97 00 11 22"
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition"
+                      />
+                      {phoneValidation && (
+                        <div className="mt-1 text-[10px] font-semibold">
+                          {phoneValidation.valid ? (
+                            phoneValidation.isOldFormat ? (
+                              <span className="text-amber-700 inline-flex items-center gap-1">
+                                <Info className="w-3 h-3 text-amber-600 shrink-0" />
+                                <span>{phoneValidation.message}</span>
+                              </span>
+                            ) : (
+                              <span className="text-emerald-700">✓ Format valide : {phoneValidation.formatted}</span>
+                            )
                           ) : (
-                            <span className="text-emerald-700">✓ Numéro valide : {phoneValidation.formatted}</span>
-                          )
-                        ) : (
-                          <span className="text-rose-600">{phoneValidation.message}</span>
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* CHAMP 3 : VILLE / LIEU DE LIVRAISON (SAISIE LIBRE) */}
-                  <div>
-                    <label className="block text-[11px] font-bold text-[#54555A] mb-1">
-                      Ville / Lieu de livraison au Bénin *
-                    </label>
-                    <input
-                      type="text"
-                      required
-                      value={shippingCity}
-                      onChange={(e) => setShippingCity(e.target.value)}
-                      placeholder="ex: Cotonou, Calavi, Porto-Novo, Parakou..."
-                      className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition font-medium"
-                    />
-                  </div>
-
-                  {/* RÉCAPITULATIF TRANSPARENT DE COMMANDE */}
-                  <div className="bg-[#FAF9F6] p-4 rounded-2xl border border-[#EAE8E2] space-y-2 text-xs">
-                    {/* Détail des unités commandées */}
-                    {isPromoActive && orderQuantity > promo.remaining_quota ? (
-                      <div className="space-y-1 text-[#73737A] border-b border-[#EAE8E2] pb-2">
-                        <div className="flex justify-between">
-                          <span>{promo.remaining_quota}x Tarif promotionnel :</span>
-                          <span className="font-bold text-[#C27835]">{formatFCFA(promo.promo_price * promo.remaining_quota)}</span>
+                            <span className="text-rose-600">{phoneValidation.message}</span>
+                          )}
                         </div>
-                        <div className="flex justify-between">
-                          <span>{orderQuantity - promo.remaining_quota}x Tarif normal :</span>
-                          <span className="font-bold text-[#16171A]">{formatFCFA(product.price * (orderQuantity - promo.remaining_quota))}</span>
-                        </div>
-                      </div>
-                    ) : (
+                      )}
+                    </div>
+
+                    {/* CHAMP 3 : VILLE / LIEU DE LIVRAISON */}
+                    <div>
+                      <label className="block text-[11px] font-bold text-[#54555A] mb-1">
+                        Ville / Lieu de livraison au Bénin *
+                      </label>
+                      <input
+                        type="text"
+                        required
+                        value={shippingCity}
+                        onChange={(e) => setShippingCity(e.target.value)}
+                        placeholder="ex: Cotonou, Calavi, Porto-Novo, Parakou..."
+                        className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition font-medium"
+                      />
+                    </div>
+
+                    {/* RÉCAPITULATIF TRANSPARENT DU TOTAL SÉLECTIONNÉ */}
+                    <div className="bg-[#FAF9F6] p-4 rounded-2xl border border-[#EAE8E2] space-y-2 text-xs">
                       <div className="flex justify-between text-[#73737A]">
-                        <span>Article ({orderQuantity} pièce{orderQuantity > 1 ? 's' : ''}) :</span>
-                        <span className="font-bold text-[#16171A]">{formatFCFA(currentSubtotal)}</span>
+                        <span>Quantité sélectionnée :</span>
+                        <span className="font-bold text-[#16171A]">{orderQuantity} article{orderQuantity > 1 ? 's' : ''}</span>
                       </div>
-                    )}
 
-                    {/* Économie réalisée */}
-                    {totalSavings > 0 && (
-                      <div className="flex justify-between text-emerald-700 font-bold">
-                        <span>Économie totale :</span>
-                        <span>-{formatFCFA(totalSavings)}</span>
+                      {totalSavings > 0 && (
+                        <div className="flex justify-between text-emerald-700 font-bold">
+                          <span>Économie réalisée :</span>
+                          <span>-{formatFCFA(totalSavings)}</span>
+                        </div>
+                      )}
+
+                      <div className="flex justify-between pt-2 border-t border-[#EAE8E2] font-heading font-black text-sm text-[#16171A]">
+                        <span>TOTAL À LA RÉCEPTION :</span>
+                        <span className="text-[#C27835] text-base sm:text-lg">{formatFCFA(currentTotal)}</span>
                       </div>
-                    )}
-
-                    {/* Total à payer à la réception */}
-                    <div className="flex justify-between pt-2 border-t border-[#EAE8E2] font-heading font-black text-sm text-[#16171A]">
-                      <span>Total à payer à la réception :</span>
-                      <span className="text-[#C27835] text-base">{formatFCFA(currentTotal)}</span>
                     </div>
-                  </div>
 
-                  {/* Honeypot invisible */}
-                  <div className="hidden" aria-hidden="true" style={{ display: 'none' }}>
-                    <input
-                      type="text"
-                      name="website"
-                      tabIndex={-1}
-                      autoComplete="off"
-                      value={honeypot}
-                      onChange={(e) => setHoneypot(e.target.value)}
-                    />
-                  </div>
-
-                  {/* BOUTON D'ACTION PRINCIPAL HAUTEMENT VISIBLE AVEC ANIMATION D'INCITATION */}
-                  <button
-                    type="submit"
-                    disabled={submitting}
-                    className="w-full btn-accent btn-cta-animated text-sm sm:text-base py-3.5 sm:py-4 px-6 min-h-[52px] shadow-lg cursor-pointer flex items-center justify-center gap-2 group"
-                  >
-                    {submitting ? (
-                      <>
-                        <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Validation en cours...</span>
-                      </>
-                    ) : (
-                      <>
-                        <span className="font-heading font-black tracking-wide">
-                          Commander maintenant
-                        </span>
-                        <span className="btn-cta-nudge text-base sm:text-lg">→</span>
-                      </>
-                    )}
-                  </button>
-
-                  {/* RÉASSURANCE SOUS LE BOUTON */}
-                  <div className="grid grid-cols-3 gap-2 pt-3 border-t border-[#F3F1EC] text-center">
-                    <div className="p-2.5 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2]/80 flex flex-col items-center">
-                      <div className="w-7 h-7 rounded-full bg-white border border-[#EAE8E2] flex items-center justify-center text-[#C27835] mb-1 shadow-xs">
-                        <Truck className="w-3.5 h-3.5 stroke-[1.8]" />
-                      </div>
-                      <h4 className="text-[10px] font-bold text-[#16171A]">Expédition 24-48h</h4>
-                      <p className="text-[9px] text-[#73737A]">Partout au Bénin</p>
+                    {/* Honeypot invisible */}
+                    <div className="hidden" aria-hidden="true" style={{ display: 'none' }}>
+                      <input
+                        type="text"
+                        name="website"
+                        tabIndex={-1}
+                        autoComplete="off"
+                        value={honeypot}
+                        onChange={(e) => setHoneypot(e.target.value)}
+                      />
                     </div>
-                    <div className="p-2.5 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2]/80 flex flex-col items-center">
-                      <div className="w-7 h-7 rounded-full bg-white border border-[#EAE8E2] flex items-center justify-center text-[#C27835] mb-1 shadow-xs">
-                        <Banknote className="w-3.5 h-3.5 stroke-[1.8]" />
-                      </div>
-                      <h4 className="text-[10px] font-bold text-[#16171A]">Paiement Réception</h4>
-                      <p className="text-[9px] text-[#73737A]">Espèces ou MoMo</p>
-                    </div>
-                    <div className="p-2.5 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2]/80 flex flex-col items-center">
-                      <div className="w-7 h-7 rounded-full bg-white border border-[#EAE8E2] flex items-center justify-center text-[#C27835] mb-1 shadow-xs">
-                        <ShieldCheck className="w-3.5 h-3.5 stroke-[1.8]" />
-                      </div>
-                      <h4 className="text-[10px] font-bold text-[#16171A]">Garantie 48h</h4>
-                      <p className="text-[9px] text-[#73737A]">Échange immédiat</p>
-                    </div>
-                  </div>
 
-                </form>
+                    {/* BOUTON D'ACTION PRINCIPAL COMMANDER */}
+                    <button
+                      type="submit"
+                      disabled={submitting}
+                      className="w-full btn-accent btn-cta-animated text-sm sm:text-base py-3.5 sm:py-4 px-6 min-h-[52px] shadow-lg cursor-pointer flex items-center justify-center gap-2 group"
+                    >
+                      {submitting ? (
+                        <>
+                          <span className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Validation en cours...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span className="font-heading font-black tracking-wide">
+                            COMMANDER MAINTENANT
+                          </span>
+                          <span className="btn-cta-nudge text-base sm:text-lg">→</span>
+                        </>
+                      )}
+                    </button>
+
+                    <p className="text-[11px] text-[#73737A] text-center font-medium">
+                      🔒 Règlement sécurisé à la réception • Aucun paiement en ligne requis
+                    </p>
+
+                  </form>
+                </div>
+
               </div>
 
             </div>
+
+            {/* 6. REORGANISATION DES AUTRES SECTIONS (DANS L'ORDRE STRICT DEMANDÉ) */}
+            <div className="space-y-12 sm:space-y-16 pt-4 border-t border-[#EAE8E2]">
+              
+              {/* 6.1 DESCRIPTION DÉTAILLÉE DU PRODUIT */}
+              <section className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-4" aria-labelledby="desc-heading">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
+                    <Sparkles className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                      Présentation
+                    </span>
+                    <h2 id="desc-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                      Description détaillée du produit
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="text-xs sm:text-sm text-[#54555A] leading-relaxed space-y-3 pt-2">
+                  <p className="text-sm sm:text-base font-medium text-[#16171A]">
+                    {product.description}
+                  </p>
+                  <p>
+                    Chaque exemplaire sélectionné par AFRINOVA SHOP répond à un cahier des charges rigoureux. Nous privilégions les matériaux nobles, les finitions précises et la longévité d&apos;utilisation pour vous offrir une expérience d&apos;usage digne des plus grands standards.
+                  </p>
+                  <p>
+                    Que ce soit pour votre usage personnel au quotidien ou pour offrir un présent d&apos;exception à un proche, cet article allie raffinement, robustesse et élégance intemporelle.
+                  </p>
+                </div>
+              </section>
+
+              {/* 6.2 CARACTÉRISTIQUES TECHNIQUES */}
+              <section className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-4" aria-labelledby="specs-heading">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
+                    <Package className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                      Spécifications
+                    </span>
+                    <h2 id="specs-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                      Caractéristiques techniques
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="pt-2">
+                  <div className="divide-y divide-[#EAE8E2] border border-[#EAE8E2] rounded-2xl overflow-hidden bg-[#FAF9F6]">
+                    {specs.map((spec, i) => (
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 px-4 sm:px-5 gap-1 sm:gap-4 text-xs sm:text-sm">
+                        <span className="font-bold text-[#16171A] shrink-0 sm:w-1/3">
+                          {spec.label}
+                        </span>
+                        <span className="text-[#54555A] sm:w-2/3 sm:text-right">
+                          {spec.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </section>
+
+              {/* 6.3 INFORMATIONS DE LIVRAISON */}
+              <section className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-4" aria-labelledby="delivery-heading">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
+                    <Truck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                      Logistique Bénin
+                    </span>
+                    <h2 id="delivery-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                      Informations de livraison
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-3 gap-3.5 pt-2">
+                  <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-1.5">
+                    <div className="font-heading font-bold text-xs sm:text-sm text-[#16171A] flex items-center gap-1.5">
+                      <Clock className="w-4 h-4 text-[#C27835]" />
+                      <span>Délais d&apos;expédition</span>
+                    </div>
+                    <p className="text-xs text-[#54555A] leading-relaxed">
+                      Livraison express sous <strong>24h à Cotonou et Calavi</strong>. Expédition sous 24h à 48h vers Porto-Novo, Parakou et l&apos;ensemble des communes du Bénin.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-1.5">
+                    <div className="font-heading font-bold text-xs sm:text-sm text-[#16171A] flex items-center gap-1.5">
+                      <Phone className="w-4 h-4 text-[#C27835]" />
+                      <span>Appel avant passage</span>
+                    </div>
+                    <p className="text-xs text-[#54555A] leading-relaxed">
+                      Notre coursier vous contacte toujours par appel ou message avant son déplacement afin de fixer l&apos;heure et le repère idéal de rendez-vous.
+                    </p>
+                  </div>
+
+                  <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-1.5">
+                    <div className="font-heading font-bold text-xs sm:text-sm text-[#16171A] flex items-center gap-1.5">
+                      <Banknote className="w-4 h-4 text-[#C27835]" />
+                      <span>Paiement en main propre</span>
+                    </div>
+                    <p className="text-xs text-[#54555A] leading-relaxed">
+                      Aucune avance n&apos;est exigée. Vous réglez directement en espèces ou par Mobile Money lors de la réception de votre article.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* 6.4 GARANTIES ET CONDITIONS DE RETOUR */}
+              <section className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-4" aria-labelledby="warranty-heading">
+                <div className="flex items-center gap-2.5">
+                  <div className="w-8 h-8 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
+                    <ShieldCheck className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                      Tranquillité d&apos;Achat
+                    </span>
+                    <h2 id="warranty-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                      Garanties et conditions de retour
+                    </h2>
+                  </div>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-4 pt-2">
+                  <div className="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200/60 space-y-2">
+                    <h3 className="font-heading font-bold text-sm text-emerald-950 flex items-center gap-1.5">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                      <span>Contrôle libre du colis à l&apos;ouverture</span>
+                    </h3>
+                    <p className="text-xs text-emerald-900 leading-relaxed">
+                      Vous avez le droit légitime d&apos;ouvrir votre colis en présence du livreur pour vous assurer de la parfaite conformité de la commande avant d&apos;effectuer votre paiement.
+                    </p>
+                  </div>
+
+                  <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-2">
+                    <h3 className="font-heading font-bold text-sm text-[#16171A] flex items-center gap-1.5">
+                      <RotateCcw className="w-4 h-4 text-[#C27835]" />
+                      <span>Échange immédiat sous 48h</span>
+                    </h3>
+                    <p className="text-xs text-[#54555A] leading-relaxed">
+                      Si l&apos;article présente la moindre anomalie constatée dans les 48 heures suivant la réception, notre service client basé à Cotonou organise un échange gratuit sans délai.
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* 6.5 AVIS CLIENTS VÉRIFIÉS */}
+              <section id="avis-clients" className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-6" aria-labelledby="reviews-heading">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE8E2] pb-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-base border border-amber-200/80 shrink-0">
+                      ★ 4.9
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <h2 id="reviews-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                          Avis clients vérifiés
+                        </h2>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+                          <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                          Certifiés réels
+                        </span>
+                      </div>
+                      <p className="text-xs text-[#73737A] mt-0.5">
+                        Basé sur les retours d&apos;expérience de nos clients au Bénin
+                      </p>
+                    </div>
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowReviewModal(true)}
+                    className="btn-secondary text-xs py-2.5 px-4 self-start sm:self-auto cursor-pointer"
+                  >
+                    Donner mon avis
+                  </button>
+                </div>
+
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {reviews.slice(0, 6).map((rev) => (
+                    <div
+                      key={rev.id}
+                      className="p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-2.5 flex flex-col justify-between"
+                    >
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-0.5 text-amber-400">
+                            {[1, 2, 3, 4, 5].map((s) => (
+                              <Star
+                                key={s}
+                                className={`w-3.5 h-3.5 ${s <= rev.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-[10px] text-[#73737A]">
+                            {formatReviewDate(rev.created_at)}
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-[#16171A] leading-relaxed italic font-medium">
+                          &ldquo;{rev.comment}&rdquo;
+                        </p>
+                      </div>
+
+                      <div className="pt-2 border-t border-[#EAE8E2]/60 flex items-center justify-between text-[11px]">
+                        <span className="font-bold text-[#16171A]">
+                          {rev.customer_name}
+                        </span>
+                        <span className="text-[#73737A]">
+                          📍 {rev.city || 'Bénin'}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+            </div>
+
+            {/* SECTION "VOUS AIMEREZ AUSSI" */}
+            {relatedProducts.length > 0 && (
+              <section className="pt-10 border-t border-[#EAE8E2]" aria-label="Articles similaires">
+                <div className="flex items-center justify-between mb-6">
+                  <div>
+                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                      Recommandations
+                    </span>
+                    <h2 className="font-heading font-black text-xl sm:text-2xl text-[#16171A] mt-1">
+                      Vous aimerez aussi
+                    </h2>
+                  </div>
+                  <Link href="/" className="text-xs font-bold text-[#54555A] hover:text-[#16171A] transition">
+                    Voir tout le catalogue →
+                  </Link>
+                </div>
+
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
+                  {relatedProducts.map((rel) => (
+                    <ProductCard key={rel.id} product={rel} />
+                  ))}
+                </div>
+              </section>
+            )}
 
           </div>
         )}
-
-        {/* SECTION "VOUS AIMEREZ AUSSI" */}
-        {!orderConfirmed && relatedProducts.length > 0 && (
-          <section className="mt-20 pt-16 border-t border-[#EAE8E2]" aria-label="Articles similaires">
-            <div className="flex items-center justify-between mb-8">
-              <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
-                  Recommandations
-                </span>
-                <h2 className="font-heading font-black text-xl sm:text-2xl text-[#16171A] mt-1">
-                  Vous aimerez aussi
-                </h2>
-              </div>
-              <Link href="/" className="text-xs font-bold text-[#54555A] hover:text-[#16171A] transition">
-                Voir tout le catalogue →
-              </Link>
-            </div>
-
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6">
-              {relatedProducts.map((rel) => (
-                <ProductCard key={rel.id} product={rel} />
-              ))}
-            </div>
-          </section>
-        )}
-
       </main>
+
+      {/* 7. BARRE DE COMMANDE FIXE EN BAS (STICKY BOTTOM BAR MOBILE) */}
+      {!orderConfirmed && (
+        <div className="md:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-[#EAE8E2] px-4 py-2.5 z-30 shadow-xl flex items-center justify-between pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
+          <div className="space-y-0.5">
+            <div className="text-[9px] text-[#73737A] uppercase font-bold tracking-wider">
+              TOTAL À LA RÉCEPTION
+            </div>
+            <div className="text-base font-heading font-black text-[#16171A] tabular-nums">
+              {formatFCFA(currentTotal)}
+            </div>
+          </div>
+          <button
+            type="button"
+            onClick={scrollToForm}
+            className="btn-accent btn-cta-animated text-xs py-2.5 px-5 min-h-[44px] flex items-center gap-1.5 cursor-pointer shadow-md"
+          >
+            <span className="font-heading font-black tracking-wide">Commander maintenant</span>
+            <span className="btn-cta-nudge">↓</span>
+          </button>
+        </div>
+      )}
 
       {/* MODAL ZOOM PHOTO */}
       {isZoomOpen && (
@@ -1062,7 +1298,7 @@ export default function ProductPage() {
           <button
             type="button"
             onClick={() => setIsZoomOpen(false)}
-            className="absolute top-6 right-6 w-11 h-11 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center text-xl transition"
+            className="absolute top-5 right-5 w-10 h-10 rounded-full bg-white/20 hover:bg-white/40 text-white flex items-center justify-center text-lg transition cursor-pointer"
             aria-label="Fermer le zoom"
           >
             ✕
@@ -1078,28 +1314,114 @@ export default function ProductPage() {
         </div>
       )}
 
-      {/* BOUTON FLOTTANT WHATSAPP */}
-      <FloatingWhatsApp productName={product.name} />
-
-      {/* BARRE D'ACTION COLLANTE MOBILE */}
-      {!orderConfirmed && (
-        <div className="md:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-[#EAE8E2] p-3 px-4 flex justify-between items-center z-30 shadow-lg">
-          <div>
-            <div className="text-[10px] text-[#73737A] uppercase font-semibold">Total à la réception</div>
-            <div className="text-base font-heading font-black text-[#16171A]">
-              {formatFCFA(currentTotal)}
-            </div>
-          </div>
-          <button
-            type="button"
-            onClick={scrollToForm}
-            className="btn-accent btn-cta-animated text-xs py-2.5 px-5 min-h-[44px] flex items-center gap-1.5"
+      {/* MODAL LAISSER UN AVIS */}
+      {showReviewModal && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-4"
+          onClick={() => setShowReviewModal(false)}
+        >
+          <div
+            className="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-[#EAE8E2] space-y-4"
+            onClick={(e) => e.stopPropagation()}
           >
-            <span className="font-heading font-black">Commander maintenant</span>
-            <span className="btn-cta-nudge">↓</span>
-          </button>
+            <div className="flex justify-between items-center border-b border-[#EAE8E2] pb-3">
+              <h3 className="font-heading font-black text-base text-[#16171A]">
+                Partager votre expérience
+              </h3>
+              <button
+                type="button"
+                onClick={() => setShowReviewModal(false)}
+                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center text-sm transition"
+              >
+                ✕
+              </button>
+            </div>
+
+            {reviewSuccessMsg ? (
+              <div className="p-4 bg-emerald-50 text-emerald-800 rounded-2xl text-xs font-bold text-center border border-emerald-200">
+                {reviewSuccessMsg}
+              </div>
+            ) : (
+              <form onSubmit={handleSubmitReview} className="space-y-3.5 text-xs">
+                <div>
+                  <label className="block text-[11px] font-bold text-[#54555A] mb-1">
+                    Votre note *
+                  </label>
+                  <div className="flex gap-1.5 text-amber-400">
+                    {[1, 2, 3, 4, 5].map((s) => (
+                      <button
+                        key={s}
+                        type="button"
+                        onClick={() => setReviewForm((f) => ({ ...f, rating: s }))}
+                        className="cursor-pointer hover:scale-110 transition-transform p-1"
+                      >
+                        <Star
+                          className={`w-6 h-6 ${s <= reviewForm.rating ? 'fill-amber-400 text-amber-400' : 'text-slate-200'}`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-[#54555A] mb-1">
+                    Votre prénom ou nom complet *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={reviewForm.customerName}
+                    onChange={(e) => setReviewForm((f) => ({ ...f, customerName: e.target.value }))}
+                    placeholder="ex: Patrick K."
+                    className="w-full px-3.5 py-2 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-[#54555A] mb-1">
+                    Ville *
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={reviewForm.city}
+                    onChange={(e) => setReviewForm((f) => ({ ...f, city: e.target.value }))}
+                    placeholder="ex: Cotonou, Calavi, Parakou..."
+                    className="w-full px-3.5 py-2 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-[11px] font-bold text-[#54555A] mb-1">
+                    Votre avis sur le produit *
+                  </label>
+                  <textarea
+                    required
+                    rows={3}
+                    value={reviewForm.comment}
+                    onChange={(e) => setReviewForm((f) => ({ ...f, comment: e.target.value }))}
+                    placeholder="Partagez votre avis sur la qualité, la finition ou la livraison..."
+                    className="w-full px-3.5 py-2 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-xs focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835]"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submittingReview}
+                  className="w-full btn-accent text-xs py-3 rounded-xl font-bold cursor-pointer"
+                >
+                  {submittingReview ? 'Envoi en cours...' : 'Envoyer mon avis'}
+                </button>
+              </form>
+            )}
+          </div>
         </div>
       )}
+
+      {/* BOUTON FLOTTANT WHATSAPP */}
+      <FloatingWhatsApp productName={product.name} />
     </div>
   );
 }

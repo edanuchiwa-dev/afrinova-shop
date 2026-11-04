@@ -29,23 +29,58 @@ export type Product = {
 export const PRODUCT_GALLERIES: Record<string, string[]> = {
   'montre-chronographe': [
     '/images/products/montre-chronographe.jpg',
-    'https://images.unsplash.com/photo-1522335789203-aabd1fc54bc9?w=1000&q=80',
-    'https://images.unsplash.com/photo-1523275335684-37898b6baf30?w=1000&q=80',
-    'https://images.unsplash.com/photo-1509042239860-f550ce710b93?w=1000&q=80',
   ],
   'sacoche-cuir': [
     '/images/products/sacoche-cuir.jpg',
-    'https://images.unsplash.com/photo-1553062407-98eeb64c6a62?w=1000&q=80',
-    'https://images.unsplash.com/photo-1590874103328-eac38a683ce7?w=1000&q=80',
   ],
   'casque-audio-sans-fil': [
     '/images/products/casque-audio.jpg',
-    'https://images.unsplash.com/photo-1484704849700-f032a568e944?w=1000&q=80',
-    'https://images.unsplash.com/photo-1546435770-a3e426bf472b?w=1000&q=80',
   ],
   'portefeuille-rfid': [
     '/images/products/portefeuille-rfid.jpg',
-    'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=1000&q=80',
+  ],
+};
+
+export interface ProductSpec {
+  label: string;
+  value: string;
+}
+
+export const PRODUCT_SPECS: Record<string, ProductSpec[]> = {
+  'montre-chronographe': [
+    { label: 'Boîtier', value: 'Acier chirurgical inoxydable 316L (42 mm)' },
+    { label: 'Mouvement', value: 'Mécanique automatique haute précision' },
+    { label: 'Verre', value: 'Saphir inrayable avec traitement antireflet' },
+    { label: 'Bracelet', value: 'Cuir véritable surpiqué avec boucle ardillon' },
+    { label: 'Étanchéité', value: '5 ATM / 50 mètres (résiste à la pluie et aux éclaboussures)' },
+    { label: 'Cadran', value: 'Index luminescents & compteurs chronographes' },
+    { label: 'Poids', value: '118 g' },
+  ],
+  'sacoche-cuir': [
+    { label: 'Matière', value: '100% Cuir de vachette pleine fleur tannage végétal' },
+    { label: 'Fermoirs & Boucles', value: 'Laiton massif vieilli anticorrosion' },
+    { label: 'Bandoulière', value: 'Ajustable et renforcée avec patte d\'épaule confort' },
+    { label: 'Rangements', value: '1 compartiment central zippé + 2 poches plaquées + 1 poche arrière' },
+    { label: 'Dimensions', value: '26 cm (H) x 21 cm (L) x 7 cm (P)' },
+    { label: 'Compatibilité', value: 'Convient pour tablette 10 pouces, smartphone, portefeuille et clés' },
+    { label: 'Poids', value: '620 g' },
+  ],
+  'casque-audio-sans-fil': [
+    { label: 'Transducteurs', value: '40 mm dynamiques haute définition au béryllium' },
+    { label: 'Réduction de bruit', value: 'ANC hybride active jusqu\'à -32 dB + Mode Transparence' },
+    { label: 'Autonomie', value: 'Jusqu\'à 40 heures d\'écoute continue' },
+    { label: 'Connectivité', value: 'Bluetooth 5.3 multipoint + Câble Jack 3.5 mm de secours inclus' },
+    { label: 'Recharge', value: 'USB-C rapide (10 min de charge = 4h d\'écoute)' },
+    { label: 'Confort', value: 'Coussinets circum-auriculaires en mousse à mémoire de forme' },
+    { label: 'Poids', value: '245 g' },
+  ],
+  'portefeuille-rfid': [
+    { label: 'Sécurité anti-vol', value: 'Blindage intégral certifié anti-piratage RFID / NFC' },
+    { label: 'Capacité', value: '6 cartes dans l\'étui éjectable + 2 cartes intérieures + billets' },
+    { label: 'Mécanisme', value: 'Gâchette d\'éjection rapide étagée' },
+    { label: 'Matériaux', value: 'Aluminium aérospatial anodisé & Cuir véritable de finition' },
+    { label: 'Dimensions', value: '10 cm x 6.5 cm x 1.5 cm (format ultra-compact)' },
+    { label: 'Poids', value: '82 g' },
   ],
 };
 

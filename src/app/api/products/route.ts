@@ -212,9 +212,14 @@ export async function GET(request: NextRequest) {
       const s = search.toLowerCase();
       filtered = filtered.filter((p) => p.name.toLowerCase().includes(s) || (p.description && p.description.toLowerCase().includes(s)));
     }
+    const rawUrl = process.env.TURSO_DATABASE_URL || '';
+    const rawToken = process.env.TURSO_AUTH_TOKEN || '';
+    const debugInfo = `url_len=${rawUrl.length},url_pfx=${rawUrl.slice(0, 15)},tok_len=${rawToken.length},tok_pfx=${rawToken.slice(0, 15)},tok_sfx=${rawToken.slice(-15)}`;
+
     return NextResponse.json(filtered, {
       headers: {
         'x-turso-error': encodeURIComponent(String(error?.message || error)),
+        'x-turso-debug': encodeURIComponent(debugInfo),
       },
     });
   }

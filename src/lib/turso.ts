@@ -5,15 +5,37 @@ import { sendOrderNotification } from './notifications.ts';
 
 let tursoClient: Client | null = null;
 
+function sanitizeUrl(raw?: string): string {
+  if (!raw) return 'file:data/store.db';
+  let cleaned = raw.trim();
+  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  if (!cleaned.startsWith('libsql://') && !cleaned.startsWith('https://') && !cleaned.startsWith('http://') && !cleaned.startsWith('file:')) {
+    cleaned = `libsql://${cleaned}`;
+  }
+  return cleaned;
+}
+
+function sanitizeToken(raw?: string): string | undefined {
+  if (!raw) return undefined;
+  let cleaned = raw.trim();
+  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
+    cleaned = cleaned.slice(1, -1).trim();
+  }
+  return cleaned;
+}
+
 export function isTursoEnabled(): boolean {
-  return Boolean(process.env.TURSO_DATABASE_URL);
+  const url = process.env.TURSO_DATABASE_URL?.trim();
+  return Boolean(url && url !== 'file:data/store.db');
 }
 
 export function getTursoClient(): Client {
   if (tursoClient) return tursoClient;
 
-  const url = process.env.TURSO_DATABASE_URL || 'file:data/store.db';
-  const authToken = process.env.TURSO_AUTH_TOKEN;
+  const url = sanitizeUrl(process.env.TURSO_DATABASE_URL);
+  const authToken = sanitizeToken(process.env.TURSO_AUTH_TOKEN);
 
   tursoClient = createClient({
     url,

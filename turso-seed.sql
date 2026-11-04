@@ -72,7 +72,24 @@ INSERT INTO settings VALUES('whatsapp_notify_enabled','1');
 INSERT INTO settings VALUES('whatsapp_notify_phone','22942520869');
 INSERT INTO settings VALUES('whatsapp_notify_provider','greenapi');
 INSERT INTO settings VALUES('whatsapp_notify_apikey','93b228c99c2343a986da0f3e83f59dcfb370ef16c281404192');
-INSERT INTO settings VALUES('whatsapp_notify_template',unistr('🚨 *NOUVELLE COMMANDE REÇUE !*\u000a\u000a📦 *Commande :* {order_number}\u000a👤 *Client :* {customer_name}\u000a📞 *Téléphone :* {customer_phone}\u000a📍 *Ville :* {shipping_city}\u000a🏡 *Quartier / Repère :* {neighborhood} {landmark}\u000a\u000a🛍️ *Articles :*\u000a{items}\u000a\u000a💰 *Total à encaisser :* {total_price} FCFA\u000a🚚 *Livraison :* {shipping_cost} FCFA\u000a💳 *Paiement :* {payment_method}\u000a📝 *Note :* {notes}\u000a📅 *Date :* {date}\u000a\u000a🔗 *Gérer la commande :* {admin_url}'));
+INSERT INTO settings VALUES('whatsapp_notify_template','🚨 *NOUVELLE COMMANDE REÇUE !*
+
+📦 *Commande :* {order_number}
+👤 *Client :* {customer_name}
+📞 *Téléphone :* {customer_phone}
+📍 *Ville :* {shipping_city}
+🏡 *Quartier / Repère :* {neighborhood} {landmark}
+
+🛍️ *Articles :*
+{items}
+
+💰 *Total à encaisser :* {total_price} FCFA
+🚚 *Livraison :* {shipping_cost} FCFA
+💳 *Paiement :* {payment_method}
+📝 *Note :* {notes}
+📅 *Date :* {date}
+
+🔗 *Gérer la commande :* {admin_url}');
 INSERT INTO settings VALUES('whatsapp_notify_last_status','Message WhatsApp transmis via Green-API (ID: 3EB075A1FC9B9C522ED55C)');
 INSERT INTO settings VALUES('whatsapp_notify_id_instance','710722790086');
 INSERT INTO settings VALUES('whatsapp_notify_last_sent_at','2026-11-03T20:48:02.536Z');

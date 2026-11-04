@@ -1,9 +1,12 @@
-import Database from 'better-sqlite3';
+import type Database from 'better-sqlite3';
+import { createRequire } from 'node:module';
 import { randomInt } from 'node:crypto';
 import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { calculateServerShippingCost } from './shipping.ts';
 import { parseBeninPhone } from './phone.ts';
+
+const require = createRequire(import.meta.url);
 
 export type Product = {
   id: number;
@@ -338,7 +341,8 @@ export function getDb(): Database.Database {
   const dataDir = path.join(process.cwd(), 'data');
   mkdirSync(dataDir, { recursive: true });
   const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'store.db');
-  const db = new Database(dbPath);
+  const DatabaseConstructor = require('better-sqlite3');
+  const db = new DatabaseConstructor(dbPath);
 
   try {
     db.pragma('journal_mode = WAL');

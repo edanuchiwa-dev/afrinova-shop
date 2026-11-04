@@ -1,4 +1,4 @@
-import { createClient, Client } from '@libsql/client';
+import { createClient, type Client } from '@libsql/client';
 import { parseBeninPhone } from './phone.ts';
 import { calculateServerShippingCost } from './shipping.ts';
 import { sendOrderNotification } from './notifications.ts';

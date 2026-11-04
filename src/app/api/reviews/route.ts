@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getApprovedReviews, getDb } from '@/lib/db';
+import { isTursoEnabled, tursoGetApprovedReviews, getTursoClient } from '@/lib/turso';
 
 export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
@@ -7,6 +8,10 @@ export async function GET(request: NextRequest) {
   const productId = rawProductId ? Number(rawProductId) : undefined;
 
   try {
+    if (isTursoEnabled()) {
+      const reviews = await tursoGetApprovedReviews(Number.isFinite(productId) ? productId : undefined);
+      return NextResponse.json({ reviews });
+    }
     const reviews = getApprovedReviews(Number.isFinite(productId) ? productId : undefined);
     return NextResponse.json({ reviews });
   } catch {
@@ -25,6 +30,27 @@ export async function POST(request: NextRequest) {
 
     const numRating = Math.max(1, Math.min(5, Number(rating) || 5));
     const validProductId = productId ? Number(productId) : null;
+
+    if (isTursoEnabled()) {
+      const client = getTursoClient();
+      await client.execute({
+        sql: `
+          INSERT INTO reviews (product_id, rating, customer_name, city, comment, status)
+          VALUES (?, ?, ?, ?, ?, 'approuve')
+        `,
+        args: [
+          validProductId,
+          numRating,
+          String(customerName).trim().slice(0, 80),
+          String(city || 'Cotonou').trim().slice(0, 50),
+          String(comment).trim().slice(0, 500),
+        ],
+      });
+      return NextResponse.json({
+        success: true,
+        message: 'Votre avis a été enregistré avec succès.',
+      });
+    }
 
     const db = getDb();
     db.prepare(`

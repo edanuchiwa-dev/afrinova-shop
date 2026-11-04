@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getAllSettings } from '@/lib/db';
+import { isTursoEnabled, tursoGetAllSettings } from '@/lib/turso';
 
 export const runtime = 'nodejs';
 
-export function GET() {
+export async function GET() {
   try {
-    const raw = getAllSettings();
+    const raw = isTursoEnabled() ? await tursoGetAllSettings() : getAllSettings();
     const settings = {
       qb_enabled: raw.qb_enabled ?? '1',
       qb_popular_tier: raw.qb_popular_tier ?? '2',

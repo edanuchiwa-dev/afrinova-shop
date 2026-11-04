@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import { getProductById } from '@/lib/db';
+import { isTursoEnabled, tursoGetProductById } from '@/lib/turso';
 import ShopifyProductForm, { ProductData } from '@/components/admin/ShopifyProductForm';
 
 export const metadata = {
@@ -14,7 +15,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     notFound();
   }
 
-  const product = getProductById(numId);
+  const product = isTursoEnabled() ? await tursoGetProductById(numId) : getProductById(numId);
   if (!product) {
     notFound();
   }

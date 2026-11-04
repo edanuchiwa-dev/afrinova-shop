@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { recordPageView } from '@/lib/db';
+import { isTursoEnabled, tursoRecordPageView } from '@/lib/turso';
 import { extractClientIp, lookupGeoIp, parseUserAgent, isPrivateOrLocalIp } from '@/lib/geoip';
 
 export const runtime = 'nodejs';
@@ -39,8 +40,8 @@ export async function POST(request: NextRequest) {
     // 3. Résolution de la géolocalisation réelle (Ville, Région, Pays, FAI/Opérateur, Coordonnées)
     const geo = await lookupGeoIp(ip);
 
-    // 4. Enregistrement en base de données SQLite
-    recordPageView({
+    // 4. Enregistrement en base de données SQLite ou Turso
+    const visitData = {
       sessionId,
       path: typeof path === 'string' ? path : '/',
       title: typeof title === 'string' ? title : '',
@@ -59,7 +60,13 @@ export async function POST(request: NextRequest) {
       user_agent: rawUa.slice(0, 300),
       browser: uaInfo.browser,
       isHeartbeat: Boolean(isHeartbeat),
-    });
+    };
+
+    if (isTursoEnabled()) {
+      await tursoRecordPageView(visitData);
+    } else {
+      recordPageView(visitData);
+    }
 
     return NextResponse.json({
       ok: true,

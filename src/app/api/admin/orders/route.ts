@@ -1,11 +1,28 @@
 import { NextResponse } from 'next/server';
 import { getDb, updateOrderStatus } from '@/lib/db';
+import { isTursoEnabled, getTursoClient, tursoUpdateOrderStatus } from '@/lib/turso';
 
 export const runtime = 'nodejs';
 
 const validStatuses = new Set(['nouvelle', 'en_preparation', 'expediee', 'livree', 'annulee']);
 
-export function GET() {
+export async function GET() {
+  if (isTursoEnabled()) {
+    const client = getTursoClient();
+    const ordersRes = await client.execute('SELECT * FROM orders ORDER BY id DESC');
+    const orders = ordersRes.rows as unknown as Array<Record<string, unknown> & { id: number }>;
+    const ordersWithItems = await Promise.all(
+      orders.map(async (order) => {
+        const itemRes = await client.execute({
+          sql: 'SELECT * FROM order_items WHERE order_id = ? ORDER BY id',
+          args: [order.id],
+        });
+        return { ...order, items: itemRes.rows };
+      })
+    );
+    return NextResponse.json(ordersWithItems);
+  }
+
   const db = getDb();
   const orders = db.prepare('SELECT * FROM orders ORDER BY id DESC').all() as Array<Record<string, unknown> & { id: number }>;
   const findItems = db.prepare('SELECT * FROM order_items WHERE order_id = ? ORDER BY id');
@@ -37,6 +54,14 @@ export async function PATCH(request: Request) {
   }
 
   try {
+    if (isTursoEnabled()) {
+      const updated = await tursoUpdateOrderStatus(
+        id as number,
+        status as string | undefined,
+        tracking_number as string | undefined
+      );
+      return NextResponse.json(updated);
+    }
     const updated = updateOrderStatus(
       id as number,
       status as string | undefined,

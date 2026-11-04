@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { z } from 'zod';
 import { createOrder, getDb } from '@/lib/db';
+import { isTursoEnabled, tursoCreateOrder } from '@/lib/turso';
 import { sendOrderNotification } from '@/lib/notifications';
 import { sendWhatsAppOrderNotification, formatWhatsAppMessage, getWhatsAppConfig } from '@/lib/whatsapp';
 import { parseBeninPhone } from '@/lib/phone';
@@ -76,28 +77,58 @@ export async function POST(request: Request) {
     );
   }
 
-  // 6. Création de la commande en transaction SQLite atomique
-  let result: ReturnType<typeof createOrder>;
+  // 6. Création de la commande en transaction SQLite / Turso atomique
+  let result: {
+    success: true;
+    orderNumber: string;
+    totalPrice: number;
+    shippingCost: number;
+    normalizedPhone: string;
+    subtotal: number;
+    savings: number;
+  };
   try {
-    result = createOrder(
-      {
-        customerName: data.customerName,
-        customerPhone: phoneValidation.normalized,
-        shippingCity: data.shippingCity,
-        neighborhood: data.neighborhood,
-        landmark: data.landmark,
-        locationUrl: data.locationUrl,
-        carrier: data.carrier,
-        customerEmail: data.customerEmail || undefined,
-        customerNotes: data.customerNotes || undefined,
-        paymentMethod: data.paymentMethod,
-        utm_source: data.utm_source,
-        utm_medium: data.utm_medium,
-        utm_campaign: data.utm_campaign,
-        referrer: data.referrer,
-      },
-      data.items
-    );
+    if (isTursoEnabled()) {
+      result = await tursoCreateOrder(
+        {
+          customerName: data.customerName,
+          customerPhone: phoneValidation.normalized,
+          shippingCity: data.shippingCity,
+          neighborhood: data.neighborhood,
+          landmark: data.landmark,
+          locationUrl: data.locationUrl,
+          carrier: data.carrier,
+          customerEmail: data.customerEmail || undefined,
+          customerNotes: data.customerNotes || undefined,
+          paymentMethod: data.paymentMethod,
+          utm_source: data.utm_source,
+          utm_medium: data.utm_medium,
+          utm_campaign: data.utm_campaign,
+          referrer: data.referrer,
+        },
+        data.items
+      );
+    } else {
+      result = createOrder(
+        {
+          customerName: data.customerName,
+          customerPhone: phoneValidation.normalized,
+          shippingCity: data.shippingCity,
+          neighborhood: data.neighborhood,
+          landmark: data.landmark,
+          locationUrl: data.locationUrl,
+          carrier: data.carrier,
+          customerEmail: data.customerEmail || undefined,
+          customerNotes: data.customerNotes || undefined,
+          paymentMethod: data.paymentMethod,
+          utm_source: data.utm_source,
+          utm_medium: data.utm_medium,
+          utm_campaign: data.utm_campaign,
+          referrer: data.referrer,
+        },
+        data.items
+      );
+    }
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : '';
     if (message.includes('Stock insuffisant') || message.includes('introuvable ou indisponible')) {

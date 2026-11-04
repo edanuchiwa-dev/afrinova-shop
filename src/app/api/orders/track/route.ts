@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { isTursoEnabled, getTursoClient } from '@/lib/turso';
 import { parseBeninPhone } from '@/lib/phone';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
@@ -40,10 +41,22 @@ export async function POST(request: Request) {
   const phoneCheck = parseBeninPhone(phone);
   const normalizedInputPhone = phoneCheck.valid && phoneCheck.normalized ? phoneCheck.normalized : phone.trim().replace(/[\s\-\.]/g, '');
 
-  const db = getDb();
-  const order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(cleanOrderNum) as
-    | (Record<string, unknown> & { id: number; customer_phone: string })
-    | undefined;
+  let order: (Record<string, unknown> & { id: number; customer_phone: string }) | undefined;
+  let items: Array<{ product_name: string; quantity: number; product_price: number }> = [];
+
+  if (isTursoEnabled()) {
+    const client = getTursoClient();
+    const res = await client.execute({
+      sql: 'SELECT * FROM orders WHERE order_number = ?',
+      args: [cleanOrderNum],
+    });
+    order = (res.rows[0] as unknown) as (Record<string, unknown> & { id: number; customer_phone: string }) | undefined;
+  } else {
+    const db = getDb();
+    order = db.prepare('SELECT * FROM orders WHERE order_number = ?').get(cleanOrderNum) as
+      | (Record<string, unknown> & { id: number; customer_phone: string })
+      | undefined;
+  }
 
   if (!order) {
     return NextResponse.json(
@@ -70,9 +83,19 @@ export async function POST(request: Request) {
     );
   }
 
-  const items = db
-    .prepare('SELECT product_name, quantity, product_price FROM order_items WHERE order_id = ?')
-    .all(order.id) as Array<{ product_name: string; quantity: number; product_price: number }>;
+  if (isTursoEnabled()) {
+    const client = getTursoClient();
+    const itemRes = await client.execute({
+      sql: 'SELECT product_name, quantity, product_price FROM order_items WHERE order_id = ?',
+      args: [order.id],
+    });
+    items = itemRes.rows as unknown as Array<{ product_name: string; quantity: number; product_price: number }>;
+  } else {
+    const db = getDb();
+    items = db
+      .prepare('SELECT product_name, quantity, product_price FROM order_items WHERE order_id = ?')
+      .all(order.id) as Array<{ product_name: string; quantity: number; product_price: number }>;
+  }
 
   return NextResponse.json({
     orderNumber: order.order_number,

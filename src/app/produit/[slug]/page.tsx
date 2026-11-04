@@ -664,49 +664,6 @@ export default function ProductPage() {
                   )}
                 </div>
 
-                {/* 5. INFORMATIONS DE CONFIANCE (BLOCS COMPACTS ET ÉLÉGANTS) */}
-                <div className="grid grid-cols-2 gap-2.5 sm:gap-3 pt-2">
-                  <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#EAE8E2] shadow-xs flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#EAE8E2] flex items-center justify-center text-[#C27835] shrink-0">
-                      <Banknote className="w-4 h-4 stroke-[1.8]" />
-                    </div>
-                    <div>
-                      <h4 className="text-[11px] sm:text-xs font-bold text-[#16171A] leading-tight">Paiement à la livraison</h4>
-                      <p className="text-[10px] text-[#73737A] mt-0.5 leading-tight">Espèces ou MoMo à réception</p>
-                    </div>
-                  </div>
-
-                  <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#EAE8E2] shadow-xs flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#EAE8E2] flex items-center justify-center text-[#C27835] shrink-0">
-                      <Truck className="w-4 h-4 stroke-[1.8]" />
-                    </div>
-                    <div>
-                      <h4 className="text-[11px] sm:text-xs font-bold text-[#16171A] leading-tight">Expédition 24h-48h</h4>
-                      <p className="text-[10px] text-[#73737A] mt-0.5 leading-tight">Cotonou, Calavi & provinces</p>
-                    </div>
-                  </div>
-
-                  <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#EAE8E2] shadow-xs flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#EAE8E2] flex items-center justify-center text-[#C27835] shrink-0">
-                      <CheckCircle2 className="w-4 h-4 stroke-[1.8]" />
-                    </div>
-                    <div>
-                      <h4 className="text-[11px] sm:text-xs font-bold text-[#16171A] leading-tight">Colis vérifié avant paiement</h4>
-                      <p className="text-[10px] text-[#73737A] mt-0.5 leading-tight">Inspectez avant de régler</p>
-                    </div>
-                  </div>
-
-                  <div className="p-3 sm:p-3.5 rounded-2xl bg-white border border-[#EAE8E2] shadow-xs flex items-center gap-2.5">
-                    <div className="w-9 h-9 rounded-xl bg-[#FAF9F6] border border-[#EAE8E2] flex items-center justify-center text-[#C27835] shrink-0">
-                      <ShieldCheck className="w-4 h-4 stroke-[1.8]" />
-                    </div>
-                    <div>
-                      <h4 className="text-[11px] sm:text-xs font-bold text-[#16171A] leading-tight">Garantie échange 48h</h4>
-                      <p className="text-[10px] text-[#73737A] mt-0.5 leading-tight">Service client local 7j/7</p>
-                    </div>
-                  </div>
-                </div>
-
               </div>
 
               {/* COLONNE DROITE (5 COLS) : INFOS PRODUIT, OFFRES VOLUME & FORMULAIRE */}

@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Mentions Légales — Atelier Pro Bénin',
-  description: 'Mentions légales et informations éditoriales de la boutique Atelier Pro conformément au Code du numérique béninois.',
+  title: 'Mentions Légales — AFRINOVA SHOP Bénin',
+  description: 'Mentions légales et informations éditoriales de la boutique AFRINOVA SHOP conformément au Code du numérique béninois.',
 };
 
 export default function MentionsLegalesPage() {
@@ -13,7 +13,7 @@ export default function MentionsLegalesPage() {
           <span>←</span>
           <span>Retour à la boutique</span>
         </Link>
-        <span className="text-sm font-black text-slate-900">Atelier Pro</span>
+        <span className="text-sm font-black text-slate-900">AFRINOVA SHOP</span>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
@@ -33,7 +33,7 @@ export default function MentionsLegalesPage() {
           <section className="space-y-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
             <h2 className="text-sm sm:text-base font-black text-slate-900">1. Éditeur de la Plateforme</h2>
             <p>
-              Le site et service de commerce électronique <strong>Atelier Pro</strong> est édité et exploité par :
+              Le site et service de commerce électronique <strong>AFRINOVA SHOP</strong> est édité et exploité par :
             </p>
             <ul className="list-disc pl-5 space-y-1 font-medium text-slate-700">
               <li><strong>Raison sociale / Identité de l'exploitant :</strong> [À COMPLÉTER : Nom Commercial ou Nom de l'Entrepreneur]</li>
@@ -62,7 +62,7 @@ export default function MentionsLegalesPage() {
           <section className="space-y-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
             <h2 className="text-sm sm:text-base font-black text-slate-900">3. Propriété Intellectuelle</h2>
             <p>
-              Tous les éléments visuels, photographies de produits, textes, logos, icônes et architectures logicielles présents sur le site Atelier Pro sont la propriété exclusive de l'exploitant ou font l'objet d'une licence régulière d'utilisation. Toute reproduction, copie ou diffusion intégrale ou partielle non autorisée est strictement interdite conformément aux dispositions du Code de la propriété intellectuelle et du Code du numérique béninois.
+              Tous les éléments visuels, photographies de produits, textes, logos, icônes et architectures logicielles présents sur le site AFRINOVA SHOP sont la propriété exclusive de l'exploitant ou font l'objet d'une licence régulière d'utilisation. Toute reproduction, copie ou diffusion intégrale ou partielle non autorisée est strictement interdite conformément aux dispositions du Code de la propriété intellectuelle et du Code du numérique béninois.
             </p>
           </section>
 

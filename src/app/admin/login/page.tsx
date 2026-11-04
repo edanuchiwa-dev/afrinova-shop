@@ -51,7 +51,7 @@ function LoginFormContent() {
         <div className="inline-flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-900 text-white shadow-md shadow-slate-900/10 mb-3">
           <Lock className="w-6 h-6 text-white" />
         </div>
-        <h1 className="text-2xl font-black text-slate-900 tracking-tight">Atelier Pro</h1>
+        <h1 className="text-2xl font-black text-slate-900 tracking-tight">AFRINOVA SHOP</h1>
         <p className="text-xs text-slate-500 font-semibold uppercase tracking-wider mt-1">
           Espace d'administration sécurisé
         </p>

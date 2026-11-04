@@ -22,7 +22,7 @@ export default function GlobalError({
           <span>←</span>
           <span>Retour à l&apos;accueil</span>
         </Link>
-        <span className="text-sm font-black text-slate-900">Atelier Pro</span>
+        <span className="text-sm font-black text-slate-900">AFRINOVA SHOP</span>
       </header>
 
       <main className="flex-1 flex items-center justify-center px-4 sm:px-6 py-12">
@@ -68,7 +68,7 @@ export default function GlobalError({
       </main>
 
       <footer className="py-6 text-center text-xs text-slate-400 border-t border-slate-100">
-        © 2026 Atelier Pro Bénin. Tous droits réservés.
+        © 2026 AFRINOVA SHOP. Tous droits réservés.
       </footer>
     </div>
   );

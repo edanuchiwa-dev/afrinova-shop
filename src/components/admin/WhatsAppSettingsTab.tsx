@@ -567,7 +567,7 @@ export default function WhatsAppSettingsTab({
                 🏬
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-xs truncate">Atelier Pro — Commandes</div>
+                <div className="font-bold text-xs truncate">AFRINOVA SHOP — Commandes</div>
                 <div className="text-[10px] text-emerald-200">En ligne • Bot Officiel</div>
               </div>
             </div>

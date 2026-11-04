@@ -19,8 +19,8 @@ const bodyFont = Inter({
 });
 
 export const metadata: Metadata = {
-  title: 'Atelier Pro — Boutique Exclusive Bénin',
-  description: 'Objets d’exception expédiés chez vous en 24h-48h partout au Bénin.',
+  title: 'AFRINOVA SHOP — Boutique Exclusive Bénin',
+  description: 'Boutique exclusive en ligne au Bénin. Commandez en direct, expédition express 24h-48h et paiement à la livraison.',
 };
 
 export const viewport: Viewport = {

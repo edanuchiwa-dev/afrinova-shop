@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Conditions Générales de Vente (CGV) — Atelier Pro Bénin',
-  description: 'Conditions générales de vente de la boutique Atelier Pro applicables aux achats et livraisons en République du Bénin.',
+  title: 'Conditions Générales de Vente (CGV) — AFRINOVA SHOP Bénin',
+  description: 'Conditions générales de vente de la boutique AFRINOVA SHOP applicables aux achats et livraisons en République du Bénin.',
 };
 
 export default function CGVPage() {
@@ -13,7 +13,7 @@ export default function CGVPage() {
           <span>←</span>
           <span>Retour à la boutique</span>
         </Link>
-        <span className="text-sm font-black text-slate-900">Atelier Pro</span>
+        <span className="text-sm font-black text-slate-900">AFRINOVA SHOP</span>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
@@ -33,7 +33,7 @@ export default function CGVPage() {
           <section className="space-y-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
             <h2 className="text-sm sm:text-base font-black text-slate-900">1. Objet et Champ d'Application</h2>
             <p>
-              Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des relations contractuelles entre l'acheteur (ci-après le « Client ») et l'exploitant de la boutique en ligne <strong>Atelier Pro</strong> (ci-après le « Vendeur ») :
+              Les présentes Conditions Générales de Vente (CGV) régissent l'ensemble des relations contractuelles entre l'acheteur (ci-après le « Client ») et l'exploitant de la boutique en ligne <strong>AFRINOVA SHOP</strong> (ci-après le « Vendeur ») :
             </p>
             <ul className="list-disc pl-5 space-y-1 font-medium text-slate-700">
               <li><strong>Exploitant / Vendeur :</strong> [À COMPLÉTER : Raison sociale / Nom de l'exploitant]</li>

@@ -23,7 +23,7 @@ const {
   listPromotions,
 } = await import('../src/lib/db.ts');
 
-describe('Suite de Tests Critiques — Atelier Pro Bénin', () => {
+describe('Suite de Tests Critiques — AFRINOVA SHOP Bénin', () => {
   before(() => {
     // Initialise la base SQLite de test
     getDb();

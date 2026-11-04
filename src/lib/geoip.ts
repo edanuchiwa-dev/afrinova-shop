@@ -1,6 +1,6 @@
 /**
  * Service de géolocalisation et de détection IP / FAI
- * Atelier Pro Bénin
+ * AFRINOVA SHOP Bénin
  */
 
 export type GeoLocation = {

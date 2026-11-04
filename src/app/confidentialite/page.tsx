@@ -1,8 +1,8 @@
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'Politique de Confidentialité — Atelier Pro Bénin',
-  description: 'Politique de protection des données personnelles de la boutique Atelier Pro conformément aux exigences de l’APDP et du Code du numérique béninois.',
+  title: 'Politique de Confidentialité — AFRINOVA SHOP Bénin',
+  description: 'Politique de protection des données personnelles de la boutique AFRINOVA SHOP conformément aux exigences de l’APDP et du Code du numérique béninois.',
 };
 
 export default function ConfidentialitePage() {
@@ -13,7 +13,7 @@ export default function ConfidentialitePage() {
           <span>←</span>
           <span>Retour à la boutique</span>
         </Link>
-        <span className="text-sm font-black text-slate-900">Atelier Pro</span>
+        <span className="text-sm font-black text-slate-900">AFRINOVA SHOP</span>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 sm:px-6 pt-8 sm:pt-12">
@@ -33,7 +33,7 @@ export default function ConfidentialitePage() {
           <section className="space-y-2 text-xs sm:text-sm text-slate-600 leading-relaxed">
             <h2 className="text-sm sm:text-base font-black text-slate-900">1. Responsable de Traitement</h2>
             <p>
-              Les données à caractère personnel collectées sur le site <strong>Atelier Pro</strong> sont traitées par le responsable de traitement :
+              Les données à caractère personnel collectées sur le site <strong>AFRINOVA SHOP</strong> sont traitées par le responsable de traitement :
             </p>
             <ul className="list-disc pl-5 space-y-1 font-medium text-slate-700">
               <li><strong>Responsable légal :</strong> [À COMPLÉTER : Nom Commercial / Raison Sociale]</li>

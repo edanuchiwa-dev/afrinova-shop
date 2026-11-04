@@ -352,7 +352,7 @@ export default function HomePage() {
                     <span>↓</span>
                   </a>
                   <a
-                    href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '22942520869').replace(/[\s\+]/g, '')}?text=${encodeURIComponent("Bonjour Atelier Pro, j'aimerais échanger avec votre service client.")}`}
+                    href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '22942520869').replace(/[\s\+]/g, '')}?text=${encodeURIComponent("Bonjour AFRINOVA SHOP, j'aimerais échanger avec votre service client.")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 px-5 py-3.5 text-xs sm:text-sm font-bold transition active:scale-95"
@@ -368,7 +368,7 @@ export default function HomePage() {
                 <div className="relative w-full aspect-[4/3] sm:aspect-[4/3.2] rounded-3xl overflow-hidden shadow-2xl border border-white/15 group">
                   <Image
                     src="/images/hero-visuel-shopping.jpg"
-                    alt="Cliente découvrant ses achats Atelier Pro Bénin"
+                    alt="Cliente découvrant ses achats AFRINOVA SHOP Bénin"
                     fill
                     priority
                     unoptimized
@@ -389,7 +389,7 @@ export default function HomePage() {
                   <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 bg-[#121316]/85 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-white/15 shadow-xl">
                     <div className="flex items-center justify-between gap-2 mb-1">
                       <span className="text-xs font-heading font-black text-white">
-                        « Bienvenue chez Atelier Pro »
+                        « Bienvenue chez AFRINOVA SHOP »
                       </span>
                       <span className="text-[10px] font-bold text-[#C27835] bg-[#C27835]/15 px-2 py-0.5 rounded-full border border-[#C27835]/30">
                         Cotonou & Régions
@@ -634,7 +634,7 @@ export default function HomePage() {
               Comment ça marche ?
             </h2>
             <p className="text-xs sm:text-sm text-[#73737A] mt-2">
-              Commander chez Atelier Pro ne prend que 60 secondes. Zéro inscription, zéro carte bancaire.
+              Commander chez AFRINOVA SHOP ne prend que 60 secondes. Zéro inscription, zéro carte bancaire.
             </p>
           </div>
 
@@ -778,13 +778,13 @@ export default function HomePage() {
             {/* Colonne 1 : À propos */}
             <div className="space-y-3">
               <span className="font-heading font-black text-base text-[#16171A] uppercase tracking-tight block">
-                Atelier Pro
+                AFRINOVA SHOP
               </span>
               <p className="text-xs text-[#73737A] leading-relaxed">
-                Maison d&apos;artisanat et sélection exclusive au Bénin. Nous proposons des pièces durables et intemporelles livrées directement chez vous sans intermédiaire.
+                Boutique en ligne exclusive et tendance au Bénin. Nous proposons des articles sélectionnés avec rigueur, expédiés directement chez vous sans intermédiaire.
               </p>
               <div className="pt-1 text-[11px] text-[#73737A]">
-                Atelier physique : Haie Vive, Cotonou, Bénin.
+                Service logistique : Cotonou, Bénin.
               </div>
             </div>
 
@@ -859,7 +859,7 @@ export default function HomePage() {
           {/* Bas du footer */}
           <div className="pt-8 border-t border-[#EAE8E2] flex flex-col sm:flex-row justify-between items-center text-[11px] text-[#9C9CA4] gap-3">
             <div>
-              © 2026 Atelier Pro Bénin. Tous droits réservés. Conformité Code du numérique béninois.
+              © 2026 AFRINOVA SHOP. Tous droits réservés. Conformité Code du numérique béninois.
             </div>
             <a href="#" className="hover:text-[#16171A] transition font-semibold">
               Haut de page ↑
@@ -887,7 +887,7 @@ export default function HomePage() {
                 Votre Témoignage
               </div>
               <h3 className="font-heading font-black text-xl text-[#16171A]">
-                Partagez votre avis sur Atelier Pro
+                Partagez votre avis sur AFRINOVA SHOP
               </h3>
               <p className="text-xs text-[#73737A] mt-1">
                 Votre retour d&apos;expérience sur la livraison, la qualité et le paiement à la remise.

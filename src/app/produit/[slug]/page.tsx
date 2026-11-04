@@ -418,7 +418,7 @@ export default function ProductPage() {
           </Link>
           <Link href="/" className="flex flex-col items-center">
             <span className="font-heading font-black text-base sm:text-lg tracking-tight text-[#16171A] uppercase leading-none">
-              Atelier Pro
+              AFRINOVA SHOP
             </span>
             <span className="text-[8px] font-bold text-[#73737A] tracking-[0.2em] uppercase mt-0.5 leading-none">
               Boutique Exclusive
@@ -496,7 +496,7 @@ export default function ProductPage() {
             <div className="mb-6 space-y-2">
               <a
                 href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '2290197000000').replace(/[\s\+]/g, '')}?text=${encodeURIComponent(
-                  `Bonjour Atelier Pro ! Je viens de valider la commande *${orderConfirmed.orderNumber}* pour *${product.name}* (x${orderQuantity}) d'un montant de *${formatFCFA(orderConfirmed.totalPrice)}* à régler à la livraison.\nVille : ${orderConfirmed.shippingCity}.\nMerci de me contacter pour la livraison !`
+                  `Bonjour AFRINOVA SHOP ! Je viens de valider la commande *${orderConfirmed.orderNumber}* pour *${product.name}* (x${orderQuantity}) d'un montant de *${formatFCFA(orderConfirmed.totalPrice)}* à régler à la livraison.\nVille : ${orderConfirmed.shippingCity}.\nMerci de me contacter pour la livraison !`
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -507,7 +507,7 @@ export default function ProductPage() {
                 <ArrowRight className="w-4 h-4 ml-1 shrink-0" />
               </a>
               <p className="text-[11px] text-[#73737A]">
-                1 clic pour notifier immédiatement notre atelier et accélérer l&apos;expédition.
+                1 clic pour notifier immédiatement notre équipe et accélérer l&apos;expédition.
               </p>
             </div>
 
@@ -666,7 +666,7 @@ export default function ProductPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <h3 className="font-heading font-black text-sm text-[#16171A]">
-                        Atelier Pro certifié par ses clients
+                        AFRINOVA SHOP certifié par ses clients
                       </h3>
                       <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200/60">
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
@@ -696,7 +696,7 @@ export default function ProductPage() {
               {/* Carte Titre, Prix Promotionnel & Sélecteur */}
               <div className="bg-white rounded-3xl p-6 sm:p-8 border border-[#EAE8E2] shadow-sm space-y-4">
                 <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835] bg-[#FBF4ED] px-3 py-1 rounded-full border border-[#F2DFCE] inline-block">
-                  Atelier Pro • Édition Artisanale
+                  AFRINOVA SHOP • Sélection Exclusive
                 </span>
 
                 <h1 className="font-heading font-black text-xl sm:text-2xl text-[#16171A] leading-snug">

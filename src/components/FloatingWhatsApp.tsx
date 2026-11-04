@@ -3,8 +3,8 @@
 export default function FloatingWhatsApp({ productName }: { productName?: string }) {
   const whatsappPhone = (process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '2290197000000').replace(/[\s\+]/g, '');
   const message = productName
-    ? `Bonjour Atelier Pro, j'aimerais avoir des renseignements sur : ${productName}`
-    : "Bonjour Atelier Pro, j'aimerais avoir des informations sur votre boutique.";
+    ? `Bonjour AFRINOVA SHOP, j'aimerais avoir des renseignements sur : ${productName}`
+    : "Bonjour AFRINOVA SHOP, j'aimerais avoir des informations sur votre boutique.";
 
   const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(message)}`;
 

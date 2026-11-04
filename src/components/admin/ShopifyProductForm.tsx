@@ -175,7 +175,7 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
   // Colonne latérale
   const [status, setStatus] = useState<'active' | 'draft' | 'archived'>(initialData?.status || 'active');
   const [category, setCategory] = useState(initialData?.category || 'Maroquinerie');
-  const [vendor, setVendor] = useState(initialData?.vendor || 'Atelier Pro Bénin');
+  const [vendor, setVendor] = useState(initialData?.vendor || 'AFRINOVA SHOP');
   const [tags, setTags] = useState<string[]>(() => {
     if (Array.isArray(initialData?.tags)) return initialData.tags;
     if (typeof initialData?.tags === 'string' && initialData.tags.trim()) {
@@ -427,7 +427,7 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
       is_physical: isPhysical ? 1 : 0,
       vendor: vendor.trim(),
       tags: tags.join(', '),
-      seo_title: seoTitle.trim() || `${name} — Atelier Pro`,
+      seo_title: seoTitle.trim() || `${name} — AFRINOVA SHOP`,
       seo_description: seoDescription.trim() || description.slice(0, 160),
       variants: hasVariants ? variantMatrix : [],
       sales_channels: [
@@ -1235,7 +1235,7 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                   <span>https://boutique.bj/produit/{customSlug || 'mon-produit'}</span>
                 </div>
                 <div className="text-sm font-bold text-[#1a0dab] hover:underline cursor-pointer leading-tight truncate">
-                  {seoTitle || name || 'Titre de votre produit'} — Atelier Pro Bénin
+                  {seoTitle || name || 'Titre de votre produit'} — AFRINOVA SHOP Bénin
                 </div>
                 <p className="text-xs text-slate-600 line-clamp-2 leading-relaxed">
                   {seoDescription ||

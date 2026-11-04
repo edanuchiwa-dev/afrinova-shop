@@ -154,7 +154,7 @@ INSERT INTO reviews VALUES(61,NULL,4,'Hermann T.','Cotonou','Boutique sérieuse,
 INSERT INTO reviews VALUES(62,NULL,5,'Ulrich S.','Parakou','Expédition sécurisée jusqu''à Parakou, colis bien protégé et intact.',NULL,'approuve','2026-10-20 09:30:00');
 INSERT INTO reviews VALUES(63,NULL,5,'Serge G.','Cotonou','Très bonne sélection de produits, le service client WhatsApp répond vite.',NULL,'approuve','2026-10-18 17:15:00');
 INSERT INTO reviews VALUES(64,NULL,5,'Gildas A.','Abomey-Calavi','Paiement à la livraison sans prise de tête, commande traitée en quelques heures.',NULL,'approuve','2026-10-14 15:40:00');
-INSERT INTO reviews VALUES(65,NULL,5,'Gloria M.','Cotonou','Deuxième commande chez Atelier Pro et toujours aussi satisfaite de la qualité.',NULL,'approuve','2026-10-10 12:20:00');
+INSERT INTO reviews VALUES(65,NULL,5,'Gloria M.','Cotonou','Deuxième commande chez AFRINOVA SHOP et toujours aussi satisfaite de la qualité.',NULL,'approuve','2026-10-10 12:20:00');
 INSERT INTO reviews VALUES(66,NULL,4,'Wilfried B.','Porto-Novo','Articles solides et bien présentés, commerçant courtois au téléphone.',NULL,'approuve','2026-10-06 10:05:00');
 INSERT INTO reviews VALUES(67,NULL,5,'Blandine T.','Ouidah','Livraison soignée jusqu''à Ouidah, échange fluide avec le service commercial.',NULL,'approuve','2026-10-02 14:50:00');
 INSERT INTO reviews VALUES(68,NULL,5,'Lionel K.','Cotonou','Achat en ligne simple et sans carte bancaire, je recommande cette boutique.',NULL,'approuve','2026-09-28 20:30:00');

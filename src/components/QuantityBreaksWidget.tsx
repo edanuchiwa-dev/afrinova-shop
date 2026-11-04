@@ -361,7 +361,7 @@ export default function QuantityBreaksWidget({
   }
 
   /* =======================================================================
-   * TEMPLATE 2 : PRESTIGE (Luxe Artisanal / Atelier Pro)
+   * TEMPLATE 2 : PRESTIGE (Luxe Artisanal / AFRINOVA SHOP)
    * ======================================================================= */
   if (template === 'prestige') {
     return (

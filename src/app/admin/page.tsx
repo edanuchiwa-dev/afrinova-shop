@@ -802,11 +802,11 @@ export default function AdminDashboard() {
           <div className="p-4 border-b border-slate-800/80 flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 text-white flex items-center justify-center font-black text-sm shadow-md shadow-blue-900/30">
-                AP
+                AS
               </div>
               <div>
                 <div className="font-heading font-black text-sm text-white tracking-tight leading-tight">
-                  Atelier Pro
+                  AFRINOVA SHOP
                 </div>
                 <div className="flex items-center gap-1.5 mt-0.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -1147,7 +1147,7 @@ export default function AdminDashboard() {
             <div>
               {/* Fil d'ariane dynamique */}
               <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 mb-1">
-                <span>Atelier Pro Admin</span>
+                <span>AFRINOVA SHOP Admin</span>
                 <ChevronRight className="w-3 h-3 text-slate-400" />
                 <span className="text-slate-900 font-bold capitalize">
                   {activeTab === 'analytics' && 'Tableau de bord & Analyses'}
@@ -2092,7 +2092,7 @@ export default function AdminDashboard() {
                         {
                           id: 'prestige',
                           name: 'Prestige Luxe',
-                          desc: 'Atelier Pro, ivoire & or, ambiance bijouterie et haute joaillerie',
+                          desc: 'AFRINOVA SHOP, ivoire & or, ambiance bijouterie et haute joaillerie',
                           icon: <Crown className="w-4 h-4 text-amber-600 shrink-0" />,
                         },
                         {

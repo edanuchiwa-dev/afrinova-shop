@@ -9,7 +9,7 @@ export async function sendOrderNotification(
   order: OrderNotification,
 ): Promise<{ success: boolean; topic: string }> {
   // Topic long et difficilement devinable par défaut, surchargeable via variable d'environnement
-  const topic = process.env.NTFY_TOPIC || 'atelier-pro-benin-alertes-8f92a4c7e1b3d6f0';
+  const topic = process.env.NTFY_TOPIC || 'afrinova-shop-benin-alertes-8f92a4c7e1b3d6f0';
   const token = process.env.NTFY_TOKEN;
 
   // Extraction stricte du prénom (premier mot) pour ne divulguer aucune donnée privée sensible

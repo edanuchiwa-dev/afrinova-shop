@@ -7,7 +7,7 @@ import { Package, MessageCircle } from 'lucide-react';
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const whatsappPhone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '2290197000000';
-  const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent("Bonjour Atelier Pro, j'aimerais avoir des informations sur vos articles.")}`;
+  const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent("Bonjour AFRINOVA SHOP, j'aimerais avoir des informations sur vos articles.")}`;
 
   return (
     <>
@@ -33,7 +33,7 @@ export default function Navbar() {
 
               <Link href="/" className="group flex flex-col justify-center py-1">
                 <span className="font-heading font-black text-lg sm:text-xl tracking-tight text-[#16171A] uppercase leading-none group-hover:text-[#C27835] transition-colors">
-                  Atelier Pro
+                  AFRINOVA SHOP
                 </span>
                 <span className="text-[9px] font-bold text-[#73737A] tracking-[0.2em] uppercase mt-1 leading-none hidden sm:block">
                   Cotonou • Boutique Exclusive
@@ -115,7 +115,7 @@ export default function Navbar() {
               <div className="flex items-center justify-between pb-6 border-b border-[#EAE8E2]">
                 <div>
                   <span className="font-heading font-black text-lg text-[#16171A] uppercase tracking-tight block">
-                    Atelier Pro
+                    AFRINOVA SHOP
                   </span>
                   <span className="text-[10px] font-bold text-[#73737A] uppercase tracking-wider">
                     Bénin • Vente directe

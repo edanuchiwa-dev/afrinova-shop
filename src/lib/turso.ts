@@ -5,12 +5,25 @@ import { sendOrderNotification } from './notifications.ts';
 
 let tursoClient: Client | null = null;
 
-function sanitizeUrl(raw?: string): string {
-  if (!raw) return 'file:data/store.db';
-  let cleaned = raw.trim();
-  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
-    cleaned = cleaned.slice(1, -1).trim();
+function cleanEnvValue(raw?: string): string {
+  if (!raw) return '';
+  let cleaned = String(raw).trim();
+  if (cleaned.includes('=')) {
+    const idx = cleaned.indexOf('=');
+    cleaned = cleaned.substring(idx + 1).trim();
   }
+  // Repeatedly remove leading/trailing quotes (", ', `) and slashes (\)
+  while (/^[\s"'`\\]/.test(cleaned) || /[\s"'`\\]$/.test(cleaned)) {
+    cleaned = cleaned.replace(/^[\s"'`\\]+/, '').replace(/[\s"'`\\]+$/, '');
+  }
+  // Remove any remaining whitespace or newlines inside
+  cleaned = cleaned.replace(/\s+/g, '');
+  return cleaned;
+}
+
+function sanitizeUrl(raw?: string): string {
+  let cleaned = cleanEnvValue(raw);
+  if (!cleaned) return 'file:data/store.db';
   if (!cleaned.startsWith('libsql://') && !cleaned.startsWith('https://') && !cleaned.startsWith('http://') && !cleaned.startsWith('file:')) {
     cleaned = `libsql://${cleaned}`;
   }
@@ -18,16 +31,12 @@ function sanitizeUrl(raw?: string): string {
 }
 
 function sanitizeToken(raw?: string): string | undefined {
-  if (!raw) return undefined;
-  let cleaned = raw.trim();
-  if ((cleaned.startsWith('"') && cleaned.endsWith('"')) || (cleaned.startsWith("'") && cleaned.endsWith("'"))) {
-    cleaned = cleaned.slice(1, -1).trim();
-  }
-  return cleaned;
+  const cleaned = cleanEnvValue(raw);
+  return cleaned || undefined;
 }
 
 export function isTursoEnabled(): boolean {
-  const url = process.env.TURSO_DATABASE_URL?.trim();
+  const url = cleanEnvValue(process.env.TURSO_DATABASE_URL);
   return Boolean(url && url !== 'file:data/store.db');
 }
 

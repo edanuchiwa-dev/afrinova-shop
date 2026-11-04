@@ -212,6 +212,10 @@ export async function GET(request: NextRequest) {
       const s = search.toLowerCase();
       filtered = filtered.filter((p) => p.name.toLowerCase().includes(s) || (p.description && p.description.toLowerCase().includes(s)));
     }
-    return NextResponse.json(filtered);
+    return NextResponse.json(filtered, {
+      headers: {
+        'x-turso-error': encodeURIComponent(String(error?.message || error)),
+      },
+    });
   }
 }

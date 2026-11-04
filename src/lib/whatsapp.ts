@@ -65,14 +65,27 @@ export function sanitizePhoneForWhatsApp(raw: string): string {
 }
 
 export function getWhatsAppConfig(): WhatsAppConfig {
-  const enabledStr = getSetting('whatsapp_notify_enabled', '1');
+  let enabledStr = '1';
   const defaultPhone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '2290197000000';
-  const phone = getSetting('whatsapp_notify_phone', defaultPhone);
-  const provider = (getSetting('whatsapp_notify_provider', 'callmebot') as 'callmebot' | 'greenapi' | 'webhook') || 'callmebot';
-  const apiKey = getSetting('whatsapp_notify_apikey', '');
-  const idInstance = getSetting('whatsapp_notify_id_instance', '');
-  const webhookUrl = getSetting('whatsapp_notify_webhook_url', '');
-  const rawTemplate = getSetting('whatsapp_notify_template', '');
+  let phone = defaultPhone;
+  let provider: 'callmebot' | 'greenapi' | 'webhook' = 'callmebot';
+  let apiKey = '';
+  let idInstance = '';
+  let webhookUrl = '';
+  let rawTemplate = '';
+
+  try {
+    enabledStr = getSetting('whatsapp_notify_enabled', '1');
+    phone = getSetting('whatsapp_notify_phone', defaultPhone);
+    provider = (getSetting('whatsapp_notify_provider', 'callmebot') as 'callmebot' | 'greenapi' | 'webhook') || 'callmebot';
+    apiKey = getSetting('whatsapp_notify_apikey', '');
+    idInstance = getSetting('whatsapp_notify_id_instance', '');
+    webhookUrl = getSetting('whatsapp_notify_webhook_url', '');
+    rawTemplate = getSetting('whatsapp_notify_template', '');
+  } catch {
+    // Tolérance d'échec si la base locale SQLite n'est pas instanciable (ex. Vercel)
+  }
+
   const template = rawTemplate && rawTemplate.trim() ? rawTemplate : DEFAULT_WHATSAPP_TEMPLATE;
 
   return {

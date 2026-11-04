@@ -139,7 +139,10 @@ export async function POST(request: Request) {
     }
     console.error('Erreur interne lors de la commande :', error instanceof Error ? error.message : 'Erreur');
     return NextResponse.json(
-      { error: 'Impossible de finaliser votre commande pour le moment. Veuillez réessayer.' },
+      {
+        error: 'Impossible de finaliser votre commande pour le moment. Veuillez réessayer.',
+        details: error instanceof Error ? error.message : String(error),
+      },
       { status: 500 }
     );
   }
@@ -159,13 +162,12 @@ export async function POST(request: Request) {
   // 8. Notification WhatsApp automatique sur mesure au commerçant
   let whatsappDirectUrl = '';
   try {
-    const db = getDb();
-    const orderItems = db.prepare(`
-      SELECT product_name as name, quantity, product_price as price
-      FROM order_items
-      WHERE order_id = (SELECT id FROM orders WHERE order_number = ?)
-      ORDER BY id
-    `).all(result.orderNumber) as Array<{ name: string; quantity: number; price: number }>;
+    const waConfig = getWhatsAppConfig();
+    const waItems = data.items.map((it) => ({
+      name: `Article #${it.id}`,
+      quantity: it.quantity,
+      price: Math.round(result.subtotal / Math.max(1, data.items.length)),
+    }));
 
     const orderNotificationPayload = {
       orderNumber: result.orderNumber,
@@ -174,7 +176,7 @@ export async function POST(request: Request) {
       shippingCity: data.shippingCity,
       neighborhood: data.neighborhood,
       landmark: data.landmark,
-      items: orderItems,
+      items: waItems,
       totalPrice: result.totalPrice,
       shippingCost: result.shippingCost,
       subtotal: result.subtotal,
@@ -182,7 +184,6 @@ export async function POST(request: Request) {
       customerNotes: data.customerNotes || undefined,
     };
 
-    const waConfig = getWhatsAppConfig();
     const waMessage = formatWhatsAppMessage(waConfig.template, orderNotificationPayload);
     whatsappDirectUrl = `https://wa.me/${waConfig.phone}?text=${encodeURIComponent(waMessage)}`;
 

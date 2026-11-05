@@ -224,7 +224,7 @@ export default function AdminDashboard() {
   const [previewBundleId, setPreviewBundleId] = useState<string>('x1');
 
   // Filtres et Recherche avancée
-  const [bundleShareModal, setBundleShareModal] = useState<{ slug: string; name: string } | null>(null);
+  const [copiedSlug, setCopiedSlug] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [utmFilter, setUtmFilter] = useState('all');
@@ -634,24 +634,40 @@ export default function AdminDashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  const copyAdLink = (slug: string, productName: string, bundleId?: string | null) => {
+  const copyAdLink = (slug: string, productName?: string) => {
     const origin = typeof window !== 'undefined' ? window.location.origin : '';
-    const query = bundleId ? `?bundle=${bundleId}` : '';
-    const adUrl = `${origin}/produit/${slug}${query}`;
-    if (navigator.clipboard) {
-      navigator.clipboard.writeText(adUrl).then(() => {
-        const bundleLabel = bundleId
-          ? bundleId === 'x1'
-            ? ' (1 article)'
-            : bundleId === 'x2'
-              ? ' (Lot 2 articles — Le plus populaire)'
-              : bundleId === 'x3'
-                ? ' (Lot 3 articles — Meilleur choix)'
-                : ` (Lot ${bundleId})`
-          : ' (Lien standard)';
-        showToast(`Lien pub copié${bundleLabel} : ${adUrl}`, 'info');
-        setBundleShareModal(null);
+    const adUrl = `${origin}/produit/${slug}`;
+
+    const fallbackCopy = (text: string) => {
+      try {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        textArea.style.position = 'fixed';
+        textArea.style.opacity = '0';
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        return true;
+      } catch {
+        return false;
+      }
+    };
+
+    const notifySuccess = () => {
+      setCopiedSlug(slug);
+      showToast(`Lien pub copié dans le presse-papier : ${adUrl}`, 'info');
+      setTimeout(() => setCopiedSlug((cur) => (cur === slug ? null : cur)), 2500);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(adUrl).then(notifySuccess).catch(() => {
+        fallbackCopy(adUrl);
+        notifySuccess();
       });
+    } else {
+      fallbackCopy(adUrl);
+      notifySuccess();
     }
   };
 
@@ -1724,12 +1740,25 @@ export default function AdminDashboard() {
                       Aperçu
                     </Link>
                     <button
-                      onClick={() => setBundleShareModal({ slug: product.slug, name: product.name })}
-                      className="bg-blue-600 hover:bg-blue-700 text-white text-xs lg:text-sm font-black px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer"
-                      title="Choisir une formule de lot et copier le lien pub"
+                      onClick={() => copyAdLink(product.slug, product.name)}
+                      className={`text-xs lg:text-sm font-black px-4 py-2 rounded-xl shadow-xs flex items-center gap-1.5 transition active:scale-95 cursor-pointer ${
+                        copiedSlug === product.slug
+                          ? 'bg-emerald-600 text-white shadow-emerald-900/20'
+                          : 'bg-blue-600 hover:bg-blue-700 text-white'
+                      }`}
+                      title="Copier directement le lien pub dans le presse-papier"
                     >
-                      <Copy className="w-3.5 h-3.5" />
-                      <span>Lien pub</span>
+                      {copiedSlug === product.slug ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-white" />
+                          <span>Lien copié !</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5" />
+                          <span>Copier le lien</span>
+                        </>
+                      )}
                     </button>
                     <button
                       onClick={() => handleDeleteProduct(product.id, product.name)}
@@ -3169,87 +3198,6 @@ export default function AdminDashboard() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
-      )}
-
-      {/* MODAL CHOIX DU LOT POUR LIEN PUB */}
-      {bundleShareModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-200 animate-in fade-in zoom-in-95 space-y-4">
-            <div className="flex justify-between items-center pb-3 border-b border-slate-100">
-              <div>
-                <h3 className="text-sm font-black text-slate-900">Copier le lien pub</h3>
-                <p className="text-xs text-slate-500 mt-0.5">{bundleShareModal.name}</p>
-              </div>
-              <button
-                onClick={() => setBundleShareModal(null)}
-                className="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 flex items-center justify-center transition cursor-pointer"
-                title="Fermer"
-              >
-                ✕
-              </button>
-            </div>
-
-            <p className="text-xs text-slate-600">
-              Sélectionnez l&apos;offre de lot à présélectionner automatiquement lorsque le prospect clique sur votre publicité :
-            </p>
-
-            <div className="space-y-2.5">
-              <button
-                type="button"
-                onClick={() => copyAdLink(bundleShareModal.slug, bundleShareModal.name, null)}
-                className="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center justify-between transition cursor-pointer group"
-              >
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block group-hover:text-blue-700">Lien standard (sans présélection)</span>
-                  <span className="text-[10px] text-slate-400 font-mono">/produit/{bundleShareModal.slug}</span>
-                </div>
-                <Copy className="w-4 h-4 text-slate-400 group-hover:text-blue-600" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => copyAdLink(bundleShareModal.slug, bundleShareModal.name, 'x1')}
-                className="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center justify-between transition cursor-pointer group"
-              >
-                <div>
-                  <span className="text-xs font-bold text-slate-900 block group-hover:text-blue-700">Offre 1 article (Solo)</span>
-                  <span className="text-[10px] text-slate-400 font-mono">?bundle=x1</span>
-                </div>
-                <Copy className="w-4 h-4 text-slate-400 group-hover:text-blue-600" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => copyAdLink(bundleShareModal.slug, bundleShareModal.name, 'x2')}
-                className="w-full text-left p-3 rounded-xl border-2 border-[#C27835] bg-[#FDF9F4] hover:bg-[#FBEFE3] flex items-center justify-between transition cursor-pointer group"
-              >
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-black text-slate-900 block">Lot 2 articles (Duo)</span>
-                    <span className="text-[9px] font-black uppercase text-white bg-[#C27835] px-1.5 py-0.2 rounded-full">★ Recommandé</span>
-                  </div>
-                  <span className="text-[10px] text-[#C27835] font-mono">?bundle=x2 (-10% d&apos;économie)</span>
-                </div>
-                <Copy className="w-4 h-4 text-[#C27835]" />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => copyAdLink(bundleShareModal.slug, bundleShareModal.name, 'x3')}
-                className="w-full text-left p-3 rounded-xl border border-slate-200 hover:border-blue-500 hover:bg-blue-50/50 flex items-center justify-between transition cursor-pointer group"
-              >
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-slate-900 block group-hover:text-blue-700">Lot 3 articles (Famille)</span>
-                    <span className="text-[9px] font-bold text-slate-500 bg-slate-100 px-1.5 py-0.2 rounded-full">Meilleur choix</span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-mono">?bundle=x3 (-15% d&apos;économie)</span>
-                </div>
-                <Copy className="w-4 h-4 text-slate-400 group-hover:text-blue-600" />
-              </button>
-            </div>
           </div>
         </div>
       )}

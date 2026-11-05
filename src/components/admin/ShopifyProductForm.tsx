@@ -609,14 +609,37 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
               Ignorer
             </Link>
             {isEdit && customSlug && (
-              <Link
-                href={`/produit/${customSlug}`}
-                target="_blank"
-                className="hidden md:flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-xl transition"
-              >
-                <Eye className="w-3.5 h-3.5" />
-                <span>Voir en ligne</span>
-              </Link>
+              <>
+                <button
+                  type="button"
+                  onClick={() => {
+                    const origin = typeof window !== 'undefined' ? window.location.origin : '';
+                    const adUrl = `${origin}/produit/${customSlug}`;
+                    if (navigator.clipboard?.writeText) {
+                      navigator.clipboard.writeText(adUrl).then(() => {
+                        setToastMessage(`Lien copié : ${adUrl}`);
+                        setTimeout(() => setToastMessage(null), 2500);
+                      });
+                    } else {
+                      setToastMessage(`Lien copié : ${adUrl}`);
+                      setTimeout(() => setToastMessage(null), 2500);
+                    }
+                  }}
+                  className="hidden md:flex items-center gap-1.5 text-xs font-bold text-slate-700 bg-slate-100 hover:bg-slate-200 px-3 py-2 rounded-xl transition cursor-pointer"
+                  title="Copier automatiquement l'adresse web de ce produit"
+                >
+                  <Copy className="w-3.5 h-3.5" />
+                  <span>Copier le lien</span>
+                </button>
+                <Link
+                  href={`/produit/${customSlug}`}
+                  target="_blank"
+                  className="hidden md:flex items-center gap-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 px-3 py-2 rounded-xl transition"
+                >
+                  <Eye className="w-3.5 h-3.5" />
+                  <span>Voir en ligne</span>
+                </Link>
+              </>
             )}
             <button
               onClick={() => handleSubmit()}

@@ -36,16 +36,22 @@ function sanitizeToken(raw?: string): string | undefined {
   return cleaned || undefined;
 }
 
+const DEFAULT_TURSO_URL = 'libsql://afrinova-shop-edanuchiwa-dev.aws-eu-west-1.turso.io';
+const DEFAULT_TURSO_AUTH_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTM4MjkzODMsImlkIjoiMDFhMWE4NTItMzIwMS03ODBhLTlmOGYtMjExODBiY2Y4YzZhIiwia2lkIjoiQ2stUWd1aVJBR1p6N3N4bzBPZjB5MzMwX0ItVVZDRXVDeVNUd3NUMTR3byIsInJpZCI6ImZiNWM3MjViLTU1ZjEtNDE3OC1iOTM3LTA0MzIwMjIzNWZiYyJ9.aiq82RSp61j41j-YsQNyoqe7wDAQYRUO9gvYuNigs4euaOdq4FBZ0gRdS-J3bhE6fY__W6I5gsvaIMp2QZ1_Ag';
+
 export function isTursoEnabled(): boolean {
-  const url = cleanEnvValue(process.env.TURSO_DATABASE_URL);
+  const url = cleanEnvValue(process.env.TURSO_DATABASE_URL) || DEFAULT_TURSO_URL;
   return Boolean(url && url !== 'file:data/store.db');
 }
 
 export function getTursoClient(): Client {
   if (tursoClient) return tursoClient;
 
-  const url = sanitizeUrl(process.env.TURSO_DATABASE_URL);
-  const authToken = sanitizeToken(process.env.TURSO_AUTH_TOKEN);
+  const rawUrl = cleanEnvValue(process.env.TURSO_DATABASE_URL) || DEFAULT_TURSO_URL;
+  const rawToken = cleanEnvValue(process.env.TURSO_AUTH_TOKEN) || DEFAULT_TURSO_AUTH_TOKEN;
+
+  const url = sanitizeUrl(rawUrl);
+  const authToken = sanitizeToken(rawToken);
 
   tursoClient = createClient({
     url,

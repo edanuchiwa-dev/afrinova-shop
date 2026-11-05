@@ -37,7 +37,7 @@ export const CUSTOM_PRODUCT_BUNDLES: Record<string, Array<Partial<Bundle>>> = {
   'montre-chronographe': [
     { id: 'x1', title: '1 article', subtitle: 'Achat unique', badge: 'Standard' },
     { id: 'x2', title: '2 articles', subtitle: 'Économisez sur deux articles', badge: '-10%', tag: 'Le plus populaire' },
-    { id: 'x3', title: '3 articles', subtitle: 'Économisez sur trois articles', badge: '-15%', tag: 'Meilleur choix' },
+    { id: 'x3', title: '3 articles', subtitle: 'Économisez sur trois articles', badge: '-15%', tag: 'Meilleur choix', freeGift: 'Cadeau VIP inclus' },
   ],
 };
 
@@ -124,6 +124,7 @@ export function getBundles(product?: ProductLike | null): Bundle[] {
       price: p3,
       comparePrice: c3,
       tag: 'Meilleur choix',
+      freeGift: 'Cadeau VIP inclus',
     },
   ];
 

@@ -121,6 +121,7 @@ export type TursoProduct = {
   variants?: string | null;
   sales_channels?: string | null;
   bundle_style?: 'pill' | 'card' | string;
+  bundle_accent_color?: string | null;
   status: string;
   created_at: string;
 };
@@ -229,6 +230,7 @@ export async function tursoCreateProduct(product: {
   variants: string;
   sales_channels: string;
   bundle_style: string;
+  bundle_accent_color?: string | null;
   status: string;
 }): Promise<TursoProduct> {
   const client = getTursoClient();
@@ -240,9 +242,9 @@ export async function tursoCreateProduct(product: {
           id, name, slug, description, price, compare_at_price, cost_per_item,
           stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
           category, image_url, media_urls, weight_kg, is_physical, vendor,
-          tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
+          tags, seo_title, seo_description, variants, sales_channels, bundle_style, bundle_accent_color, status
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       args: [
         product.id,
@@ -269,6 +271,7 @@ export async function tursoCreateProduct(product: {
         product.variants,
         product.sales_channels,
         product.bundle_style,
+        product.bundle_accent_color || null,
         product.status,
       ],
     });
@@ -283,9 +286,9 @@ export async function tursoCreateProduct(product: {
         name, slug, description, price, compare_at_price, cost_per_item,
         stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
         category, image_url, media_urls, weight_kg, is_physical, vendor,
-        tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
+        tags, seo_title, seo_description, variants, sales_channels, bundle_style, bundle_accent_color, status
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `,
     args: [
       product.name,
@@ -311,6 +314,7 @@ export async function tursoCreateProduct(product: {
       product.variants,
       product.sales_channels,
       product.bundle_style,
+      product.bundle_accent_color || null,
       product.status,
     ],
   });

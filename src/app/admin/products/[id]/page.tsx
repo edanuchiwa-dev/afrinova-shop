@@ -45,6 +45,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     variants: product.variants || '[]',
     sales_channels: product.sales_channels || '["online_store","whatsapp","ads"]',
     bundle_style: (product.bundle_style as 'pill' | 'card') || 'card',
+    bundle_accent_color: product.bundle_accent_color || null,
     status: (product.status as 'active' | 'draft' | 'archived') || 'active',
   };
 

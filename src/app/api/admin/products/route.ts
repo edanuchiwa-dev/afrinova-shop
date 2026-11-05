@@ -90,6 +90,7 @@ export async function POST(request: Request) {
     variants,
     sales_channels,
     bundle_style,
+    bundle_accent_color,
     status,
   } = body as Record<string, unknown>;
 
@@ -156,6 +157,7 @@ export async function POST(request: Request) {
   const cleanVariants = typeof variants === 'string' ? variants : JSON.stringify(variants || []);
   const cleanSalesChannels = typeof sales_channels === 'string' ? sales_channels : JSON.stringify(sales_channels || ['online_store', 'whatsapp', 'ads']);
   const cleanBundleStyle = bundle_style === 'pill' ? 'pill' : 'card';
+  const cleanBundleAccentColor = typeof bundle_accent_color === 'string' && bundle_accent_color.trim() ? bundle_accent_color.trim() : null;
   const prodStatus = typeof status === 'string' && productStatuses.has(status) ? status : 'active';
 
   let baseSlug = typeof requestedSlug === 'string' && requestedSlug.trim()
@@ -196,6 +198,7 @@ export async function POST(request: Request) {
         variants: cleanVariants,
         sales_channels: cleanSalesChannels,
         bundle_style: cleanBundleStyle,
+        bundle_accent_color: cleanBundleAccentColor,
         status: prodStatus,
       });
 
@@ -207,9 +210,9 @@ export async function POST(request: Request) {
             id, name, slug, description, price, compare_at_price, cost_per_item,
             stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
             category, image_url, media_urls, weight_kg, is_physical, vendor,
-            tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
+            tags, seo_title, seo_description, variants, sales_channels, bundle_style, bundle_accent_color, status
           )
-          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `).run(
           tursoCreated.id,
           name.trim(),
@@ -235,6 +238,7 @@ export async function POST(request: Request) {
           cleanVariants,
           cleanSalesChannels,
           cleanBundleStyle,
+          cleanBundleAccentColor,
           prodStatus
         );
       } catch {
@@ -259,9 +263,9 @@ export async function POST(request: Request) {
       name, slug, description, price, compare_at_price, cost_per_item,
       stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
       category, image_url, media_urls, weight_kg, is_physical, vendor,
-      tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
+      tags, seo_title, seo_description, variants, sales_channels, bundle_style, bundle_accent_color, status
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     name.trim(),
     finalSlug,
@@ -286,6 +290,7 @@ export async function POST(request: Request) {
     cleanVariants,
     cleanSalesChannels,
     cleanBundleStyle,
+    cleanBundleAccentColor,
     prodStatus
   );
 
@@ -330,6 +335,7 @@ export async function PUT(request: Request) {
     variants,
     sales_channels,
     bundle_style,
+    bundle_accent_color,
     status,
     statut,
   } = body as Record<string, unknown>;
@@ -494,6 +500,11 @@ export async function PUT(request: Request) {
   if (bundle_style !== undefined) {
     fields.push('bundle_style = ?');
     values.push(bundle_style === 'pill' ? 'pill' : 'card');
+  }
+
+  if (bundle_accent_color !== undefined) {
+    fields.push('bundle_accent_color = ?');
+    values.push(typeof bundle_accent_color === 'string' && bundle_accent_color.trim() ? bundle_accent_color.trim() : null);
   }
 
   if (newStatus !== undefined) {

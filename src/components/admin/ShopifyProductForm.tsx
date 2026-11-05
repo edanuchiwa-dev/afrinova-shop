@@ -70,6 +70,7 @@ export type ProductData = {
   }> | string;
   sales_channels?: string[] | string;
   bundle_style?: 'pill' | 'card' | string;
+  bundle_accent_color?: string | null;
   status: 'active' | 'draft' | 'archived';
 };
 
@@ -177,6 +178,9 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
   // Colonne latérale
   const [bundleStyle, setBundleStyle] = useState<'card' | 'pill'>(
     (initialData?.bundle_style as 'card' | 'pill') || 'card'
+  );
+  const [bundleAccentColor, setBundleAccentColor] = useState<string>(
+    initialData?.bundle_accent_color || '#C27835'
   );
   const [status, setStatus] = useState<'active' | 'draft' | 'archived'>(initialData?.status || 'active');
   const [category, setCategory] = useState(initialData?.category || 'Maroquinerie');
@@ -508,6 +512,7 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
         salesChannels.ads && 'ads',
       ].filter(Boolean),
       bundle_style: bundleStyle,
+      bundle_accent_color: bundleAccentColor,
       status,
     };
 
@@ -1058,9 +1063,10 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                 <button
                   type="button"
                   onClick={() => setBundleStyle('card')}
+                  style={bundleStyle === 'card' ? { borderColor: bundleAccentColor } : undefined}
                   className={`text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
                     bundleStyle === 'card'
-                      ? 'border-[#C27835] bg-[#FDF9F4] ring-2 ring-[#C27835]/15'
+                      ? 'bg-[#FDF9F4] ring-2 ring-slate-900/10'
                       : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                 >
@@ -1069,20 +1075,29 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                       <span className="text-xs font-black text-slate-900">
                         Style Cartes (Card) — Défaut
                       </span>
-                      <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        bundleStyle === 'card' ? 'border-[#C27835]' : 'border-slate-300'
-                      }`}>
-                        {bundleStyle === 'card' && <span className="w-2 h-2 rounded-full bg-[#C27835]" />}
+                      <span
+                        style={bundleStyle === 'card' ? { borderColor: bundleAccentColor } : undefined}
+                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                          bundleStyle === 'card' ? '' : 'border-slate-300'
+                        }`}
+                      >
+                        {bundleStyle === 'card' && <span style={{ backgroundColor: bundleAccentColor }} className="w-2 h-2 rounded-full" />}
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-tight">
-                      Cartes complètes avec miniature de l&apos;article, ruban populaire et barre cadeau animée.
+                      Cartes complètes avec miniature de l&apos;article, ruban populaire et barre cadeau animée (Style Screenshot 2).
                     </p>
                   </div>
 
                   {/* Aperçu miniature Card */}
-                  <div className="mt-4 p-2.5 rounded-xl bg-slate-50 border border-slate-200 relative pt-3">
-                    <span className="absolute -top-2 right-2 text-[8px] font-black bg-[#C27835] text-white px-1.5 py-0.5 rounded-full">
+                  <div
+                    style={bundleStyle === 'card' ? { borderColor: `${bundleAccentColor}50` } : undefined}
+                    className="mt-4 p-2.5 rounded-xl bg-slate-50 border border-slate-200 relative pt-3"
+                  >
+                    <span
+                      style={{ backgroundColor: bundleAccentColor }}
+                      className="absolute -top-2 right-2 text-[8px] font-black text-white px-2 py-0.5 rounded-md shadow-2xs"
+                    >
                       ★ Populaire
                     </span>
                     <div className="flex items-center justify-between gap-2">
@@ -1093,12 +1108,17 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                         <div>
                           <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1">
                             <span>2 articles</span>
-                            <span className="text-[9px] text-[#C27835] bg-[#C27835]/10 px-1 rounded">-10%</span>
+                            <span
+                              style={{ backgroundColor: bundleAccentColor }}
+                              className="text-[9px] text-white px-1.5 py-0.2 rounded-full font-bold"
+                            >
+                              -10%
+                            </span>
                           </div>
                           <span className="text-[9px] text-slate-400">Économie max</span>
                         </div>
                       </div>
-                      <span className="text-[11px] font-black text-[#C27835]">
+                      <span style={{ color: bundleAccentColor }} className="text-[11px] font-black">
                         {formatFCFA(Math.round(Number(price || 15000) * 1.8))}
                       </span>
                     </div>
@@ -1109,9 +1129,10 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                 <button
                   type="button"
                   onClick={() => setBundleStyle('pill')}
+                  style={bundleStyle === 'pill' ? { borderColor: bundleAccentColor } : undefined}
                   className={`text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
                     bundleStyle === 'pill'
-                      ? 'border-[#C27835] bg-[#FDF9F4] ring-2 ring-[#C27835]/15'
+                      ? 'bg-[#FDF9F4] ring-2 ring-slate-900/10'
                       : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                 >
@@ -1120,36 +1141,121 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                       <span className="text-xs font-black text-slate-900">
                         Style Pilules (Pill)
                       </span>
-                      <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
-                        bundleStyle === 'pill' ? 'border-[#C27835]' : 'border-slate-300'
-                      }`}>
-                        {bundleStyle === 'pill' && <span className="w-2 h-2 rounded-full bg-[#C27835]" />}
+                      <span
+                        style={bundleStyle === 'pill' ? { borderColor: bundleAccentColor } : undefined}
+                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                          bundleStyle === 'pill' ? '' : 'border-slate-300'
+                        }`}
+                      >
+                        {bundleStyle === 'pill' && <span style={{ backgroundColor: bundleAccentColor }} className="w-2 h-2 rounded-full" />}
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-tight">
-                      Lignes ultra-arrondies épurées, bouton radio intégré et pastille colorée de remise.
+                      Lignes ultra-arrondies épurées, bouton radio intégré et pastille colorée de remise (Style Screenshot 1).
                     </p>
                   </div>
 
                   {/* Aperçu miniature Pill */}
-                  <div className="mt-4 p-2.5 rounded-[20px] bg-white border-2 border-[#C27835] flex items-center justify-between gap-2 shadow-2xs">
+                  <div
+                    style={{ borderColor: bundleAccentColor }}
+                    className="mt-4 p-2.5 rounded-[24px] bg-white border-2 flex items-center justify-between gap-2 shadow-2xs"
+                  >
                     <div className="flex items-center gap-2">
-                      <div className="w-3.5 h-3.5 rounded-full border-2 border-[#C27835] flex items-center justify-center shrink-0">
-                        <span className="w-1.5 h-1.5 rounded-full bg-[#C27835]" />
+                      <div
+                        style={{ borderColor: bundleAccentColor }}
+                        className="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0"
+                      >
+                        <span style={{ backgroundColor: bundleAccentColor }} className="w-1.5 h-1.5 rounded-full" />
                       </div>
                       <div>
-                        <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1">
+                        <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
                           <span>Duo</span>
-                          <span className="text-[8px] text-white bg-[#C27835] px-1 rounded-full font-bold">2 art.</span>
+                          <span
+                            style={{ backgroundColor: bundleAccentColor }}
+                            className="text-[8px] text-white px-1.5 py-0.2 rounded-full font-bold"
+                          >
+                            2 articles
+                          </span>
                         </div>
-                        <span className="text-[9px] text-slate-400">-10% économie</span>
+                        <span className="text-[9px] text-slate-400">✨ Économie -10% ✨</span>
                       </div>
                     </div>
-                    <span className="text-[11px] font-black text-[#C27835]">
+                    <span style={{ color: bundleAccentColor }} className="text-[11px] font-black">
                       {formatFCFA(Math.round(Number(price || 15000) * 1.8))}
                     </span>
                   </div>
                 </button>
+              </div>
+
+              {/* SÉLECTEUR DE COULEUR D'ACCENTUATION DU PRODUIT */}
+              <div className="pt-4 border-t border-slate-100 space-y-3">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <label className="block text-xs font-black text-slate-800">
+                      Couleur d&apos;accentuation du Bundle
+                    </label>
+                    <span className="text-[11px] text-slate-500">
+                      Personnalisez la couleur des bordures, radios, rubans et badges pour ce produit.
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-4 h-4 rounded-full border border-black/10 shadow-xs inline-block"
+                      style={{ backgroundColor: bundleAccentColor }}
+                    />
+                    <span className="font-mono text-xs font-bold text-slate-700 uppercase">
+                      {bundleAccentColor}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 pt-1">
+                  {[
+                    { name: 'Rose Flash (Screenshot 1)', hex: '#E91E63' },
+                    { name: 'Bleu Indigo (Screenshot 2)', hex: '#4F46E5' },
+                    { name: 'Or Atelier', hex: '#C27835' },
+                    { name: 'Vert Polaris', hex: '#008060' },
+                    { name: 'Bleu Royal', hex: '#2563EB' },
+                    { name: 'Noir Ébène', hex: '#121316' },
+                    { name: 'Rouge Flash', hex: '#DC2626' },
+                    { name: 'Violet Luxe', hex: '#7C3AED' },
+                  ].map((c) => (
+                    <button
+                      key={c.hex}
+                      type="button"
+                      onClick={() => setBundleAccentColor(c.hex)}
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border text-xs font-bold transition cursor-pointer ${
+                        bundleAccentColor?.toLowerCase() === c.hex.toLowerCase()
+                          ? 'bg-white border-slate-900 shadow-xs ring-1 ring-slate-900/20'
+                          : 'bg-white border-slate-200 hover:border-slate-300 text-slate-700'
+                      }`}
+                    >
+                      <span
+                        className="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0"
+                        style={{ backgroundColor: c.hex }}
+                      />
+                      <span>{c.name}</span>
+                    </button>
+                  ))}
+
+                  {/* Pipette personnalisée */}
+                  <div className="relative inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border border-slate-200 bg-white">
+                    <input
+                      type="color"
+                      value={bundleAccentColor}
+                      onChange={(e) => setBundleAccentColor(e.target.value)}
+                      className="w-5 h-5 rounded cursor-pointer border-0 bg-transparent p-0"
+                      title="Choisir une couleur sur mesure"
+                    />
+                    <input
+                      type="text"
+                      value={bundleAccentColor}
+                      onChange={(e) => setBundleAccentColor(e.target.value)}
+                      placeholder="#HEX"
+                      className="w-16 font-mono text-[11px] uppercase font-bold text-slate-800 bg-transparent border-0 focus:outline-none"
+                    />
+                  </div>
+                </div>
               </div>
             </section>
 

@@ -309,11 +309,11 @@ export default function BundleSelector({
             key={bundle.id}
             className="relative"
           >
-            {/* Ruban / Tag posé au-dessus de la carte en haut à droite */}
+            {/* Ruban / Tag posé sur la carte en haut à droite (Style Screenshot 2) */}
             {bundle.tag && (
               <div
                 style={{ backgroundColor: accent }}
-                className="absolute -top-2.5 right-4 z-10 text-[10px] sm:text-[11px] font-black uppercase tracking-wider text-white px-2.5 py-0.5 rounded-full shadow-xs"
+                className="absolute -top-3 right-4 z-10 text-[10px] font-black uppercase tracking-wider text-white px-3 py-0.5 rounded-md shadow-xs flex items-center gap-1"
               >
                 ★ {bundle.tag}
               </div>
@@ -365,11 +365,10 @@ export default function BundleSelector({
                       {bundle.badge && (
                         <span
                           style={{
-                            color: accent,
-                            borderColor: `${accent}40`,
-                            backgroundColor: `${accent}14`,
+                            backgroundColor: accent,
+                            color: '#FFFFFF',
                           }}
-                          className="text-[10px] sm:text-[11px] font-extrabold px-2 py-0.5 rounded-full border leading-tight"
+                          className="text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap leading-tight shadow-2xs"
                         >
                           {bundle.badge}
                         </span>

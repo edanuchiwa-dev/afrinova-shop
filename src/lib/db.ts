@@ -34,6 +34,7 @@ export type Product = {
   variants?: string | null;
   sales_channels?: string | null;
   bundle_style?: 'pill' | 'card' | string;
+  bundle_accent_color?: string | null;
   status: string;
   created_at: string;
 };
@@ -269,6 +270,7 @@ function runMigrations(db: Database.Database) {
   addProductColumnIfNotExists('variants', "TEXT DEFAULT '[]'");
   addProductColumnIfNotExists('sales_channels', "TEXT DEFAULT '[\"online_store\",\"whatsapp\",\"ads\"]'");
   addProductColumnIfNotExists('bundle_style', "TEXT DEFAULT 'card'");
+  addProductColumnIfNotExists('bundle_accent_color', "TEXT DEFAULT NULL");
 
   // 2c. Migration des colonnes IP & Géolocalisation dans page_views
   const pageViewsCols = db.prepare('PRAGMA table_info(page_views)').all() as Array<{ name: string }>;

@@ -125,12 +125,12 @@ function ProductDetailView() {
   const [loading, setLoading] = useState(!fallbackCatalog[slug]);
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [isZoomOpen, setIsZoomOpen] = useState(false);
-  const [orderQuantity, setOrderQuantity] = useState(2); // 2 articles présélectionné par défaut
+  const [orderQuantity, setOrderQuantity] = useState(1); // 1 article présélectionné par défaut
   const [selectedBundleId, setSelectedBundleId] = useState<string>(() => {
     if (urlBundleParam) {
       return urlBundleParam.startsWith('x') ? urlBundleParam : `x${urlBundleParam}`;
     }
-    return 'x2'; // Lot « 2 articles » présélectionné
+    return 'x1'; // Lot standard « 1 article » présélectionné par défaut
   });
 
   // Mise à jour si le paramètre d'URL ?bundle= change
@@ -300,11 +300,18 @@ function ProductDetailView() {
   }, [selectedBundle]);
 
   const bundleVariant: 'pill' | 'card' = (product?.bundle_style as 'pill' | 'card') || 'card';
+  const activeAccentColor = ((product as any)?.bundle_accent_color) || qbSettings.accentColor || '#C27835';
 
   const currentSubtotal = useMemo(() => {
     if (!product) return 0;
     if (selectedBundle) {
-      return selectedBundle.price;
+      if (orderQuantity === selectedBundle.quantity) {
+        return selectedBundle.price;
+      }
+      if (orderQuantity === 1) return product.price;
+      if (orderQuantity === 2) return Math.round(product.price * 2 * 0.9);
+      if (orderQuantity >= 3) return Math.round(product.price * orderQuantity * 0.85);
+      return product.price * orderQuantity;
     }
     if (!isPromoActive) return product.price * orderQuantity;
     return promoUnitsInOrder * promoUnitPrice + normalUnitsInOrder * normalUnitPrice;
@@ -819,7 +826,14 @@ function ProductDetailView() {
                         Offres par quantité (Volume Discounts) :
                       </span>
                       {selectedBundle?.tag && (
-                        <span className="text-[10px] font-black uppercase tracking-wider text-[#C27835] bg-[#FBF4ED] px-2.5 py-0.5 rounded-full border border-[#F2DFCE]">
+                        <span
+                          style={{
+                            color: activeAccentColor,
+                            backgroundColor: `${activeAccentColor}14`,
+                            borderColor: `${activeAccentColor}30`,
+                          }}
+                          className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border"
+                        >
                           ★ {selectedBundle.tag}
                         </span>
                       )}
@@ -833,21 +847,27 @@ function ProductDetailView() {
                         setOrderQuantity(b.quantity);
                       }}
                       variant={bundleVariant}
-                      accent="#C27835"
+                      accent={activeAccentColor}
                       image={product.image_url}
                     />
                   </div>
 
-                  {/* Ajusteur manuel de quantité */}
+                  {/* Ajusteur manuel de quantité synchronisé */}
                   <div className="pt-2 border-t border-[#F3F1EC] flex items-center justify-between">
                     <div>
                       <span className="text-xs font-bold text-[#16171A] block">Quantité exacte :</span>
-                      <span className="text-[10px] text-[#73737A]">Ajustable librement</span>
+                      <span className="text-[10px] text-[#73737A]">Ajustable librement (+ / −)</span>
                     </div>
                     <div className="flex items-center border border-[#EAE8E2] rounded-full bg-[#FAF9F6]">
                       <button
                         type="button"
-                        onClick={() => setOrderQuantity((q) => Math.max(1, q - 1))}
+                        onClick={() => {
+                          const nextQ = Math.max(1, orderQuantity - 1);
+                          setOrderQuantity(nextQ);
+                          if (nextQ === 1) setSelectedBundleId('x1');
+                          else if (nextQ === 2) setSelectedBundleId('x2');
+                          else if (nextQ === 3) setSelectedBundleId('x3');
+                        }}
                         disabled={orderQuantity <= 1}
                         className="w-8 h-8 flex items-center justify-center font-bold text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
                         aria-label="Diminuer la quantité"
@@ -859,7 +879,14 @@ function ProductDetailView() {
                       </span>
                       <button
                         type="button"
-                        onClick={() => setOrderQuantity((q) => Math.min(Math.min(10, product.stock || 10), q + 1))}
+                        onClick={() => {
+                          const maxStock = Math.min(10, product.stock || 10);
+                          const nextQ = Math.min(maxStock, orderQuantity + 1);
+                          setOrderQuantity(nextQ);
+                          if (nextQ === 1) setSelectedBundleId('x1');
+                          else if (nextQ === 2) setSelectedBundleId('x2');
+                          else if (nextQ === 3) setSelectedBundleId('x3');
+                        }}
                         disabled={orderQuantity >= Math.min(10, product.stock || 10)}
                         className="w-8 h-8 flex items-center justify-center font-bold text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
                         aria-label="Augmenter la quantité"
@@ -957,30 +984,24 @@ function ProductDetailView() {
                       />
                     </div>
 
-                    {/* CHOIX DE LA FORMULE BUNDLE */}
-                    <div className="space-y-2 pt-2 border-t border-[#F3F1EC]">
-                      <div className="flex items-center justify-between">
-                        <span className="text-[11px] font-bold text-[#54555A]">
-                          Formule sélectionnée :
-                        </span>
-                        {selectedBundle?.badge && (
-                          <span className="text-[10px] font-black text-[#C27835] bg-[#FBF4ED] px-2 py-0.5 rounded-full border border-[#F2DFCE]">
-                            {selectedBundle.badge}
+                    {/* RÉCAPITULATIF DE LA FORMULE BUNDLE */}
+                    <div className="pt-2 border-t border-[#F3F1EC]">
+                      <div className="flex items-center justify-between bg-[#FAF9F6] border border-[#EAE8E2] rounded-xl px-3.5 py-2.5">
+                        <div className="flex items-center gap-2">
+                          <span
+                            style={{ backgroundColor: activeAccentColor }}
+                            className="text-[10px] font-black text-white px-2 py-0.5 rounded-full"
+                          >
+                            {selectedBundle?.badge || `${orderQuantity} art.`}
                           </span>
-                        )}
+                          <span className="text-xs font-bold text-[#16171A]">
+                            {selectedBundle?.title || `${orderQuantity} article${orderQuantity > 1 ? 's' : ''}`}
+                          </span>
+                        </div>
+                        <span className="text-[11px] font-bold text-[#73737A]">
+                          {formatFCFA(currentSubtotal)}
+                        </span>
                       </div>
-
-                      <BundleSelector
-                        bundles={bundles}
-                        value={selectedBundleId}
-                        onChange={(b) => {
-                          setSelectedBundleId(b.id);
-                          setOrderQuantity(b.quantity);
-                        }}
-                        variant={bundleVariant}
-                        accent="#C27835"
-                        image={product.image_url}
-                      />
                     </div>
 
                     {/* RÉCAPITULATIF TRANSPARENT DU TOTAL SÉLECTIONNÉ */}

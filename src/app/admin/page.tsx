@@ -53,6 +53,7 @@ import {
 import { formatFCFA } from '@/lib/format';
 import ShopifyAnalyticsDashboard from '@/components/admin/ShopifyAnalyticsDashboard';
 import QuantityBreaksWidget from '@/components/QuantityBreaksWidget';
+import BundleSelector from '@/components/BundleSelector';
 import WhatsAppSettingsTab from '@/components/admin/WhatsAppSettingsTab';
 
 type Product = {
@@ -218,7 +219,9 @@ export default function AdminDashboard() {
     qb_accent_color: '#C27835',
   });
   const [savingQb, setSavingQb] = useState(false);
-  const [previewQty, setPreviewQty] = useState(2);
+  const [previewQty, setPreviewQty] = useState(1);
+  const [previewBundleStyle, setPreviewBundleStyle] = useState<'card' | 'pill'>('card');
+  const [previewBundleId, setPreviewBundleId] = useState<string>('x1');
 
   // Filtres et Recherche avancée
   const [bundleShareModal, setBundleShareModal] = useState<{ slug: string; name: string } | null>(null);
@@ -2190,6 +2193,8 @@ export default function AdminDashboard() {
                     {/* Nuancier de palettes rapides + Custom Picker */}
                     <div className="flex flex-wrap items-center gap-2 pt-1">
                       {[
+                        { name: 'Rose Flash (Screenshot 1)', hex: '#E91E63' },
+                        { name: 'Bleu Indigo (Screenshot 2)', hex: '#4F46E5' },
                         { name: 'Or Atelier', hex: '#C27835' },
                         { name: 'Vert Polaris', hex: '#008060' },
                         { name: 'Bleu Royal', hex: '#2563EB' },
@@ -2381,34 +2386,47 @@ export default function AdminDashboard() {
                     </span>
                   </div>
 
-                  <p className="text-[11px] text-slate-500">
-                    Voici exactement comment le widget apparaît pour un client sur son smartphone avec le template et la couleur sélectionnés :
-                  </p>
+                  <div className="flex items-center justify-between gap-2 flex-wrap">
+                    <p className="text-[11px] text-slate-500">
+                      Rendu interactif des offres de lots avec la couleur choisie :
+                    </p>
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                      <button
+                        type="button"
+                        onClick={() => setPreviewBundleStyle('card')}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                          previewBundleStyle === 'card'
+                            ? 'bg-white text-slate-900 shadow-2xs'
+                            : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                      >
+                        Style Cartes (Image 2)
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setPreviewBundleStyle('pill')}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                          previewBundleStyle === 'pill'
+                            ? 'bg-white text-slate-900 shadow-2xs'
+                            : 'text-slate-500 hover:text-slate-900'
+                        }`}
+                      >
+                        Style Pilules (Image 1)
+                      </button>
+                    </div>
+                  </div>
 
-                  <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
-                    <QuantityBreaksWidget
-                      currentQuantity={previewQty}
-                      onSelectQuantity={(q) => setPreviewQty(q)}
-                      productPrice={18900}
-                      originalPrice={25000}
-                      promoPrice={15900}
-                      promoRemainingQuota={10}
-                      stock={15}
-                      popularTier={Number(qbSettings.qb_popular_tier) || 2}
-                      template={(qbSettings.qb_template as any) || 'modern'}
-                      accentColor={qbSettings.qb_accent_color || '#C27835'}
-                      customLabels={{
-                        tier1Label: qbSettings.qb_tier1_label,
-                        tier2Label: qbSettings.qb_tier2_label,
-                        tier3Label: qbSettings.qb_tier3_label,
-                        tier2Subtitle: qbSettings.qb_tier2_subtitle,
-                        tier3Subtitle: qbSettings.qb_tier3_subtitle,
-                        tier2Badge: qbSettings.qb_tier2_badge,
-                        tier3Badge: qbSettings.qb_tier3_badge,
+                  <div className="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs space-y-4">
+                    <BundleSelector
+                      variant={previewBundleStyle}
+                      accent={qbSettings.qb_accent_color || '#C27835'}
+                      value={previewBundleId}
+                      onChange={(b) => {
+                        setPreviewBundleId(b.id);
+                        setPreviewQty(b.quantity);
+                        showToast(`Lot sélectionné : ${b.title} (${b.quantity} art.)`, 'info');
                       }}
-                      onProceedToOrder={() => {
-                        showToast(`Simulation clic "Commander cette offre" (quantité : ${previewQty})`, 'info');
-                      }}
+                      image="https://images.unsplash.com/photo-1524592094714-0f0654e20314?w=200&q=80"
                     />
                   </div>
                 </div>

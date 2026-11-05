@@ -24,6 +24,7 @@ export type Product = {
   status?: string;
   created_at?: string;
   bundle_style?: 'pill' | 'card' | string;
+  bundle_accent_color?: string | null;
   promotion?: ProductPromotion | null;
 };
 

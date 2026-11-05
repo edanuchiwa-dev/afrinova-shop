@@ -978,7 +978,13 @@ function ProductDetailView() {
                         type="text"
                         required
                         value={shippingCity}
-                        onChange={(e) => setShippingCity(e.target.value)}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setShippingCity(val);
+                          try {
+                            sessionStorage.setItem('atelier_customer_location', val);
+                          } catch {}
+                        }}
                         placeholder="ex: Cotonou, Calavi, Porto-Novo, Parakou..."
                         className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition font-medium"
                       />

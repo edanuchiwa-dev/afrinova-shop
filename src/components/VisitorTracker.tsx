@@ -7,9 +7,10 @@ export default function VisitorTracker() {
   const pathname = usePathname();
   const sessionRef = useRef<string>('');
   const publicIpRef = useRef<string>('');
+  const coordsRef = useRef<{ lat?: number; lon?: number }>({});
 
   useEffect(() => {
-    // Détection de l'IP publique en tâche de fond pour enrichir les requêtes de test local
+    // 1. Détection de l'IP publique en tâche de fond pour enrichir les requêtes de test local
     try {
       const cachedIp = sessionStorage.getItem('atelier_public_ip');
       if (cachedIp) {
@@ -24,6 +25,28 @@ export default function VisitorTracker() {
             }
           })
           .catch(() => {});
+      }
+    } catch {}
+
+    // 2. Détection GPS haute précision si déjà autorisée par le client
+    try {
+      if (typeof navigator !== 'undefined' && 'geolocation' in navigator && 'permissions' in navigator) {
+        navigator.permissions.query({ name: 'geolocation' }).then((status) => {
+          if (status.state === 'granted') {
+            navigator.geolocation.getCurrentPosition(
+              (pos) => {
+                if (pos?.coords) {
+                  coordsRef.current = {
+                    lat: pos.coords.latitude,
+                    lon: pos.coords.longitude,
+                  };
+                }
+              },
+              () => {},
+              { enableHighAccuracy: true, timeout: 5000, maximumAge: 120000 }
+            );
+          }
+        }).catch(() => {});
       }
     } catch {}
   }, []);
@@ -58,8 +81,13 @@ export default function VisitorTracker() {
       utmCampaign = params.get('utm_campaign') || '';
     } catch {}
 
-    // Envoi du ping de visite de la page
+    // Envoi du ping de visite avec géolocalisation pointue
     const sendVisit = (isHeartbeat = false) => {
+      let clientDeclaredLocation = '';
+      try {
+        clientDeclaredLocation = sessionStorage.getItem('atelier_customer_location') || '';
+      } catch {}
+
       fetch('/api/track/visit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,6 +100,9 @@ export default function VisitorTracker() {
           utm_medium: utmMedium,
           utm_campaign: utmCampaign,
           clientPublicIp: publicIpRef.current || undefined,
+          clientLat: coordsRef.current.lat,
+          clientLon: coordsRef.current.lon,
+          clientDeclaredLocation: clientDeclaredLocation || undefined,
           isHeartbeat,
         }),
       }).catch(() => {});

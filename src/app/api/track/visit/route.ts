@@ -19,6 +19,7 @@ export async function POST(request: NextRequest) {
       clientPublicIp,
       clientLat,
       clientLon,
+      clientDeclaredLocation,
       isHeartbeat,
     } = body;
 
@@ -42,8 +43,13 @@ export async function POST(request: NextRequest) {
     // 2. Détection du terminal et navigateur via le User-Agent réel
     const uaInfo = parseUserAgent(rawUa);
 
-    // 3. Résolution de la géolocalisation réelle (Ville, Région, Pays, FAI/Opérateur, Coordonnées)
-    const geo = await lookupGeoIp(ip);
+    // 3. Résolution de la géolocalisation haute précision (En-têtes Edge Vercel/Cloudflare, GPS client, multi-fournisseurs)
+    const clientCoords = {
+      lat: typeof clientLat === 'number' && !isNaN(clientLat) ? clientLat : undefined,
+      lon: typeof clientLon === 'number' && !isNaN(clientLon) ? clientLon : undefined,
+      declaredLocation: typeof clientDeclaredLocation === 'string' && clientDeclaredLocation.trim() ? clientDeclaredLocation.trim() : undefined,
+    };
+    const geo = await lookupGeoIp(ip, request.headers, clientCoords);
 
     // Filtrage secondaire : si le FAI ou l'ISP est un datacenter crawler (ex: AWS avec UA générique)
     if (isBotOrCrawler(rawUa, geo.isp)) {
@@ -70,8 +76,8 @@ export async function POST(request: NextRequest) {
       region: geo.region,
       country: geo.country,
       isp: geo.isp,
-      latitude: typeof clientLat === 'number' ? clientLat : geo.latitude,
-      longitude: typeof clientLon === 'number' ? clientLon : geo.longitude,
+      latitude: geo.latitude,
+      longitude: geo.longitude,
       user_agent: rawUa.slice(0, 300),
       browser: uaInfo.browser,
       isHeartbeat: Boolean(isHeartbeat),

@@ -1748,38 +1748,70 @@ export default function ShopifyAnalyticsDashboard() {
                         </div>
                       </td>
 
-                      {/* Localisation Réelle */}
+                      {/* Localisation Réelle Haute Précision */}
                       <td className="py-3 px-3.5 whitespace-nowrap">
-                        <div className="flex items-center gap-1.5">
-                          <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0" />
-                          <div>
-                            <div className="font-bold text-white">
-                              {v.city}{v.region ? `, ${v.region}` : ''}
+                        <div className="flex items-start gap-2">
+                          <MapPin className="w-3.5 h-3.5 text-rose-400 shrink-0 mt-0.5" />
+                          <div className="space-y-0.5">
+                            <div className="font-bold text-white flex items-center gap-1.5">
+                              <span>{v.city}</span>
+                              {v.latitude && v.longitude && (
+                                <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-700/50 shadow-xs">
+                                  GPS Pointu
+                                </span>
+                              )}
                             </div>
-                            <div className="text-[10px] text-slate-400 font-medium">
-                              {v.country}
+                            <div className="text-[10px] text-slate-400 flex items-center gap-1.5 font-medium">
+                              <span>{v.region ? `${v.region} • ` : ''}{v.country}</span>
                             </div>
+                            {v.latitude && v.longitude && (
+                              <div className="flex items-center gap-2 pt-0.5 text-[10px] font-mono text-cyan-400">
+                                <span>{v.latitude.toFixed(4)}°, {v.longitude.toFixed(4)}°</span>
+                                <a
+                                  href={`https://www.google.com/maps?q=${v.latitude},${v.longitude}&z=16`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1 text-cyan-300 hover:text-white bg-cyan-950/80 hover:bg-cyan-900 px-1.5 py-0.5 rounded border border-cyan-700/60 transition cursor-pointer font-bold shadow-xs"
+                                  title="Ouvrir le quartier exact sur Google Maps (Zoom 16)"
+                                >
+                                  <span>Voir sur Carte</span>
+                                  <ExternalLink className="w-2.5 h-2.5" />
+                                </a>
+                              </div>
+                            )}
                           </div>
-                          {v.latitude && v.longitude && (
-                            <a
-                              href={`https://www.google.com/maps?q=${v.latitude},${v.longitude}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="ml-1 text-cyan-400 hover:text-cyan-300 p-1 rounded hover:bg-cyan-950/40 transition"
-                              title="Voir l'emplacement sur Google Maps"
-                            >
-                              <ExternalLink className="w-3 h-3" />
-                            </a>
-                          )}
                         </div>
                       </td>
 
-                      {/* Opérateur / FAI */}
+                      {/* Opérateur / FAI avec badge thématique */}
                       <td className="py-3 px-3.5 whitespace-nowrap">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-bold text-[11px] bg-slate-900 text-amber-300 border border-amber-500/20">
-                          <Wifi className="w-3 h-3 text-amber-400" />
-                          <span>{v.isp || 'Opérateur Réseau'}</span>
-                        </span>
+                        {(() => {
+                          const ispLower = (v.isp || '').toLowerCase();
+                          const isCeltiis = ispLower.includes('celtiis') || ispLower.includes('sbin');
+                          const isMtn = ispLower.includes('mtn');
+                          const isMoov = ispLower.includes('moov');
+                          const isCanalbox = ispLower.includes('canalbox');
+                          const isStarlink = ispLower.includes('starlink');
+
+                          const badgeStyle = isCeltiis
+                            ? 'bg-emerald-950/80 text-emerald-300 border-emerald-500/40'
+                            : isMtn
+                            ? 'bg-amber-950/80 text-amber-300 border-amber-500/40'
+                            : isMoov
+                            ? 'bg-blue-950/80 text-blue-300 border-blue-500/40'
+                            : isCanalbox
+                            ? 'bg-purple-950/80 text-purple-300 border-purple-500/40'
+                            : isStarlink
+                            ? 'bg-cyan-950/80 text-cyan-300 border-cyan-500/40'
+                            : 'bg-slate-900 text-slate-300 border-slate-700/80';
+
+                          return (
+                            <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg font-bold text-[11px] border shadow-xs ${badgeStyle}`}>
+                              <Wifi className="w-3 h-3 shrink-0" />
+                              <span>{v.isp || 'Opérateur Réseau'}</span>
+                            </span>
+                          );
+                        })()}
                       </td>
 
                       {/* Terminal & App */}

@@ -1755,9 +1755,13 @@ export default function ShopifyAnalyticsDashboard() {
                           <div className="space-y-0.5">
                             <div className="font-bold text-white flex items-center gap-1.5">
                               <span>{v.city}</span>
-                              {v.latitude && v.longitude && (
+                              {v.city.includes('(') ? (
                                 <span className="text-[9px] font-extrabold uppercase px-1.5 py-0.2 rounded bg-emerald-950/80 text-emerald-400 border border-emerald-700/50 shadow-xs">
-                                  GPS Pointu
+                                  GPS / Quartier
+                                </span>
+                              ) : (
+                                <span className="text-[9px] font-bold uppercase px-1.5 py-0.2 rounded bg-slate-800 text-slate-300 border border-slate-700 shadow-xs">
+                                  Passerelle IP FAI
                                 </span>
                               )}
                             </div>
@@ -1768,11 +1772,11 @@ export default function ShopifyAnalyticsDashboard() {
                               <div className="flex items-center gap-2 pt-0.5 text-[10px] font-mono text-cyan-400">
                                 <span>{v.latitude.toFixed(4)}°, {v.longitude.toFixed(4)}°</span>
                                 <a
-                                  href={`https://www.google.com/maps?q=${v.latitude},${v.longitude}&z=16`}
+                                  href={`https://www.google.com/maps?q=${v.latitude},${v.longitude}&z=13`}
                                   target="_blank"
                                   rel="noopener noreferrer"
                                   className="inline-flex items-center gap-1 text-cyan-300 hover:text-white bg-cyan-950/80 hover:bg-cyan-900 px-1.5 py-0.5 rounded border border-cyan-700/60 transition cursor-pointer font-bold shadow-xs"
-                                  title="Ouvrir le quartier exact sur Google Maps (Zoom 16)"
+                                  title="Voir la zone géographique sur Google Maps"
                                 >
                                   <span>Voir sur Carte</span>
                                   <ExternalLink className="w-2.5 h-2.5" />

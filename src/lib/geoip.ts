@@ -143,19 +143,35 @@ export function formatCarrierName(isp = '', org = '', as = '', asNumber = ''): s
 }
 
 /**
- * Raffine la géolocalisation pour le Bénin : identifie le quartier, arrondissement et commune exacte
+ * Raffine la géolocalisation pour le Bénin :
+ * - Si coordonnées génériques d'IP (ex: centroïde Cotonou 6.3669, 2.4151) : conserve la ville réelle "Cotonou" sans inventer de quartier.
+ * - Si coordonnées GPS réelles du client : identifie le quartier ou l'arrondissement précis.
  */
 export function refineBeninLocation(
   lat: number | null | undefined,
   lon: number | null | undefined,
   fallbackCity = 'Cotonou',
-  fallbackRegion = 'Littoral'
+  fallbackRegion = 'Littoral',
+  isRealGps = false
 ): { city: string; region: string; precision: 'gps' | 'edge' | 'ip' } {
   if (lat == null || lon == null) {
     return { city: fallbackCity || 'Cotonou', region: fallbackRegion || 'Littoral', precision: 'ip' };
   }
 
-  // Cotonou et ses arrondissements principaux
+  // Détection des centroïdes génériques des bases de données IP (ex: 6.3669 / 2.4151 ou 6.3654 / 2.4183)
+  const isGenericIpCentroid =
+    Math.abs(lat - 6.3669) < 0.005 && Math.abs(lon - 2.4151) < 0.005;
+
+  if (!isRealGps || isGenericIpCentroid) {
+    // Si c'est une détection basée sur l'IP, on affiche la ville réelle vérifiée (Cotonou, Calavi, etc.) sans prétendre connaître le quartier exact
+    return {
+      city: fallbackCity || 'Cotonou',
+      region: fallbackRegion || 'Littoral',
+      precision: 'ip',
+    };
+  }
+
+  // Cotonou et ses arrondissements principaux (UNIQUEMENT si coordonnées GPS réelles de l'appareil)
   if (lat >= 6.33 && lat <= 6.395 && lon >= 2.33 && lon <= 2.49) {
     if (lon < 2.375) return { city: 'Cotonou (Fidjrossè / Fiyégnon)', region: 'Littoral (12e Arr.)', precision: 'gps' };
     if (lon >= 2.375 && lon < 2.405) return { city: 'Cotonou (Haie Vive / Cadjehoun)', region: 'Littoral (12e Arr.)', precision: 'gps' };
@@ -374,8 +390,9 @@ export async function lookupGeoIp(
   }
 
   // Coordonnées finales : priorité absolue aux coordonnées GPS client si fournies
-  const finalLat = clientCoords?.lat != null ? clientCoords.lat : edgeLat;
-  const finalLon = clientCoords?.lon != null ? clientCoords.lon : edgeLon;
+  const isRealGps = clientCoords?.lat != null && !isNaN(clientCoords.lat);
+  const finalLat = isRealGps ? clientCoords.lat! : edgeLat;
+  const finalLon = isRealGps ? clientCoords.lon! : edgeLon;
 
   // Si on a les en-têtes Edge de Vercel ou Cloudflare
   if (edgeCity || edgeCountry || (edgeLat != null && edgeLon != null)) {
@@ -384,7 +401,7 @@ export async function lookupGeoIp(
     const countryName = edgeCountry === 'BJ' || edgeCountry === 'Benin' ? 'Bénin' : edgeCountry || 'Bénin';
 
     // Raffinement béninois par quartier/commune si coordonnées présentes
-    const refined = refineBeninLocation(finalLat, finalLon, baseCity, baseRegion);
+    const refined = refineBeninLocation(finalLat, finalLon, baseCity, baseRegion, isRealGps);
     const ispName = formatCarrierName('', '', '', edgeAsNumber);
 
     const result: GeoLocation = {
@@ -514,7 +531,7 @@ export async function lookupGeoIp(
   const usedLon = finalLon != null ? finalLon : resolvedData?.longitude || null;
   const baseCity = resolvedData?.city || 'Cotonou';
   const baseRegion = resolvedData?.region || 'Littoral';
-  const refined = refineBeninLocation(usedLat, usedLon, baseCity, baseRegion);
+  const refined = refineBeninLocation(usedLat, usedLon, baseCity, baseRegion, isRealGps);
 
   const result: GeoLocation = {
     ip: clean,
@@ -528,7 +545,7 @@ export async function lookupGeoIp(
     latitude: usedLat,
     longitude: usedLon,
     timezone: resolvedData?.timezone || 'Africa/Porto-Novo',
-    precision: clientCoords?.lat != null ? 'gps' : (usedLat != null ? 'gps' : 'ip'),
+    precision: isRealGps ? 'gps' : 'ip',
     isLocal: false,
   };
 

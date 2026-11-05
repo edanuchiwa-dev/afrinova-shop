@@ -355,14 +355,27 @@ function runMigrations(db: Database.Database) {
 export function getDb(): Database.Database {
   if (database) return database;
 
-  const dataDir = path.join(process.cwd(), 'data');
-  mkdirSync(dataDir, { recursive: true });
-  const dbPath = process.env.DATABASE_PATH || path.join(dataDir, 'store.db');
+  let dbPath = process.env.DATABASE_PATH;
+  if (!dbPath) {
+    try {
+      const dataDir = path.join(process.cwd(), 'data');
+      mkdirSync(dataDir, { recursive: true });
+      dbPath = path.join(dataDir, 'store.db');
+    } catch {
+      // Vercel serverless / read-only filesystem: fallback to /tmp
+      dbPath = path.join('/tmp', 'store.db');
+    }
+  }
+
   const DatabaseConstructor = require('better-sqlite3');
   const db = new DatabaseConstructor(dbPath);
 
   try {
-    db.pragma('journal_mode = WAL');
+    try {
+      db.pragma('journal_mode = WAL');
+    } catch {
+      db.pragma('journal_mode = DELETE');
+    }
     db.pragma('foreign_keys = ON');
     runMigrations(db);
     database = db;

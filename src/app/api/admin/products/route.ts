@@ -48,7 +48,11 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json(getDb().prepare('SELECT * FROM products ORDER BY id DESC').all());
+  try {
+    return NextResponse.json(getDb().prepare('SELECT * FROM products ORDER BY id DESC').all());
+  } catch {
+    return NextResponse.json([]);
+  }
 }
 
 export async function POST(request: Request) {
@@ -124,7 +128,6 @@ export async function POST(request: Request) {
     finalImageUrl = parsedMediaUrls[0];
   }
 
-  // Prix comparé et coût
   const numComparePrice = compare_at_price !== undefined && compare_at_price !== null && compare_at_price !== ''
     ? Math.round(Number(compare_at_price))
     : null;
@@ -132,7 +135,6 @@ export async function POST(request: Request) {
     ? Math.round(Number(cost_per_item))
     : null;
 
-  // SKU, code-barres, poids, tracking
   const cleanSku = typeof sku === 'string' ? sku.trim() : '';
   const cleanBarcode = typeof barcode === 'string' ? barcode.trim() : '';
   const cleanTrackQty = track_quantity === false || track_quantity === 0 ? 0 : 1;
@@ -141,7 +143,6 @@ export async function POST(request: Request) {
   const cleanIsPhysical = is_physical === false || is_physical === 0 ? 0 : 1;
   const cleanVendor = typeof vendor === 'string' ? vendor.trim() : '';
 
-  // Tags
   let cleanTags = '';
   if (Array.isArray(tags)) {
     cleanTags = tags.map(String).join(', ');
@@ -149,35 +150,27 @@ export async function POST(request: Request) {
     cleanTags = tags.trim();
   }
 
-  // SEO
   const cleanSeoTitle = typeof seo_title === 'string' ? seo_title.trim() : '';
   const cleanSeoDesc = typeof seo_description === 'string' ? seo_description.trim() : '';
 
-  // Variants & Sales Channels & Bundle Style
   const cleanVariants = typeof variants === 'string' ? variants : JSON.stringify(variants || []);
   const cleanSalesChannels = typeof sales_channels === 'string' ? sales_channels : JSON.stringify(sales_channels || ['online_store', 'whatsapp', 'ads']);
   const cleanBundleStyle = bundle_style === 'pill' ? 'pill' : 'card';
-
   const prodStatus = typeof status === 'string' && productStatuses.has(status) ? status : 'active';
 
-  // Génération automatique ou validation d'un slug unique
   let baseSlug = typeof requestedSlug === 'string' && requestedSlug.trim()
     ? formatSlug(requestedSlug)
     : formatSlug(name);
   if (!baseSlug) baseSlug = 'produit';
 
-  const db = getDb();
   let finalSlug = baseSlug;
   let counter = 1;
-  while (
-    db.prepare('SELECT id FROM products WHERE slug = ?').get(finalSlug) ||
-    (isTursoEnabled() && (await tursoGetProductBySlug(finalSlug)))
-  ) {
-    finalSlug = `${baseSlug}-${counter++}`;
-  }
 
-  // Si Turso est activé, insérer d'abord dans Turso pour générer l'ID officiel
   if (isTursoEnabled()) {
+    while (await tursoGetProductBySlug(finalSlug)) {
+      finalSlug = `${baseSlug}-${counter++}`;
+    }
+
     try {
       const tursoCreated = await tursoCreateProduct({
         name: name.trim(),
@@ -206,47 +199,59 @@ export async function POST(request: Request) {
         status: prodStatus,
       });
 
-      // Synchroniser avec SQLite local avec le même identifiant
-      db.prepare(`
-        INSERT OR REPLACE INTO products (
-          id, name, slug, description, price, compare_at_price, cost_per_item,
-          stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
-          category, image_url, media_urls, weight_kg, is_physical, vendor,
-          tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
-        )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      `).run(
-        tursoCreated.id,
-        name.trim(),
-        finalSlug,
-        desc,
-        Math.round(numPrice),
-        numComparePrice,
-        numCostPerItem,
-        numStock,
-        cleanSku,
-        cleanBarcode,
-        cleanTrackQty,
-        cleanContinueSelling,
-        cat,
-        finalImageUrl,
-        JSON.stringify(parsedMediaUrls),
-        cleanWeight,
-        cleanIsPhysical,
-        cleanVendor,
-        cleanTags,
-        cleanSeoTitle,
-        cleanSeoDesc,
-        cleanVariants,
-        cleanSalesChannels,
-        cleanBundleStyle,
-        prodStatus
-      );
+      // Synchronisation locale optionnelle si SQLite est accessible
+      try {
+        const db = getDb();
+        db.prepare(`
+          INSERT OR REPLACE INTO products (
+            id, name, slug, description, price, compare_at_price, cost_per_item,
+            stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
+            category, image_url, media_urls, weight_kg, is_physical, vendor,
+            tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
+          )
+          VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          tursoCreated.id,
+          name.trim(),
+          finalSlug,
+          desc,
+          Math.round(numPrice),
+          numComparePrice,
+          numCostPerItem,
+          numStock,
+          cleanSku,
+          cleanBarcode,
+          cleanTrackQty,
+          cleanContinueSelling,
+          cat,
+          finalImageUrl,
+          JSON.stringify(parsedMediaUrls),
+          cleanWeight,
+          cleanIsPhysical,
+          cleanVendor,
+          cleanTags,
+          cleanSeoTitle,
+          cleanSeoDesc,
+          cleanVariants,
+          cleanSalesChannels,
+          cleanBundleStyle,
+          prodStatus
+        );
+      } catch {
+        // Ignorer si filesystem read-only sur serverless
+      }
 
       return NextResponse.json(tursoCreated, { status: 201 });
     } catch (tursoErr) {
-      console.warn('[Turso Create Product Warning]:', tursoErr);
+      console.error('[Turso Create Product Error]:', tursoErr);
+      return NextResponse.json({ error: 'Erreur lors de la création du produit sur Turso Cloud.' }, { status: 500 });
     }
+  }
+
+  // SQLite local si Turso non configuré
+  const db = getDb();
+  while (db.prepare('SELECT id FROM products WHERE slug = ?').get(finalSlug)) {
+    finalSlug = `${baseSlug}-${counter++}`;
   }
 
   const result = db.prepare(`
@@ -336,14 +341,8 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Identifiant invalide.' }, { status: 400 });
   }
 
-  const db = getDb();
-  const existing = db.prepare('SELECT * FROM products WHERE id = ?').get(id as number) as Record<string, unknown> | undefined;
-  if (!existing) {
-    return NextResponse.json({ error: 'Produit introuvable.' }, { status: 404 });
-  }
-
   const fields: string[] = [];
-  const values: unknown[] = [];
+  const values: any[] = [];
 
   if (name !== undefined && typeof name === 'string' && name.trim()) {
     fields.push('name = ?');
@@ -353,10 +352,6 @@ export async function PUT(request: Request) {
   if (requestedSlug !== undefined && typeof requestedSlug === 'string' && requestedSlug.trim()) {
     const formatted = formatSlug(requestedSlug);
     if (formatted) {
-      const duplicate = db.prepare('SELECT id FROM products WHERE slug = ? AND id != ?').get(formatted, id as number);
-      if (duplicate) {
-        return NextResponse.json({ error: 'Cette URL/slug est déjà utilisée par un autre produit.' }, { status: 400 });
-      }
       fields.push('slug = ?');
       values.push(formatted);
     }
@@ -392,7 +387,6 @@ export async function PUT(request: Request) {
     fields.push('media_urls = ?');
     values.push(JSON.stringify(parsedMediaUrls));
 
-    // Si image_url n'est pas spécifié explicitement, mettre à jour avec la 1ère image
     if (image_url === undefined && parsedMediaUrls.length > 0) {
       fields.push('image_url = ?');
       values.push(parsedMediaUrls[0]);
@@ -450,9 +444,8 @@ export async function PUT(request: Request) {
   }
 
   if (weight_kg !== undefined) {
-    const numW = Number(weight_kg);
     fields.push('weight_kg = ?');
-    values.push(!isNaN(numW) && numW >= 0 ? numW : 0.5);
+    values.push(typeof weight_kg === 'number' && weight_kg >= 0 ? weight_kg : 0.5);
   }
 
   if (is_physical !== undefined) {
@@ -515,14 +508,16 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Aucun champ à modifier.' }, { status: 400 });
   }
 
-  // Si Turso est activé, mettre à jour Turso Cloud en priorité
+  // Si Turso est activé
   if (isTursoEnabled()) {
     try {
       const tursoUpdated = await tursoUpdateProduct(id as number, fields, values);
       if (tursoUpdated) {
-        // Mettre à jour aussi SQLite local
-        const localValues = [...values, id as number];
-        db.prepare(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`).run(...localValues);
+        try {
+          const db = getDb();
+          const localValues = [...values, id as number];
+          db.prepare(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`).run(...localValues);
+        } catch {}
         return NextResponse.json(tursoUpdated);
       }
     } catch (tursoErr) {
@@ -530,9 +525,14 @@ export async function PUT(request: Request) {
     }
   }
 
-  values.push(id as number);
-  db.prepare(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`).run(...values);
-  return NextResponse.json(db.prepare('SELECT * FROM products WHERE id = ?').get(id));
+  try {
+    const db = getDb();
+    const localValues = [...values, id as number];
+    db.prepare(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`).run(...localValues);
+    return NextResponse.json(db.prepare('SELECT * FROM products WHERE id = ?').get(id));
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message || 'Erreur lors de la mise à jour.' }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: Request) {
@@ -542,16 +542,22 @@ export async function DELETE(request: Request) {
   if (!Number.isSafeInteger(id) || id <= 0) {
     return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
   }
-  const db = getDb();
 
   if (isTursoEnabled()) {
     try {
       const tursoRes = await tursoDeleteProduct(id);
+      try {
+        const db = getDb();
+        if (tursoRes.archived) {
+          db.prepare("UPDATE products SET status = 'archived' WHERE id = ?").run(id);
+        } else {
+          db.prepare('DELETE FROM products WHERE id = ?').run(id);
+        }
+      } catch {}
+
       if (tursoRes.archived) {
-        db.prepare("UPDATE products SET status = 'archived' WHERE id = ?").run(id);
         return NextResponse.json({ success: true, archived: true, message: 'Produit archivé (présent dans des commandes existantes).' });
       } else {
-        db.prepare('DELETE FROM products WHERE id = ?').run(id);
         return NextResponse.json({ success: true, deleted: true, message: 'Produit supprimé définitivement.' });
       }
     } catch (tursoErr) {
@@ -559,13 +565,17 @@ export async function DELETE(request: Request) {
     }
   }
 
-  // Vérifier si le produit est lié à des commandes existantes
-  const inOrders = db.prepare('SELECT COUNT(*) as count FROM order_items WHERE product_id = ?').get(id) as { count: number };
-  if (inOrders && inOrders.count > 0) {
-    db.prepare("UPDATE products SET status = 'archived' WHERE id = ?").run(id);
-    return NextResponse.json({ success: true, archived: true, message: 'Produit archivé (présent dans des commandes existantes).' });
-  } else {
-    db.prepare('DELETE FROM products WHERE id = ?').run(id);
-    return NextResponse.json({ success: true, deleted: true, message: 'Produit supprimé définitivement.' });
+  try {
+    const db = getDb();
+    const inOrders = db.prepare('SELECT COUNT(*) as count FROM order_items WHERE product_id = ?').get(id) as { count: number };
+    if (inOrders && inOrders.count > 0) {
+      db.prepare("UPDATE products SET status = 'archived' WHERE id = ?").run(id);
+      return NextResponse.json({ success: true, archived: true, message: 'Produit archivé (présent dans des commandes existantes).' });
+    } else {
+      db.prepare('DELETE FROM products WHERE id = ?').run(id);
+      return NextResponse.json({ success: true, deleted: true, message: 'Produit supprimé définitivement.' });
+    }
+  } catch (err: any) {
+    return NextResponse.json({ error: err?.message || 'Erreur lors de la suppression.' }, { status: 500 });
   }
 }

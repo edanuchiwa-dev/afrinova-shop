@@ -30,7 +30,7 @@ import AnnouncementBar from '@/components/AnnouncementBar';
 import ProductCard from '@/components/ProductCard';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import QuantityBreaksWidget from '@/components/QuantityBreaksWidget';
-import BundleSelector from '@/components/BundleSelector';
+import BundleSelector, { type BundleVariant } from '@/components/BundleSelector';
 import { getBundles, type Bundle } from '@/lib/bundles';
 import { formatFCFA } from '@/lib/format';
 import { captureUtmParams } from '@/lib/utm';
@@ -299,7 +299,7 @@ function ProductDetailView() {
     }
   }, [selectedBundle]);
 
-  const bundleVariant: 'pill' | 'card' = (product?.bundle_style as 'pill' | 'card') || 'card';
+  const bundleVariant: BundleVariant = ((product?.bundle_style as any) || 'card') as BundleVariant;
   const activeAccentColor = ((product as any)?.bundle_accent_color) || qbSettings.accentColor || '#C27835';
 
   const currentSubtotal = useMemo(() => {

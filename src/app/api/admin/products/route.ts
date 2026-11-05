@@ -156,7 +156,7 @@ export async function POST(request: Request) {
 
   const cleanVariants = typeof variants === 'string' ? variants : JSON.stringify(variants || []);
   const cleanSalesChannels = typeof sales_channels === 'string' ? sales_channels : JSON.stringify(sales_channels || ['online_store', 'whatsapp', 'ads']);
-  const cleanBundleStyle = bundle_style === 'pill' ? 'pill' : 'card';
+  const cleanBundleStyle = ['card', 'pill', 'grid', 'compact', 'badge_stack'].includes(bundle_style as string) ? (bundle_style as string) : 'card';
   const cleanBundleAccentColor = typeof bundle_accent_color === 'string' && bundle_accent_color.trim() ? bundle_accent_color.trim() : null;
   const prodStatus = typeof status === 'string' && productStatuses.has(status) ? status : 'active';
 
@@ -499,7 +499,7 @@ export async function PUT(request: Request) {
 
   if (bundle_style !== undefined) {
     fields.push('bundle_style = ?');
-    values.push(bundle_style === 'pill' ? 'pill' : 'card');
+    values.push(['card', 'pill', 'grid', 'compact', 'badge_stack'].includes(bundle_style as string) ? (bundle_style as string) : 'card');
   }
 
   if (bundle_accent_color !== undefined) {

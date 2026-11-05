@@ -176,8 +176,8 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
   const [customSlug, setCustomSlug] = useState(initialData?.slug || '');
 
   // Colonne latérale
-  const [bundleStyle, setBundleStyle] = useState<'card' | 'pill'>(
-    (initialData?.bundle_style as 'card' | 'pill') || 'card'
+  const [bundleStyle, setBundleStyle] = useState<'card' | 'pill' | 'grid' | 'compact' | 'badge_stack'>(
+    (initialData?.bundle_style as any) || 'card'
   );
   const [bundleAccentColor, setBundleAccentColor] = useState<string>(
     initialData?.bundle_accent_color || '#C27835'
@@ -1058,131 +1058,176 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                 </p>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Option 1: Style Cartes (Card) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3.5">
+                {/* 1. Style Cartes (Card) */}
                 <button
                   type="button"
                   onClick={() => setBundleStyle('card')}
                   style={bundleStyle === 'card' ? { borderColor: bundleAccentColor } : undefined}
-                  className={`text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
                     bundleStyle === 'card'
-                      ? 'bg-[#FDF9F4] ring-2 ring-slate-900/10'
+                      ? 'bg-white ring-2 ring-slate-900/10 shadow-xs'
                       : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-black text-slate-900">
-                        Style Cartes (Card) — Défaut
-                      </span>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-black text-slate-900">1. Cartes (Card)</span>
                       <span
                         style={bundleStyle === 'card' ? { borderColor: bundleAccentColor } : undefined}
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
                           bundleStyle === 'card' ? '' : 'border-slate-300'
                         }`}
                       >
-                        {bundleStyle === 'card' && <span style={{ backgroundColor: bundleAccentColor }} className="w-2 h-2 rounded-full" />}
+                        {bundleStyle === 'card' && <span style={{ backgroundColor: bundleAccentColor }} className="w-1.5 h-1.5 rounded-full" />}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 leading-tight">
-                      Cartes complètes avec miniature de l&apos;article, ruban populaire et barre cadeau animée (Style Screenshot 2).
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      Miniature photo, ruban d&apos;angle & bandeau cadeau timer (Style Capture 2).
                     </p>
                   </div>
-
-                  {/* Aperçu miniature Card */}
                   <div
                     style={bundleStyle === 'card' ? { borderColor: `${bundleAccentColor}50` } : undefined}
-                    className="mt-4 p-2.5 rounded-xl bg-slate-50 border border-slate-200 relative pt-3"
+                    className="mt-3 p-2 rounded-xl bg-slate-50 border border-slate-200 text-[10px] font-bold flex items-center justify-between"
                   >
-                    <span
-                      style={{ backgroundColor: bundleAccentColor }}
-                      className="absolute -top-2 right-2 text-[8px] font-black text-white px-2 py-0.5 rounded-md shadow-2xs"
-                    >
-                      ★ Populaire
-                    </span>
-                    <div className="flex items-center justify-between gap-2">
-                      <div className="flex items-center gap-2">
-                        <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 shrink-0 flex items-center justify-center text-[9px] text-slate-400">
-                          📦
-                        </div>
-                        <div>
-                          <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1">
-                            <span>2 articles</span>
-                            <span
-                              style={{ backgroundColor: bundleAccentColor }}
-                              className="text-[9px] text-white px-1.5 py-0.2 rounded-full font-bold"
-                            >
-                              -10%
-                            </span>
-                          </div>
-                          <span className="text-[9px] text-slate-400">Économie max</span>
-                        </div>
-                      </div>
-                      <span style={{ color: bundleAccentColor }} className="text-[11px] font-black">
-                        {formatFCFA(Math.round(Number(price || 15000) * 1.8))}
-                      </span>
-                    </div>
+                    <span>🖼️ Photo + Ruban</span>
+                    <span style={{ color: bundleAccentColor }}>Duo -10%</span>
                   </div>
                 </button>
 
-                {/* Option 2: Style Pilules (Pill) */}
+                {/* 2. Style Pilules (Pill) */}
                 <button
                   type="button"
                   onClick={() => setBundleStyle('pill')}
                   style={bundleStyle === 'pill' ? { borderColor: bundleAccentColor } : undefined}
-                  className={`text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                  className={`text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
                     bundleStyle === 'pill'
-                      ? 'bg-[#FDF9F4] ring-2 ring-slate-900/10'
+                      ? 'bg-white ring-2 ring-slate-900/10 shadow-xs'
                       : 'border-slate-200 bg-white hover:border-slate-300'
                   }`}
                 >
                   <div>
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-black text-slate-900">
-                        Style Pilules (Pill)
-                      </span>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-black text-slate-900">2. Pilules (Pill)</span>
                       <span
                         style={bundleStyle === 'pill' ? { borderColor: bundleAccentColor } : undefined}
-                        className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
                           bundleStyle === 'pill' ? '' : 'border-slate-300'
                         }`}
                       >
-                        {bundleStyle === 'pill' && <span style={{ backgroundColor: bundleAccentColor }} className="w-2 h-2 rounded-full" />}
+                        {bundleStyle === 'pill' && <span style={{ backgroundColor: bundleAccentColor }} className="w-1.5 h-1.5 rounded-full" />}
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-500 leading-tight">
-                      Lignes ultra-arrondies épurées, bouton radio intégré et pastille colorée de remise (Style Screenshot 1).
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      Formes ultra-arrondies, boutons radio & pastilles pleines (Style Capture 1).
                     </p>
                   </div>
-
-                  {/* Aperçu miniature Pill */}
                   <div
                     style={{ borderColor: bundleAccentColor }}
-                    className="mt-4 p-2.5 rounded-[24px] bg-white border-2 flex items-center justify-between gap-2 shadow-2xs"
+                    className="mt-3 p-2 rounded-full bg-white border-2 text-[10px] font-bold flex items-center justify-between"
                   >
-                    <div className="flex items-center gap-2">
-                      <div
-                        style={{ borderColor: bundleAccentColor }}
-                        className="w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center shrink-0"
+                    <span>🔘 Radio rond</span>
+                    <span style={{ color: bundleAccentColor }}>✨ -10% ✨</span>
+                  </div>
+                </button>
+
+                {/* 3. Style Grille 3 Colonnes (Grid) */}
+                <button
+                  type="button"
+                  onClick={() => setBundleStyle('grid')}
+                  style={bundleStyle === 'grid' ? { borderColor: bundleAccentColor } : undefined}
+                  className={`text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                    bundleStyle === 'grid'
+                      ? 'bg-white ring-2 ring-slate-900/10 shadow-xs'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-black text-slate-900">3. Grille (Grid)</span>
+                      <span
+                        style={bundleStyle === 'grid' ? { borderColor: bundleAccentColor } : undefined}
+                        className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
+                          bundleStyle === 'grid' ? '' : 'border-slate-300'
+                        }`}
                       >
-                        <span style={{ backgroundColor: bundleAccentColor }} className="w-1.5 h-1.5 rounded-full" />
-                      </div>
-                      <div>
-                        <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1.5">
-                          <span>Duo</span>
-                          <span
-                            style={{ backgroundColor: bundleAccentColor }}
-                            className="text-[8px] text-white px-1.5 py-0.2 rounded-full font-bold"
-                          >
-                            2 articles
-                          </span>
-                        </div>
-                        <span className="text-[9px] text-slate-400">✨ Économie -10% ✨</span>
-                      </div>
+                        {bundleStyle === 'grid' && <span style={{ backgroundColor: bundleAccentColor }} className="w-1.5 h-1.5 rounded-full" />}
+                      </span>
                     </div>
-                    <span style={{ color: bundleAccentColor }} className="text-[11px] font-black">
-                      {formatFCFA(Math.round(Number(price || 15000) * 1.8))}
-                    </span>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      3 boîtes verticales côte à côte avec calcul du prix unitaire par pièce.
+                    </p>
+                  </div>
+                  <div className="mt-3 grid grid-cols-3 gap-1 text-[9px] font-black text-center">
+                    <div className="p-1 rounded bg-slate-100">x1</div>
+                    <div style={{ backgroundColor: bundleAccentColor, color: '#fff' }} className="p-1 rounded shadow-2xs">x2 ★</div>
+                    <div className="p-1 rounded bg-slate-100">x3</div>
+                  </div>
+                </button>
+
+                {/* 4. Style Minimaliste (Compact) */}
+                <button
+                  type="button"
+                  onClick={() => setBundleStyle('compact')}
+                  style={bundleStyle === 'compact' ? { borderColor: bundleAccentColor } : undefined}
+                  className={`text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                    bundleStyle === 'compact'
+                      ? 'bg-white ring-2 ring-slate-900/10 shadow-xs'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-black text-slate-900">4. Minimaliste (Compact)</span>
+                      <span
+                        style={bundleStyle === 'compact' ? { borderColor: bundleAccentColor } : undefined}
+                        className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
+                          bundleStyle === 'compact' ? '' : 'border-slate-300'
+                        }`}
+                      >
+                        {bundleStyle === 'compact' && <span style={{ backgroundColor: bundleAccentColor }} className="w-1.5 h-1.5 rounded-full" />}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      Lignes ultra-fines épurées avec coches discrètes ✓ sans images.
+                    </p>
+                  </div>
+                  <div className="mt-3 p-1.5 rounded-lg border border-slate-200 text-[10px] font-bold flex items-center justify-between">
+                    <span>✓ Ligne fine</span>
+                    <span className="font-mono text-slate-600">Compact</span>
+                  </div>
+                </button>
+
+                {/* 5. Style Bannières Flash (Badge Stack) */}
+                <button
+                  type="button"
+                  onClick={() => setBundleStyle('badge_stack')}
+                  style={bundleStyle === 'badge_stack' ? { borderColor: bundleAccentColor } : undefined}
+                  className={`text-left p-3.5 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                    bundleStyle === 'badge_stack'
+                      ? 'bg-white ring-2 ring-slate-900/10 shadow-xs'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-black text-slate-900">5. Flash Promo (Badge Stack)</span>
+                      <span
+                        style={bundleStyle === 'badge_stack' ? { borderColor: bundleAccentColor } : undefined}
+                        className={`w-3.5 h-3.5 rounded-full border-2 flex items-center justify-center ${
+                          bundleStyle === 'badge_stack' ? '' : 'border-slate-300'
+                        }`}
+                      >
+                        {bundleStyle === 'badge_stack' && <span style={{ backgroundColor: bundleAccentColor }} className="w-1.5 h-1.5 rounded-full" />}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-snug">
+                      Gros blocs carrés de réduction à gauche avec montant économisé en vert.
+                    </p>
+                  </div>
+                  <div className="mt-3 p-1.5 rounded-xl border border-slate-200 text-[10px] font-bold flex items-center gap-2">
+                    <span style={{ backgroundColor: bundleAccentColor, color: '#fff' }} className="px-1.5 py-0.5 rounded font-black text-[9px]">-15%</span>
+                    <span className="text-emerald-700 font-extrabold">Économie max</span>
                   </div>
                 </button>
               </div>

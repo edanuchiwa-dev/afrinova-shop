@@ -4,7 +4,7 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import Image from 'next/image';
 import type { Bundle } from '@/lib/bundles';
 
-export type BundleVariant = 'pill' | 'card';
+export type BundleVariant = 'card' | 'pill' | 'grid' | 'compact' | 'badge_stack';
 
 export interface BundleSelectorProps {
   bundles?: Bundle[];
@@ -279,6 +279,267 @@ export default function BundleSelector({
 
                 {hasDiscount && (
                   <span className="text-[10px] sm:text-[11px] text-[#9C9CA4] line-through block tabular-nums font-semibold leading-tight">
+                    {formatPrice(bundle.comparePrice!)}
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------
+  // RENDU STYLE 3 : VARIANT "GRID" (Grille Comparateur 3 Colonnes)
+  // -------------------------------------------------------------
+  if (variant === 'grid') {
+    return (
+      <div
+        role="radiogroup"
+        aria-label="Sélection des lots et offres"
+        className="w-full grid grid-cols-1 sm:grid-cols-3 gap-3 select-none pt-2.5"
+      >
+        {bundles.map((bundle, index) => {
+          const isSelected = bundle.id === selectedBundle?.id;
+          const hasDiscount = bundle.comparePrice && bundle.comparePrice > bundle.price;
+          const unitPrice = Math.round(bundle.price / bundle.quantity);
+
+          return (
+            <div key={bundle.id} className="relative flex flex-col">
+              {bundle.tag && (
+                <div
+                  style={{ backgroundColor: accent }}
+                  className="absolute -top-2.5 inset-x-3 z-10 text-[9px] font-black uppercase tracking-wider text-white py-0.5 rounded-full shadow-xs text-center"
+                >
+                  ★ {bundle.tag}
+                </div>
+              )}
+
+              <button
+                ref={(el) => {
+                  buttonsRef.current[index] = el;
+                }}
+                type="button"
+                role="radio"
+                aria-checked={isSelected}
+                tabIndex={isSelected ? 0 : -1}
+                onClick={() => handleSelect(bundle)}
+                onKeyDown={(e) => handleKeyDown(e, index)}
+                style={{
+                  borderColor: isSelected ? accent : '#E5E7EB',
+                  backgroundColor: isSelected ? `${accent}0A` : '#FFFFFF',
+                }}
+                className={`w-full h-full p-4 rounded-2xl border-2 text-center flex flex-col justify-between transition-all cursor-pointer outline-none focus-visible:ring-2 ${
+                  isSelected ? 'shadow-md ring-2 ring-offset-1' : 'hover:border-slate-300 hover:bg-slate-50/60'
+                }`}
+              >
+                <div>
+                  <div className="flex justify-center mb-2">
+                    <span
+                      style={{
+                        backgroundColor: isSelected ? accent : '#F3F4F6',
+                        color: isSelected ? '#FFFFFF' : '#4B5563',
+                      }}
+                      className="text-[10px] font-bold px-2.5 py-0.5 rounded-full"
+                    >
+                      {bundle.badge || `${bundle.quantity} art.`}
+                    </span>
+                  </div>
+
+                  <h4 className="font-heading font-black text-sm text-[#16171A]">
+                    {bundle.title}
+                  </h4>
+
+                  <span className="text-[11px] text-[#73737A] block mt-0.5">
+                    {formatPrice(unitPrice)} / unité
+                  </span>
+                </div>
+
+                <div className="pt-3 mt-3 border-t border-slate-100">
+                  <span
+                    style={{ color: isSelected ? accent : '#16171A' }}
+                    className="font-heading font-black text-base block tabular-nums"
+                  >
+                    {formatPrice(bundle.price)}
+                  </span>
+                  {hasDiscount && (
+                    <span className="text-[10px] text-[#9C9CA4] line-through block tabular-nums font-semibold">
+                      {formatPrice(bundle.comparePrice!)}
+                    </span>
+                  )}
+                </div>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------
+  // RENDU STYLE 4 : VARIANT "COMPACT" (Liste Épurée Minimaliste)
+  // -------------------------------------------------------------
+  if (variant === 'compact') {
+    return (
+      <div
+        role="radiogroup"
+        aria-label="Sélection des lots et offres"
+        className="w-full flex flex-col gap-2 select-none"
+      >
+        {bundles.map((bundle, index) => {
+          const isSelected = bundle.id === selectedBundle?.id;
+          const hasDiscount = bundle.comparePrice && bundle.comparePrice > bundle.price;
+
+          return (
+            <button
+              key={bundle.id}
+              ref={(el) => {
+                buttonsRef.current[index] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={isSelected ? 0 : -1}
+              onClick={() => handleSelect(bundle)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              style={{
+                borderColor: isSelected ? accent : '#E5E7EB',
+                backgroundColor: isSelected ? `${accent}08` : '#FFFFFF',
+              }}
+              className={`w-full py-2.5 px-3.5 rounded-xl border text-left flex items-center justify-between gap-3 transition-all cursor-pointer outline-none ${
+                isSelected ? 'border-2 shadow-xs' : 'hover:border-slate-300 hover:bg-slate-50/70'
+              }`}
+            >
+              <div className="flex items-center gap-2.5">
+                <div
+                  style={{
+                    borderColor: isSelected ? accent : '#D1D5DB',
+                    backgroundColor: isSelected ? accent : '#FFFFFF',
+                  }}
+                  className="w-4 h-4 rounded-full border flex items-center justify-center shrink-0"
+                >
+                  {isSelected && <span className="text-white text-[9px] font-black">✓</span>}
+                </div>
+
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-bold text-xs text-[#16171A]">
+                    {bundle.title}
+                  </span>
+                  {bundle.badge && (
+                    <span
+                      style={{ backgroundColor: accent }}
+                      className="text-[9px] font-bold text-white px-1.5 py-0.2 rounded"
+                    >
+                      {bundle.badge}
+                    </span>
+                  )}
+                  {bundle.tag && (
+                    <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+                      ★ {bundle.tag}
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-right shrink-0">
+                <span
+                  style={{ color: isSelected ? accent : '#16171A' }}
+                  className="font-bold text-xs block tabular-nums"
+                >
+                  {formatPrice(bundle.price)}
+                </span>
+                {hasDiscount && (
+                  <span className="text-[10px] text-slate-400 line-through block tabular-nums">
+                    {formatPrice(bundle.comparePrice!)}
+                  </span>
+                )}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+    );
+  }
+
+  // -------------------------------------------------------------
+  // RENDU STYLE 5 : VARIANT "BADGE_STACK" (Bannières Grosses Économies)
+  // -------------------------------------------------------------
+  if (variant === 'badge_stack') {
+    return (
+      <div
+        role="radiogroup"
+        aria-label="Sélection des lots et offres"
+        className="w-full flex flex-col gap-3 select-none pt-1"
+      >
+        {bundles.map((bundle, index) => {
+          const isSelected = bundle.id === selectedBundle?.id;
+          const hasDiscount = bundle.comparePrice && bundle.comparePrice > bundle.price;
+          const savings = hasDiscount ? bundle.comparePrice! - bundle.price : 0;
+
+          return (
+            <button
+              key={bundle.id}
+              ref={(el) => {
+                buttonsRef.current[index] = el;
+              }}
+              type="button"
+              role="radio"
+              aria-checked={isSelected}
+              tabIndex={isSelected ? 0 : -1}
+              onClick={() => handleSelect(bundle)}
+              onKeyDown={(e) => handleKeyDown(e, index)}
+              style={{
+                borderColor: isSelected ? accent : '#E2E8F0',
+                backgroundColor: isSelected ? `${accent}0A` : '#FFFFFF',
+              }}
+              className={`w-full rounded-2xl border-2 p-3.5 sm:p-4 text-left flex items-center justify-between gap-3 transition-all cursor-pointer outline-none relative ${
+                isSelected ? 'shadow-md ring-2 ring-offset-1' : 'hover:border-slate-300 hover:bg-slate-50'
+              }`}
+            >
+              <div className="flex items-center gap-3.5">
+                {/* Gros badge quantité et réduction à gauche */}
+                <div
+                  style={{ backgroundColor: accent }}
+                  className="w-12 h-12 rounded-xl text-white font-black flex flex-col items-center justify-center shrink-0 shadow-xs leading-none"
+                >
+                  <span className="text-sm">x{bundle.quantity}</span>
+                  <span className="text-[8px] uppercase tracking-tighter opacity-90 mt-0.5">
+                    {bundle.badge || 'Pack'}
+                  </span>
+                </div>
+
+                <div>
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="font-heading font-black text-sm text-[#16171A]">
+                      {bundle.title}
+                    </span>
+                    {bundle.tag && (
+                      <span className="text-[9px] font-black uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                        ★ {bundle.tag}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-[#73737A] block mt-0.5">
+                    {bundle.subtitle || 'Offre dégressive'}
+                  </span>
+                  {savings > 0 && (
+                    <span className="text-[11px] text-emerald-700 font-extrabold block mt-0.5">
+                      Économisez {formatPrice(savings)} !
+                    </span>
+                  )}
+                </div>
+              </div>
+
+              <div className="text-right shrink-0">
+                <span
+                  style={{ color: isSelected ? accent : '#16171A' }}
+                  className="font-heading font-black text-base sm:text-lg block tabular-nums"
+                >
+                  {formatPrice(bundle.price)}
+                </span>
+                {hasDiscount && (
+                  <span className="text-[11px] text-[#9C9CA4] line-through block tabular-nums font-semibold">
                     {formatPrice(bundle.comparePrice!)}
                   </span>
                 )}

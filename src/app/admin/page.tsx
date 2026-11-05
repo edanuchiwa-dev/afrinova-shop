@@ -220,7 +220,7 @@ export default function AdminDashboard() {
   });
   const [savingQb, setSavingQb] = useState(false);
   const [previewQty, setPreviewQty] = useState(1);
-  const [previewBundleStyle, setPreviewBundleStyle] = useState<'card' | 'pill'>('card');
+  const [previewBundleStyle, setPreviewBundleStyle] = useState<'card' | 'pill' | 'grid' | 'compact' | 'badge_stack'>('card');
   const [previewBundleId, setPreviewBundleId] = useState<string>('x1');
 
   // Filtres et Recherche avancée
@@ -2388,31 +2388,29 @@ export default function AdminDashboard() {
 
                   <div className="flex items-center justify-between gap-2 flex-wrap">
                     <p className="text-[11px] text-slate-500">
-                      Rendu interactif des offres de lots avec la couleur choisie :
+                      Rendu interactif des 5 styles disponibles avec la couleur choisie :
                     </p>
-                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
-                      <button
-                        type="button"
-                        onClick={() => setPreviewBundleStyle('card')}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                          previewBundleStyle === 'card'
-                            ? 'bg-white text-slate-900 shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                      >
-                        Style Cartes (Image 2)
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setPreviewBundleStyle('pill')}
-                        className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
-                          previewBundleStyle === 'pill'
-                            ? 'bg-white text-slate-900 shadow-2xs'
-                            : 'text-slate-500 hover:text-slate-900'
-                        }`}
-                      >
-                        Style Pilules (Image 1)
-                      </button>
+                    <div className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl flex-wrap">
+                      {[
+                        { id: 'card', label: '1. Cartes (Image 2)' },
+                        { id: 'pill', label: '2. Pilules (Image 1)' },
+                        { id: 'grid', label: '3. Grille' },
+                        { id: 'compact', label: '4. Minimaliste' },
+                        { id: 'badge_stack', label: '5. Flash Promo' },
+                      ].map((st) => (
+                        <button
+                          key={st.id}
+                          type="button"
+                          onClick={() => setPreviewBundleStyle(st.id as any)}
+                          className={`px-2.5 py-1 rounded-lg text-xs font-bold transition cursor-pointer ${
+                            previewBundleStyle === st.id
+                              ? 'bg-white text-slate-900 shadow-2xs'
+                              : 'text-slate-500 hover:text-slate-900'
+                          }`}
+                        >
+                          {st.label}
+                        </button>
+                      ))}
                     </div>
                   </div>
 

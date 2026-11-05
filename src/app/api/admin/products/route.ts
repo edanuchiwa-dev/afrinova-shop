@@ -1,5 +1,14 @@
 import { NextResponse } from 'next/server';
 import { getDb, getProductById } from '@/lib/db';
+import {
+  isTursoEnabled,
+  tursoGetProductById,
+  tursoGetProductBySlug,
+  tursoGetAllAdminProducts,
+  tursoCreateProduct,
+  tursoUpdateProduct,
+  tursoDeleteProduct,
+} from '@/lib/turso';
 
 export const runtime = 'nodejs';
 
@@ -14,7 +23,7 @@ function formatSlug(input: string): string {
     .replace(/^-+|-+$/g, '');
 }
 
-export function GET(request: Request) {
+export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const idStr = searchParams.get('id');
 
@@ -23,11 +32,20 @@ export function GET(request: Request) {
     if (!Number.isSafeInteger(id) || id <= 0) {
       return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
     }
-    const product = getProductById(id);
+    const product = isTursoEnabled() ? await tursoGetProductById(id) : getProductById(id);
     if (!product) {
       return NextResponse.json({ error: 'Produit introuvable' }, { status: 404 });
     }
     return NextResponse.json(product);
+  }
+
+  if (isTursoEnabled()) {
+    try {
+      const products = await tursoGetAllAdminProducts();
+      return NextResponse.json(products);
+    } catch (err) {
+      console.warn('[Admin Products Turso GET warning]:', err);
+    }
   }
 
   return NextResponse.json(getDb().prepare('SELECT * FROM products ORDER BY id DESC').all());
@@ -151,8 +169,84 @@ export async function POST(request: Request) {
   const db = getDb();
   let finalSlug = baseSlug;
   let counter = 1;
-  while (db.prepare('SELECT id FROM products WHERE slug = ?').get(finalSlug)) {
+  while (
+    db.prepare('SELECT id FROM products WHERE slug = ?').get(finalSlug) ||
+    (isTursoEnabled() && (await tursoGetProductBySlug(finalSlug)))
+  ) {
     finalSlug = `${baseSlug}-${counter++}`;
+  }
+
+  // Si Turso est activé, insérer d'abord dans Turso pour générer l'ID officiel
+  if (isTursoEnabled()) {
+    try {
+      const tursoCreated = await tursoCreateProduct({
+        name: name.trim(),
+        slug: finalSlug,
+        description: desc,
+        price: Math.round(numPrice),
+        compare_at_price: numComparePrice,
+        cost_per_item: numCostPerItem,
+        stock: numStock,
+        sku: cleanSku,
+        barcode: cleanBarcode,
+        track_quantity: cleanTrackQty,
+        continue_selling_out_of_stock: cleanContinueSelling,
+        category: cat,
+        image_url: finalImageUrl,
+        media_urls: JSON.stringify(parsedMediaUrls),
+        weight_kg: cleanWeight,
+        is_physical: cleanIsPhysical,
+        vendor: cleanVendor,
+        tags: cleanTags,
+        seo_title: cleanSeoTitle,
+        seo_description: cleanSeoDesc,
+        variants: cleanVariants,
+        sales_channels: cleanSalesChannels,
+        bundle_style: cleanBundleStyle,
+        status: prodStatus,
+      });
+
+      // Synchroniser avec SQLite local avec le même identifiant
+      db.prepare(`
+        INSERT OR REPLACE INTO products (
+          id, name, slug, description, price, compare_at_price, cost_per_item,
+          stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
+          category, image_url, media_urls, weight_kg, is_physical, vendor,
+          tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `).run(
+        tursoCreated.id,
+        name.trim(),
+        finalSlug,
+        desc,
+        Math.round(numPrice),
+        numComparePrice,
+        numCostPerItem,
+        numStock,
+        cleanSku,
+        cleanBarcode,
+        cleanTrackQty,
+        cleanContinueSelling,
+        cat,
+        finalImageUrl,
+        JSON.stringify(parsedMediaUrls),
+        cleanWeight,
+        cleanIsPhysical,
+        cleanVendor,
+        cleanTags,
+        cleanSeoTitle,
+        cleanSeoDesc,
+        cleanVariants,
+        cleanSalesChannels,
+        cleanBundleStyle,
+        prodStatus
+      );
+
+      return NextResponse.json(tursoCreated, { status: 201 });
+    } catch (tursoErr) {
+      console.warn('[Turso Create Product Warning]:', tursoErr);
+    }
   }
 
   const result = db.prepare(`
@@ -421,6 +515,21 @@ export async function PUT(request: Request) {
     return NextResponse.json({ error: 'Aucun champ à modifier.' }, { status: 400 });
   }
 
+  // Si Turso est activé, mettre à jour Turso Cloud en priorité
+  if (isTursoEnabled()) {
+    try {
+      const tursoUpdated = await tursoUpdateProduct(id as number, fields, values);
+      if (tursoUpdated) {
+        // Mettre à jour aussi SQLite local
+        const localValues = [...values, id as number];
+        db.prepare(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`).run(...localValues);
+        return NextResponse.json(tursoUpdated);
+      }
+    } catch (tursoErr) {
+      console.warn('[Turso Update Product Warning]:', tursoErr);
+    }
+  }
+
   values.push(id as number);
   db.prepare(`UPDATE products SET ${fields.join(', ')} WHERE id = ?`).run(...values);
   return NextResponse.json(db.prepare('SELECT * FROM products WHERE id = ?').get(id));
@@ -434,6 +543,22 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: 'ID invalide' }, { status: 400 });
   }
   const db = getDb();
+
+  if (isTursoEnabled()) {
+    try {
+      const tursoRes = await tursoDeleteProduct(id);
+      if (tursoRes.archived) {
+        db.prepare("UPDATE products SET status = 'archived' WHERE id = ?").run(id);
+        return NextResponse.json({ success: true, archived: true, message: 'Produit archivé (présent dans des commandes existantes).' });
+      } else {
+        db.prepare('DELETE FROM products WHERE id = ?').run(id);
+        return NextResponse.json({ success: true, deleted: true, message: 'Produit supprimé définitivement.' });
+      }
+    } catch (tursoErr) {
+      console.warn('[Turso Delete Product Warning]:', tursoErr);
+    }
+  }
+
   // Vérifier si le produit est lié à des commandes existantes
   const inOrders = db.prepare('SELECT COUNT(*) as count FROM order_items WHERE product_id = ?').get(id) as { count: number };
   if (inOrders && inOrders.count > 0) {

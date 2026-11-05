@@ -207,6 +207,16 @@ function runMigrations(db: Database.Database) {
     CREATE INDEX IF NOT EXISTS idx_page_views_created_at ON page_views(created_at);
     CREATE INDEX IF NOT EXISTS idx_page_views_heartbeat ON page_views(last_heartbeat);
     CREATE INDEX IF NOT EXISTS idx_page_views_session ON page_views(session_id);
+
+    CREATE TABLE IF NOT EXISTS uploaded_files (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      filename TEXT UNIQUE NOT NULL,
+      mime_type TEXT NOT NULL,
+      data TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+    CREATE INDEX IF NOT EXISTS idx_uploaded_files_filename ON uploaded_files(filename);
   `);
 
   // 2. Migration des colonnes complémentaires dans orders et order_items
@@ -1260,4 +1270,25 @@ export function getLiveVisitorsData(windowMinutes = 3): LiveVisitorStats {
     todayPageViewsCount: todayRow?.views || 0,
   };
 }
+
+export function saveUploadedFile(filename: string, mimeType: string, dataBase64: string, size: number) {
+  const db = getDb();
+  db.prepare(`
+    INSERT INTO uploaded_files (filename, mime_type, data, size)
+    VALUES (?, ?, ?, ?)
+    ON CONFLICT(filename) DO UPDATE SET
+      mime_type = excluded.mime_type,
+      data = excluded.data,
+      size = excluded.size
+  `).run(filename, mimeType, dataBase64, size);
+}
+
+export function getUploadedFile(filename: string): { mime_type: string; data: string; size: number } | null {
+  const db = getDb();
+  const row = db.prepare('SELECT mime_type, data, size FROM uploaded_files WHERE filename = ?').get(filename) as
+    | { mime_type: string; data: string; size: number }
+    | undefined;
+  return row || null;
+}
+
 

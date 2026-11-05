@@ -157,6 +157,165 @@ export async function tursoGetProductBySlug(slug: string): Promise<TursoProduct 
   return (res.rows[0] as unknown as TursoProduct) || null;
 }
 
+export async function tursoGetAllAdminProducts(): Promise<TursoProduct[]> {
+  const client = getTursoClient();
+  const res = await client.execute('SELECT * FROM products ORDER BY id DESC');
+  return res.rows as unknown as TursoProduct[];
+}
+
+export async function tursoCreateProduct(product: {
+  id?: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  compare_at_price: number | null;
+  cost_per_item: number | null;
+  stock: number;
+  sku: string;
+  barcode: string;
+  track_quantity: number;
+  continue_selling_out_of_stock: number;
+  category: string;
+  image_url: string | null;
+  media_urls: string;
+  weight_kg: number;
+  is_physical: number;
+  vendor: string;
+  tags: string;
+  seo_title: string;
+  seo_description: string;
+  variants: string;
+  sales_channels: string;
+  bundle_style: string;
+  status: string;
+}): Promise<TursoProduct> {
+  const client = getTursoClient();
+
+  if (product.id) {
+    await client.execute({
+      sql: `
+        INSERT INTO products (
+          id, name, slug, description, price, compare_at_price, cost_per_item,
+          stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
+          category, image_url, media_urls, weight_kg, is_physical, vendor,
+          tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `,
+      args: [
+        product.id,
+        product.name,
+        product.slug,
+        product.description,
+        product.price,
+        product.compare_at_price,
+        product.cost_per_item,
+        product.stock,
+        product.sku,
+        product.barcode,
+        product.track_quantity,
+        product.continue_selling_out_of_stock,
+        product.category,
+        product.image_url,
+        product.media_urls,
+        product.weight_kg,
+        product.is_physical,
+        product.vendor,
+        product.tags,
+        product.seo_title,
+        product.seo_description,
+        product.variants,
+        product.sales_channels,
+        product.bundle_style,
+        product.status,
+      ],
+    });
+    const fetched = await tursoGetProductById(product.id);
+    if (!fetched) throw new Error('Produit créé dans Turso mais introuvable lors de la relecture.');
+    return fetched;
+  }
+
+  const res = await client.execute({
+    sql: `
+      INSERT INTO products (
+        name, slug, description, price, compare_at_price, cost_per_item,
+        stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
+        category, image_url, media_urls, weight_kg, is_physical, vendor,
+        tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
+      )
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `,
+    args: [
+      product.name,
+      product.slug,
+      product.description,
+      product.price,
+      product.compare_at_price,
+      product.cost_per_item,
+      product.stock,
+      product.sku,
+      product.barcode,
+      product.track_quantity,
+      product.continue_selling_out_of_stock,
+      product.category,
+      product.image_url,
+      product.media_urls,
+      product.weight_kg,
+      product.is_physical,
+      product.vendor,
+      product.tags,
+      product.seo_title,
+      product.seo_description,
+      product.variants,
+      product.sales_channels,
+      product.bundle_style,
+      product.status,
+    ],
+  });
+
+  const insertedId = Number(res.lastInsertRowid);
+  const fetched = await tursoGetProductById(insertedId);
+  if (!fetched) throw new Error('Produit créé dans Turso mais introuvable lors de la relecture.');
+  return fetched;
+}
+
+export async function tursoUpdateProduct(
+  id: number,
+  fields: string[],
+  values: any[]
+): Promise<TursoProduct | null> {
+  const client = getTursoClient();
+  await client.execute({
+    sql: `UPDATE products SET ${fields.join(', ')} WHERE id = ?`,
+    args: [...values, id] as any[],
+  });
+  return await tursoGetProductById(id);
+}
+
+export async function tursoDeleteProduct(id: number): Promise<{ archived: boolean; deleted: boolean }> {
+  const client = getTursoClient();
+  const countRes = await client.execute({
+    sql: 'SELECT COUNT(*) as count FROM order_items WHERE product_id = ?',
+    args: [id],
+  });
+  const count = Number(countRes.rows[0]?.count ?? 0);
+  if (count > 0) {
+    await client.execute({
+      sql: "UPDATE products SET status = 'archived' WHERE id = ?",
+      args: [id],
+    });
+    return { archived: true, deleted: false };
+  } else {
+    await client.execute({
+      sql: 'DELETE FROM products WHERE id = ?',
+      args: [id],
+    });
+    return { archived: false, deleted: true };
+  }
+}
+
+
 // -------------------------------------------------------------
 // PROMOTIONS
 // -------------------------------------------------------------
@@ -579,3 +738,60 @@ export async function tursoRecordPageView(params: {
     ],
   });
 }
+
+// -------------------------------------------------------------
+// FICHIERS MULTIMÉDIAS UPLOADÉS (PERSISTANCE NATIVE CLOUD)
+// -------------------------------------------------------------
+export async function tursoSaveUploadedFile(
+  filename: string,
+  mimeType: string,
+  dataBase64: string,
+  size: number
+): Promise<void> {
+  const client = getTursoClient();
+  // S'assurer que la table existe
+  await client.execute(`
+    CREATE TABLE IF NOT EXISTS uploaded_files (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      filename TEXT UNIQUE NOT NULL,
+      mime_type TEXT NOT NULL,
+      data TEXT NOT NULL,
+      size INTEGER NOT NULL,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+  `);
+
+  await client.execute({
+    sql: `
+      INSERT INTO uploaded_files (filename, mime_type, data, size)
+      VALUES (?, ?, ?, ?)
+      ON CONFLICT(filename) DO UPDATE SET
+        mime_type = excluded.mime_type,
+        data = excluded.data,
+        size = excluded.size
+    `,
+    args: [filename, mimeType, dataBase64, size],
+  });
+}
+
+export async function tursoGetUploadedFile(
+  filename: string
+): Promise<{ mime_type: string; data: string; size: number } | null> {
+  const client = getTursoClient();
+  try {
+    const res = await client.execute({
+      sql: 'SELECT mime_type, data, size FROM uploaded_files WHERE filename = ?',
+      args: [filename],
+    });
+    if (res.rows.length === 0) return null;
+    const row = res.rows[0];
+    return {
+      mime_type: String(row.mime_type || 'image/webp'),
+      data: String(row.data || ''),
+      size: Number(row.size || 0),
+    };
+  } catch {
+    return null;
+  }
+}
+

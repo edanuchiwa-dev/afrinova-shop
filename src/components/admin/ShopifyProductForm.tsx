@@ -123,6 +123,7 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
   const [showUrlModal, setShowUrlModal] = useState(false);
   const [urlInput, setUrlInput] = useState('');
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   // Tarification
   const [price, setPrice] = useState<string>(initialData?.price ? String(initialData.price) : '');
@@ -265,17 +266,81 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
     setTimeout(() => setToastMessage(null), 3500);
   };
 
+  // Pré-compression côté client pour garantir la rapidité et contourner la limite Vercel de 4.5 Mo
+  const compressImageClient = async (file: File): Promise<File | Blob> => {
+    if (file.type === 'image/svg+xml' || file.name.endsWith('.svg') || file.size < 800 * 1024) {
+      return file;
+    }
+
+    return new Promise((resolve) => {
+      const img = new Image();
+      const objectUrl = URL.createObjectURL(file);
+
+      img.onload = () => {
+        URL.revokeObjectURL(objectUrl);
+        const maxDim = 1600;
+        let width = img.width;
+        let height = img.height;
+
+        if (width > maxDim || height > maxDim) {
+          if (width > height) {
+            height = Math.round((height * maxDim) / width);
+            width = maxDim;
+          } else {
+            width = Math.round((width * maxDim) / height);
+            height = maxDim;
+          }
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) {
+          resolve(file);
+          return;
+        }
+
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (blob && blob.size < file.size) {
+              const compressedFile = new File([blob], file.name.replace(/\.[^.]+$/, '.jpg'), {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+              });
+              resolve(compressedFile);
+            } else {
+              resolve(file);
+            }
+          },
+          'image/jpeg',
+          0.85
+        );
+      };
+
+      img.onerror = () => {
+        URL.revokeObjectURL(objectUrl);
+        resolve(file);
+      };
+
+      img.src = objectUrl;
+    });
+  };
+
   // Upload d'image fichier
   const handleFileUpload = async (files: FileList | null) => {
     if (!files || files.length === 0) return;
     setIsUploading(true);
     setErrorMsg(null);
 
+    let successCount = 0;
     try {
       for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+        const originalFile = files[i];
+        const fileToUpload = await compressImageClient(originalFile);
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', fileToUpload, originalFile.name);
 
         const res = await fetch('/api/admin/upload', {
           method: 'POST',
@@ -283,16 +348,19 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
         });
 
         if (!res.ok) {
-          const errData = await res.json();
-          throw new Error(errData.error || "Échec de l'import de l'image.");
+          const errData = await res.json().catch(() => ({ error: "Échec de l'upload." }));
+          throw new Error(errData.error || `Échec de l'import pour "${originalFile.name}".`);
         }
 
         const data = await res.json();
         if (data.url) {
           setMediaList((prev) => [...prev, data.url]);
+          successCount++;
         }
       }
-      showToast('Image(s) importée(s) avec succès.');
+      if (successCount > 0) {
+        showToast(`${successCount} image(s) importée(s) avec succès.`);
+      }
     } catch (err: unknown) {
       setErrorMsg(err instanceof Error ? err.message : 'Erreur upload.');
     } finally {
@@ -712,13 +780,40 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
               {/* Dropzone d'importation */}
               <div
                 onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-slate-300 hover:border-[#008060] rounded-2xl p-6 sm:p-8 text-center bg-slate-50/50 hover:bg-emerald-50/20 transition cursor-pointer group"
+                onDragOver={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDragging(true);
+                }}
+                onDragEnter={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDragging(true);
+                }}
+                onDragLeave={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDragging(false);
+                }}
+                onDrop={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setIsDragging(false);
+                  if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleFileUpload(e.dataTransfer.files);
+                  }
+                }}
+                className={`border-2 border-dashed rounded-2xl p-6 sm:p-8 text-center transition cursor-pointer group ${
+                  isDragging
+                    ? 'border-[#008060] bg-emerald-50/60 ring-4 ring-emerald-500/20'
+                    : 'border-slate-300 hover:border-[#008060] bg-slate-50/50 hover:bg-emerald-50/20'
+                }`}
               >
                 <input
                   ref={fileInputRef}
                   type="file"
                   multiple
-                  accept="image/*"
+                  accept="image/*,.jpg,.jpeg,.png,.webp,.avif,.gif,.svg,.jfif,.heic,.heif"
                   onChange={(e) => handleFileUpload(e.target.files)}
                   className="hidden"
                 />
@@ -730,10 +825,10 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                   )}
                 </div>
                 <div className="text-xs font-black text-slate-800">
-                  {isUploading ? "Importation en cours..." : "Glissez-déposez vos fichiers ici"}
+                  {isUploading ? "Importation et optimisation en cours..." : isDragging ? "Déposez vos images ici !" : "Glissez-déposez vos fichiers ici"}
                 </div>
                 <p className="text-[11px] text-slate-500 mt-1">
-                  ou <span className="text-[#008060] font-bold underline">parcourez vos photos</span> (JPEG, PNG, WEBP jusqu&apos;à 10 Mo)
+                  ou <span className="text-[#008060] font-bold underline">parcourez vos photos</span> (JPEG, PNG, WEBP, AVIF jusqu&apos;à 20 Mo)
                 </p>
               </div>
 
@@ -1578,6 +1673,36 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                 <option value="direct-landing">Page de vente directe (Landing COD Option 2)</option>
               </select>
             </section>
+          </div>
+
+          {/* BARRE D'ACTION INFÉRIEURE */}
+          <div className="lg:col-span-12 pt-6 pb-12 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-slate-200">
+            <Link
+              href="/admin?tab=products"
+              className="text-xs font-bold text-slate-600 hover:text-slate-900 bg-slate-100 hover:bg-slate-200 px-4 py-2.5 rounded-xl transition w-full sm:w-auto text-center"
+            >
+              ← Retour au catalogue
+            </Link>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <button
+                type="button"
+                onClick={() => handleSubmit()}
+                disabled={saving}
+                className="w-full sm:w-auto bg-[#008060] hover:bg-[#006e52] text-white text-xs font-black px-6 py-3 rounded-xl shadow-md transition flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50 active:scale-95"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    <span>Enregistrement en cours...</span>
+                  </>
+                ) : (
+                  <>
+                    <Check className="w-4 h-4" />
+                    <span>{isEdit ? 'Mettre à jour le produit' : 'Enregistrer le produit'}</span>
+                  </>
+                )}
+              </button>
+            </div>
           </div>
         </form>
       </main>

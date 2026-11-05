@@ -33,7 +33,8 @@ import {
   Download,
   Wifi,
   Navigation,
-  Compass
+  Compass,
+  Trash2
 } from 'lucide-react';
 import { formatFCFA } from '@/lib/format';
 
@@ -206,6 +207,8 @@ export default function ShopifyAnalyticsDashboard() {
     document.body.removeChild(link);
   };
 
+  const [isCleaningVisitors, setIsCleaningVisitors] = useState(false);
+
   const fetchLiveVisitors = async () => {
     try {
       const res = await fetch('/api/admin/live-visitors');
@@ -216,6 +219,35 @@ export default function ShopifyAnalyticsDashboard() {
       }
     } catch (err) {
       console.error('Erreur live visitors:', err);
+    }
+  };
+
+  const handleCleanFakeVisitors = async () => {
+    if (!confirm('Supprimer toutes les fausses connexions (robots, crawlers et tests locaux) ?')) return;
+    try {
+      setIsCleaningVisitors(true);
+      const res = await fetch('/api/admin/live-visitors?action=purge_fake', { method: 'DELETE' });
+      const data = await res.json();
+      if (data.ok) {
+        fetchLiveVisitors();
+      }
+    } catch (err) {
+      console.error('Erreur nettoyage:', err);
+    } finally {
+      setIsCleaningVisitors(false);
+    }
+  };
+
+  const handleDeleteVisitorSession = async (sessionId: string) => {
+    if (!confirm('Supprimer cette session du journal ?')) return;
+    try {
+      const res = await fetch(`/api/admin/live-visitors?sessionId=${encodeURIComponent(sessionId)}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (data.ok) {
+        fetchLiveVisitors();
+      }
+    } catch (err) {
+      console.error('Erreur suppression session:', err);
     }
   };
 
@@ -1518,8 +1550,17 @@ export default function ShopifyAnalyticsDashboard() {
             </div>
           </div>
 
-          {/* Action : Exporter CSV */}
+          {/* Actions : Exporter CSV & Purger les fausses connexions */}
           <div className="flex items-center gap-2">
+            <button
+              onClick={handleCleanFakeVisitors}
+              disabled={isCleaningVisitors}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-950/40 hover:bg-rose-900/60 text-rose-300 border border-rose-800/60 rounded-xl text-xs font-bold transition cursor-pointer shadow-xs disabled:opacity-50"
+              title="Supprimer définitivement les robots, crawlers (Amazon AWS, Headless) et tests locaux"
+            >
+              <Trash2 className="w-3.5 h-3.5" />
+              <span>{isCleaningVisitors ? 'Nettoyage...' : 'Purger robots & tests'}</span>
+            </button>
             <button
               onClick={() => exportVisitorsCsv(filteredVisitors)}
               className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 rounded-xl text-xs font-bold transition cursor-pointer shadow-xs"
@@ -1604,6 +1645,7 @@ export default function ShopifyAnalyticsDashboard() {
                 <th className="py-3 px-3.5">Page Consultée</th>
                 <th className="py-3 px-3.5">Source</th>
                 <th className="py-3 px-3.5 text-right">Durée</th>
+                <th className="py-3 px-3.5 text-center">Action</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-800/60">
@@ -1739,12 +1781,23 @@ export default function ShopifyAnalyticsDashboard() {
                       <td className="py-3 px-3.5 whitespace-nowrap text-right font-mono font-bold text-slate-300">
                         {v.durationSec < 60 ? `${v.durationSec}s` : `${Math.floor(v.durationSec / 60)}m ${v.durationSec % 60}s`}
                       </td>
+
+                      {/* Action : Supprimer la session */}
+                      <td className="py-3 px-3.5 whitespace-nowrap text-center">
+                        <button
+                          onClick={() => handleDeleteVisitorSession(v.sessionId)}
+                          className="p-1 rounded text-slate-500 hover:text-rose-400 hover:bg-rose-950/40 transition cursor-pointer"
+                          title="Supprimer cette connexion du journal"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </td>
                     </tr>
                   );
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className="py-8 text-center text-slate-400">
+                  <td colSpan={9} className="py-8 text-center text-slate-400">
                     Aucun visiteur ne correspond à vos critères de recherche.
                   </td>
                 </tr>

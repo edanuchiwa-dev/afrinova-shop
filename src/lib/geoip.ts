@@ -98,6 +98,63 @@ export function formatCarrierName(isp = '', org = '', as = ''): string {
 }
 
 /**
+ * Détecte si le User-Agent ou le FAI correspond à un robot, crawler, scraper ou navigateur headless
+ */
+export function isBotOrCrawler(ua: string | null | undefined, isp?: string): boolean {
+  if (!ua || typeof ua !== 'string') return true;
+  const lowerUa = ua.toLowerCase();
+
+  const botPatterns = [
+    'headlesschrome',
+    'headless',
+    'googlebot',
+    'bingbot',
+    'yandexbot',
+    'baiduspider',
+    'duckduckbot',
+    'facebookexternalhit',
+    'twitterbot',
+    'linkedinbot',
+    'pinterestbot',
+    'crawler',
+    'spider',
+    'lighthouse',
+    'puppeteer',
+    'playwright',
+    'selenium',
+    'phantomjs',
+    'python-requests',
+    'aiohttp',
+    'curl/',
+    'wget/',
+    'postman',
+    'go-http-client',
+    'bytespider',
+    'gptbot',
+    'claudebot',
+    'semrushbot',
+    'ahrefsbot',
+    'petalbot',
+    'mj12bot',
+    'dotbot',
+  ];
+
+  for (const pattern of botPatterns) {
+    if (lowerUa.includes(pattern)) return true;
+  }
+
+  // Datacenters avec requêtes synthétiques (AWS, Google Cloud, DigitalOcean, Hetzner, etc.)
+  if (isp) {
+    const lowerIsp = isp.toLowerCase();
+    if ((lowerIsp.includes('amazon') || lowerIsp.includes('aws')) && lowerUa.includes('chrome')) {
+      return true;
+    }
+  }
+
+  return false;
+}
+
+/**
  * Décode le User-Agent pour extraire le type d'appareil et le navigateur/application source
  */
 export function parseUserAgent(ua: string | null | undefined): {

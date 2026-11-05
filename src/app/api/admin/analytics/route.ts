@@ -78,6 +78,22 @@ export async function GET(request: NextRequest) {
     allPageViews = db.prepare(`
       SELECT session_id, path, created_at 
       FROM page_views 
+      WHERE NOT (
+        LOWER(user_agent) LIKE '%headless%'
+        OR LOWER(user_agent) LIKE '%bot%'
+        OR LOWER(user_agent) LIKE '%crawler%'
+        OR LOWER(user_agent) LIKE '%spider%'
+        OR LOWER(isp) LIKE '%amazon%'
+        OR LOWER(isp) LIKE '%aws%'
+        OR ip_address LIKE '%127.0.0.1%'
+        OR ip_address LIKE '%192.168.%'
+        OR ip_address LIKE '%Localhost%'
+        OR ip_address LIKE '%Réseau Local%'
+        OR city = 'Localhost'
+        OR country = 'Local'
+        OR referrer LIKE '%localhost%'
+        OR referrer LIKE '%192.168.%'
+      )
       ORDER BY created_at ASC
     `).all() as Array<{ session_id: string; path: string; created_at: string }>;
   }

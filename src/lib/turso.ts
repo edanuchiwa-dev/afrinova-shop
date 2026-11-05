@@ -843,7 +843,7 @@ export async function tursoGetUploadedFile(
 export async function tursoGetLiveVisitorsData(windowMinutes = 3): Promise<LiveVisitorStats> {
   const client = getTursoClient();
 
-  // 1. Récupération de tous les logs de visites récents
+  // 1. Récupération de tous les logs de visites récents (filtrage strict des bots et tests locaux)
   const [rawRowsRes, todayRes] = await Promise.all([
     client.execute({
       sql: `
@@ -853,6 +853,22 @@ export async function tursoGetLiveVisitorsData(windowMinutes = 3): Promise<LiveV
           CAST((strftime('%s', 'now') - strftime('%s', created_at)) AS INTEGER) as duration_sec,
           CAST((strftime('%s', 'now') - strftime('%s', last_heartbeat)) AS INTEGER) as last_seen_sec
         FROM page_views
+        WHERE NOT (
+          LOWER(user_agent) LIKE '%headless%'
+          OR LOWER(user_agent) LIKE '%bot%'
+          OR LOWER(user_agent) LIKE '%crawler%'
+          OR LOWER(user_agent) LIKE '%spider%'
+          OR LOWER(isp) LIKE '%amazon%'
+          OR LOWER(isp) LIKE '%aws%'
+          OR ip_address LIKE '%127.0.0.1%'
+          OR ip_address LIKE '%192.168.%'
+          OR ip_address LIKE '%Localhost%'
+          OR ip_address LIKE '%Réseau Local%'
+          OR city = 'Localhost'
+          OR country = 'Local'
+          OR referrer LIKE '%localhost%'
+          OR referrer LIKE '%192.168.%'
+        )
         ORDER BY last_heartbeat DESC
         LIMIT 1000
       `,
@@ -864,6 +880,22 @@ export async function tursoGetLiveVisitorsData(windowMinutes = 3): Promise<LiveV
         COUNT(*) as views
       FROM page_views
       WHERE date(created_at) = date('now')
+        AND NOT (
+          LOWER(user_agent) LIKE '%headless%'
+          OR LOWER(user_agent) LIKE '%bot%'
+          OR LOWER(user_agent) LIKE '%crawler%'
+          OR LOWER(user_agent) LIKE '%spider%'
+          OR LOWER(isp) LIKE '%amazon%'
+          OR LOWER(isp) LIKE '%aws%'
+          OR ip_address LIKE '%127.0.0.1%'
+          OR ip_address LIKE '%192.168.%'
+          OR ip_address LIKE '%Localhost%'
+          OR ip_address LIKE '%Réseau Local%'
+          OR city = 'Localhost'
+          OR country = 'Local'
+          OR referrer LIKE '%localhost%'
+          OR referrer LIKE '%192.168.%'
+        )
     `),
   ]);
 
@@ -986,7 +1018,27 @@ export async function tursoGetAnalyticsRawData(): Promise<{
       "SELECT oi.order_id, oi.product_id, oi.product_name, oi.product_price, oi.quantity FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE o.status != 'annulee'"
     ),
     client.execute("SELECT id, name, slug, price, stock, image_url FROM products"),
-    client.execute("SELECT session_id, path, created_at FROM page_views ORDER BY created_at ASC"),
+    client.execute(`
+      SELECT session_id, path, created_at 
+      FROM page_views 
+      WHERE NOT (
+        LOWER(user_agent) LIKE '%headless%'
+        OR LOWER(user_agent) LIKE '%bot%'
+        OR LOWER(user_agent) LIKE '%crawler%'
+        OR LOWER(user_agent) LIKE '%spider%'
+        OR LOWER(isp) LIKE '%amazon%'
+        OR LOWER(isp) LIKE '%aws%'
+        OR ip_address LIKE '%127.0.0.1%'
+        OR ip_address LIKE '%192.168.%'
+        OR ip_address LIKE '%Localhost%'
+        OR ip_address LIKE '%Réseau Local%'
+        OR city = 'Localhost'
+        OR country = 'Local'
+        OR referrer LIKE '%localhost%'
+        OR referrer LIKE '%192.168.%'
+      )
+      ORDER BY created_at ASC
+    `),
   ]);
 
   return {
@@ -995,5 +1047,45 @@ export async function tursoGetAnalyticsRawData(): Promise<{
     allProducts: productsRes.rows as any[],
     allPageViews: pageViewsRes.rows as any[],
   };
+}
+
+export async function tursoDeleteVisitors(options: {
+  action?: 'purge_fake' | 'purge_all';
+  sessionId?: string;
+}): Promise<{ deleted: number }> {
+  const client = getTursoClient();
+
+  if (options.action === 'purge_all') {
+    const res = await client.execute('DELETE FROM page_views');
+    return { deleted: res.rowsAffected || 0 };
+  }
+
+  if (options.sessionId) {
+    const res = await client.execute({
+      sql: 'DELETE FROM page_views WHERE session_id = ?',
+      args: [options.sessionId],
+    });
+    return { deleted: res.rowsAffected || 0 };
+  }
+
+  // Purge de toutes les fausses connexions (bots, crawlers, tests locaux)
+  const res = await client.execute(`
+    DELETE FROM page_views
+    WHERE LOWER(user_agent) LIKE '%headless%'
+       OR LOWER(user_agent) LIKE '%bot%'
+       OR LOWER(user_agent) LIKE '%crawler%'
+       OR LOWER(user_agent) LIKE '%spider%'
+       OR LOWER(isp) LIKE '%amazon%'
+       OR LOWER(isp) LIKE '%aws%'
+       OR ip_address LIKE '%127.0.0.1%'
+       OR ip_address LIKE '%192.168.%'
+       OR ip_address LIKE '%Localhost%'
+       OR ip_address LIKE '%Réseau Local%'
+       OR city = 'Localhost'
+       OR country = 'Local'
+       OR referrer LIKE '%localhost%'
+       OR referrer LIKE '%192.168.%'
+  `);
+  return { deleted: res.rowsAffected || 0 };
 }
 

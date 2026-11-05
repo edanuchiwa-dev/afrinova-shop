@@ -1126,6 +1126,22 @@ export function getLiveVisitorsData(windowMinutes = 3): LiveVisitorStats {
       CAST((strftime('%s', 'now') - strftime('%s', last_heartbeat)) AS INTEGER) as last_seen_sec
     FROM page_views
     WHERE last_heartbeat >= datetime('now', '-' || ? || ' minutes')
+      AND NOT (
+        LOWER(user_agent) LIKE '%headless%'
+        OR LOWER(user_agent) LIKE '%bot%'
+        OR LOWER(user_agent) LIKE '%crawler%'
+        OR LOWER(user_agent) LIKE '%spider%'
+        OR LOWER(isp) LIKE '%amazon%'
+        OR LOWER(isp) LIKE '%aws%'
+        OR ip_address LIKE '%127.0.0.1%'
+        OR ip_address LIKE '%192.168.%'
+        OR ip_address LIKE '%Localhost%'
+        OR ip_address LIKE '%Réseau Local%'
+        OR city = 'Localhost'
+        OR country = 'Local'
+        OR referrer LIKE '%localhost%'
+        OR referrer LIKE '%192.168.%'
+      )
     ORDER BY last_heartbeat DESC
   `).all(windowMinutes) as Array<{
     session_id: string;
@@ -1196,6 +1212,22 @@ export function getLiveVisitorsData(windowMinutes = 3): LiveVisitorStats {
       CAST((strftime('%s', 'now') - strftime('%s', created_at)) AS INTEGER) as duration_sec,
       CAST((strftime('%s', 'now') - strftime('%s', last_heartbeat)) AS INTEGER) as last_seen_sec
     FROM page_views
+    WHERE NOT (
+      LOWER(user_agent) LIKE '%headless%'
+      OR LOWER(user_agent) LIKE '%bot%'
+      OR LOWER(user_agent) LIKE '%crawler%'
+      OR LOWER(user_agent) LIKE '%spider%'
+      OR LOWER(isp) LIKE '%amazon%'
+      OR LOWER(isp) LIKE '%aws%'
+      OR ip_address LIKE '%127.0.0.1%'
+      OR ip_address LIKE '%192.168.%'
+      OR ip_address LIKE '%Localhost%'
+      OR ip_address LIKE '%Réseau Local%'
+      OR city = 'Localhost'
+      OR country = 'Local'
+      OR referrer LIKE '%localhost%'
+      OR referrer LIKE '%192.168.%'
+    )
     ORDER BY last_heartbeat DESC
     LIMIT 1000
   `).all() as typeof rawRows;
@@ -1272,6 +1304,22 @@ export function getLiveVisitorsData(windowMinutes = 3): LiveVisitorStats {
       COUNT(*) as views
     FROM page_views
     WHERE date(created_at) = date('now')
+      AND NOT (
+        LOWER(user_agent) LIKE '%headless%'
+        OR LOWER(user_agent) LIKE '%bot%'
+        OR LOWER(user_agent) LIKE '%crawler%'
+        OR LOWER(user_agent) LIKE '%spider%'
+        OR LOWER(isp) LIKE '%amazon%'
+        OR LOWER(isp) LIKE '%aws%'
+        OR ip_address LIKE '%127.0.0.1%'
+        OR ip_address LIKE '%192.168.%'
+        OR ip_address LIKE '%Localhost%'
+        OR ip_address LIKE '%Réseau Local%'
+        OR city = 'Localhost'
+        OR country = 'Local'
+        OR referrer LIKE '%localhost%'
+        OR referrer LIKE '%192.168.%'
+      )
   `).get() as { visitors: number; views: number } | undefined;
 
   return {
@@ -1284,6 +1332,39 @@ export function getLiveVisitorsData(windowMinutes = 3): LiveVisitorStats {
     todayVisitorsCount: todayRow?.visitors || 0,
     todayPageViewsCount: todayRow?.views || 0,
   };
+}
+
+export function deleteVisitors(options: {
+  action?: 'purge_fake' | 'purge_all';
+  sessionId?: string;
+}): { deleted: number } {
+  const db = getDb();
+  if (options.action === 'purge_all') {
+    const res = db.prepare('DELETE FROM page_views').run();
+    return { deleted: res.changes };
+  }
+  if (options.sessionId) {
+    const res = db.prepare('DELETE FROM page_views WHERE session_id = ?').run(options.sessionId);
+    return { deleted: res.changes };
+  }
+  const res = db.prepare(`
+    DELETE FROM page_views
+    WHERE LOWER(user_agent) LIKE '%headless%'
+       OR LOWER(user_agent) LIKE '%bot%'
+       OR LOWER(user_agent) LIKE '%crawler%'
+       OR LOWER(user_agent) LIKE '%spider%'
+       OR LOWER(isp) LIKE '%amazon%'
+       OR LOWER(isp) LIKE '%aws%'
+       OR ip_address LIKE '%127.0.0.1%'
+       OR ip_address LIKE '%192.168.%'
+       OR ip_address LIKE '%Localhost%'
+       OR ip_address LIKE '%Réseau Local%'
+       OR city = 'Localhost'
+       OR country = 'Local'
+       OR referrer LIKE '%localhost%'
+       OR referrer LIKE '%192.168.%'
+  `).run();
+  return { deleted: res.changes };
 }
 
 export function saveUploadedFile(filename: string, mimeType: string, dataBase64: string, size: number) {

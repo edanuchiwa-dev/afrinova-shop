@@ -65,33 +65,54 @@ export function getTursoClient(): Client {
   });
 
   // Client proxy résilient avec auto-réparation sur jeton corrompu / 400
-  const resilientClient: any = {
-    ...primaryClient,
-    async execute(stmt: any) {
-      try {
-        return await primaryClient.execute(stmt);
-      } catch (err: any) {
-        const msg = String(err?.message || err);
-        if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
-          console.warn('[Turso auto-healing]: Primary client returned auth error (400), seamlessly using verified token.');
-          return await fallbackClient.execute(stmt);
-        }
-        throw err;
+  const resilientClient: any = new Proxy(primaryClient, {
+    get(target, prop, receiver) {
+      if (prop === 'execute') {
+        return async function (stmt: any) {
+          try {
+            return await primaryClient.execute(stmt);
+          } catch (err: any) {
+            const msg = String(err?.message || err);
+            if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
+              console.warn('[Turso auto-healing]: Primary client returned auth error (400), seamlessly using verified token.');
+              return await fallbackClient.execute(stmt);
+            }
+            throw err;
+          }
+        };
       }
-    },
-    async batch(stmts: any[], mode?: any) {
-      try {
-        return await primaryClient.batch(stmts, mode);
-      } catch (err: any) {
-        const msg = String(err?.message || err);
-        if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
-          console.warn('[Turso auto-healing batch]: Primary client returned auth error (400), seamlessly using verified token.');
-          return await fallbackClient.batch(stmts, mode);
-        }
-        throw err;
+      if (prop === 'batch') {
+        return async function (stmts: any[], mode?: any) {
+          try {
+            return await primaryClient.batch(stmts, mode);
+          } catch (err: any) {
+            const msg = String(err?.message || err);
+            if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
+              console.warn('[Turso auto-healing batch]: Primary client returned auth error (400), seamlessly using verified token.');
+              return await fallbackClient.batch(stmts, mode);
+            }
+            throw err;
+          }
+        };
       }
+      if (prop === 'transaction') {
+        return async function (mode?: any) {
+          try {
+            return await primaryClient.transaction(mode);
+          } catch (err: any) {
+            const msg = String(err?.message || err);
+            if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
+              console.warn('[Turso auto-healing transaction]: Primary client returned auth error (400), seamlessly using verified token.');
+              return await fallbackClient.transaction(mode);
+            }
+            throw err;
+          }
+        };
+      }
+      const val = Reflect.get(target, prop, receiver);
+      return typeof val === 'function' ? val.bind(target) : val;
     },
-  };
+  });
 
   tursoClient = resilientClient;
   return tursoClient;

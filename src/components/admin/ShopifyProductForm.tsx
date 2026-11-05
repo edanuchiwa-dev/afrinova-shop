@@ -38,6 +38,8 @@ import {
   Loader2
 } from 'lucide-react';
 import { formatFCFA } from '@/lib/format';
+import BundleSelector from '@/components/BundleSelector';
+import { getBundles } from '@/lib/bundles';
 
 export type ProductData = {
   id?: number;
@@ -201,6 +203,17 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
 
   // UI States
   const [saving, setSaving] = useState(false);
+  const [previewSelectedBundleId, setPreviewSelectedBundleId] = useState<string>('x1');
+
+  // Calcul dynamique des offres pour l'aperçu en direct du bundle
+  const previewBundles = useMemo(() => {
+    const numPrice = Number(price) || 15000;
+    return getBundles({
+      price: numPrice,
+      image_url: mediaList[0] || null,
+      slug: customSlug || 'produit',
+    });
+  }, [price, mediaList, customSlug]);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -554,8 +567,8 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
       )}
 
       {/* STICKY TOP POLARIS HEADER */}
-      <header className="sticky top-0 z-40 bg-white border-b border-slate-200/90 shadow-2xs backdrop-blur-md px-4 sm:px-8 py-3.5 transition-all">
-        <div className="max-w-6xl mx-auto flex items-center justify-between gap-4">
+      <header className="sticky top-0 z-40 bg-white border-b border-slate-200/90 shadow-2xs backdrop-blur-md px-4 sm:px-8 lg:px-12 py-3.5 lg:py-4 transition-all">
+        <div className="max-w-[1600px] w-full mx-auto flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <Link
               href="/admin?tab=products"
@@ -627,19 +640,19 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
       </header>
 
       {/* MAIN CONTAINER (2 COLUMNS) */}
-      <main className="max-w-6xl mx-auto px-4 sm:px-8 pt-6">
+      <main className="max-w-[1600px] w-full mx-auto px-4 sm:px-8 lg:px-12 pt-6 lg:pt-8 pb-20">
         {errorMsg && (
-          <div className="mb-6 p-4 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
+          <div className="mb-6 p-4 sm:p-5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-center gap-2">
             <AlertCircle className="w-4 h-4 shrink-0 text-rose-600" />
             <span>{errorMsg}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-10">
           {/* ======================================================== */}
           {/* COLONNE GAUCHE (MAIN: 8 COLS) */}
           {/* ======================================================== */}
-          <div className="lg:col-span-8 space-y-5">
+          <div className="lg:col-span-8 space-y-6 lg:space-y-8">
             {/* CARD 1: TITRE & DESCRIPTION */}
             <section className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs space-y-4">
               <div>
@@ -1301,6 +1314,34 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                     />
                   </div>
                 </div>
+
+                {/* APERÇU EN DIRECT DU BUNDLE SÉLECTIONNÉ */}
+                <div className="pt-6 border-t border-slate-100 space-y-3">
+                  <div className="flex items-center justify-between flex-wrap gap-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-black text-slate-800 flex items-center gap-1.5">
+                        <span>👁️ Aperçu interactif en direct (comme sur votre boutique)</span>
+                      </span>
+                      <span className="text-[10px] font-extrabold text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                        Rendu réel
+                      </span>
+                    </div>
+                    <span className="text-[11px] text-slate-500 font-medium">
+                      Style actif : <strong className="text-slate-900 uppercase font-bold">{bundleStyle}</strong> • Couleur : <strong className="font-mono text-slate-900 uppercase font-bold">{bundleAccentColor}</strong>
+                    </span>
+                  </div>
+
+                  <div className="p-4 sm:p-6 lg:p-8 rounded-3xl bg-slate-50/80 border border-slate-200/90 shadow-inner">
+                    <BundleSelector
+                      bundles={previewBundles}
+                      variant={bundleStyle}
+                      accent={bundleAccentColor}
+                      value={previewSelectedBundleId}
+                      onChange={(b) => setPreviewSelectedBundleId(b.id)}
+                      image={mediaList[0] || null}
+                    />
+                  </div>
+                </div>
               </div>
             </section>
 
@@ -1664,7 +1705,7 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
           {/* ======================================================== */}
           {/* COLONNE DROITE (SIDEBAR: 4 COLS) */}
           {/* ======================================================== */}
-          <div className="lg:col-span-4 space-y-5">
+          <div className="lg:col-span-4 space-y-6 lg:space-y-8">
             {/* CARD 1: STATUT DU PRODUIT */}
             <section className="bg-white rounded-2xl border border-slate-200 p-5 shadow-2xs space-y-3">
               <h2 className="text-sm font-black text-slate-900">Statut du produit</h2>

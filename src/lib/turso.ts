@@ -6,6 +6,9 @@ import { priceFor } from './bundles.ts';
 import type { LiveVisitor, LiveVisitorStats } from './db.ts';
 
 let tursoClient: Client | null = null;
+let fallbackClientInstance: Client | null = null;
+let primaryClientFailed = false;
+let primaryClientVerified = false;
 
 function cleanEnvValue(raw?: string): string {
   if (!raw) return '';
@@ -40,12 +43,25 @@ function sanitizeToken(raw?: string): string | undefined {
 const DEFAULT_TURSO_URL = 'libsql://afrinova-shop-edanuchiwa-dev.aws-eu-west-1.turso.io';
 const DEFAULT_TURSO_AUTH_TOKEN = 'eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3OTM4MjkzODMsImlkIjoiMDFhMWE4NTItMzIwMS03ODBhLTlmOGYtMjExODBiY2Y4YzZhIiwia2lkIjoiQ2stUWd1aVJBR1p6N3N4bzBPZjB5MzMwX0ItVVZDRXVDeVNUd3NUMTR3byIsInJpZCI6ImZiNWM3MjViLTU1ZjEtNDE3OC1iOTM3LTA0MzIwMjIzNWZiYyJ9.aiq82RSp61j41j-YsQNyoqe7wDAQYRUO9gvYuNigs4euaOdq4FBZ0gRdS-J3bhE6fY__W6I5gsvaIMp2QZ1_Ag';
 
+export function getFallbackClient(): Client {
+  if (!fallbackClientInstance) {
+    fallbackClientInstance = createClient({
+      url: sanitizeUrl(DEFAULT_TURSO_URL),
+      authToken: DEFAULT_TURSO_AUTH_TOKEN,
+    });
+  }
+  return fallbackClientInstance;
+}
+
 export function isTursoEnabled(): boolean {
   const url = cleanEnvValue(process.env.TURSO_DATABASE_URL) || DEFAULT_TURSO_URL;
   return Boolean(url && url !== 'file:data/store.db');
 }
 
 export function getTursoClient(): Client {
+  if (primaryClientFailed) {
+    return getFallbackClient();
+  }
   if (tursoClient) return tursoClient;
 
   const rawUrl = cleanEnvValue(process.env.TURSO_DATABASE_URL) || DEFAULT_TURSO_URL;
@@ -59,22 +75,25 @@ export function getTursoClient(): Client {
     authToken,
   });
 
-  const fallbackClient = createClient({
-    url: sanitizeUrl(DEFAULT_TURSO_URL),
-    authToken: DEFAULT_TURSO_AUTH_TOKEN,
-  });
+  const fallbackClient = getFallbackClient();
 
   // Client proxy résilient avec auto-réparation sur jeton corrompu / 400
   const resilientClient: any = new Proxy(primaryClient, {
     get(target, prop, receiver) {
       if (prop === 'execute') {
         return async function (stmt: any) {
+          if (primaryClientFailed) {
+            return await fallbackClient.execute(stmt);
+          }
           try {
-            return await primaryClient.execute(stmt);
+            const res = await primaryClient.execute(stmt);
+            primaryClientVerified = true;
+            return res;
           } catch (err: any) {
             const msg = String(err?.message || err);
             if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
-              console.warn('[Turso auto-healing]: Primary client returned auth error (400), seamlessly using verified token.');
+              primaryClientFailed = true;
+              console.warn('[Turso auto-healing execute]: Primary client returned auth error (400), seamlessly using verified token.');
               return await fallbackClient.execute(stmt);
             }
             throw err;
@@ -83,11 +102,17 @@ export function getTursoClient(): Client {
       }
       if (prop === 'batch') {
         return async function (stmts: any[], mode?: any) {
+          if (primaryClientFailed) {
+            return await fallbackClient.batch(stmts, mode);
+          }
           try {
-            return await primaryClient.batch(stmts, mode);
+            const res = await primaryClient.batch(stmts, mode);
+            primaryClientVerified = true;
+            return res;
           } catch (err: any) {
             const msg = String(err?.message || err);
             if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
+              primaryClientFailed = true;
               console.warn('[Turso auto-healing batch]: Primary client returned auth error (400), seamlessly using verified token.');
               return await fallbackClient.batch(stmts, mode);
             }
@@ -97,16 +122,24 @@ export function getTursoClient(): Client {
       }
       if (prop === 'transaction') {
         return async function (mode?: any) {
-          try {
-            return await primaryClient.transaction(mode);
-          } catch (err: any) {
-            const msg = String(err?.message || err);
-            if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
-              console.warn('[Turso auto-healing transaction]: Primary client returned auth error (400), seamlessly using verified token.');
-              return await fallbackClient.transaction(mode);
-            }
-            throw err;
+          if (primaryClientFailed) {
+            return await fallbackClient.transaction(mode);
           }
+          if (!primaryClientVerified) {
+            try {
+              await primaryClient.execute('SELECT 1');
+              primaryClientVerified = true;
+            } catch (err: any) {
+              const msg = String(err?.message || err);
+              if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
+                primaryClientFailed = true;
+                console.warn('[Turso auto-healing transaction]: Primary client returned auth error (400), seamlessly using verified token.');
+                return await fallbackClient.transaction(mode);
+              }
+              throw err;
+            }
+          }
+          return await primaryClient.transaction(mode);
         };
       }
       const val = Reflect.get(target, prop, receiver);
@@ -406,7 +439,8 @@ export async function tursoGetActivePromotion(productId: number): Promise<any | 
 // -------------------------------------------------------------
 // COMMANDES (Transaction atomique)
 // -------------------------------------------------------------
-export async function tursoCreateOrder(
+async function executeCreateOrderWithClient(
+  client: Client,
   order: {
     customerName: string;
     customerEmail?: string | null;
@@ -441,7 +475,6 @@ export async function tursoCreateOrder(
   const normalizedPhone = phoneCheck.normalized;
   const shippingCost = calculateServerShippingCost(order.shippingCity, order.carrier);
 
-  const client = getTursoClient();
   const tx = await client.transaction('write');
 
   try {
@@ -634,7 +667,46 @@ export async function tursoCreateOrder(
       savings,
     };
   } catch (error) {
-    await tx.rollback();
+    try {
+      await tx.rollback();
+    } catch {}
+    throw error;
+  }
+}
+
+export async function tursoCreateOrder(
+  order: {
+    customerName: string;
+    customerEmail?: string | null;
+    customerPhone: string;
+    shippingCity: string;
+    neighborhood?: string;
+    landmark?: string;
+    locationUrl?: string;
+    shippingAddress?: string;
+    shippingPostalCode?: string;
+    shippingCountry?: string;
+    carrier?: string;
+    customerNotes?: string;
+    paymentMethod?: string;
+    utm_source?: string;
+    utm_medium?: string;
+    utm_campaign?: string;
+    referrer?: string;
+    bundleId?: string | null;
+    quantity?: number;
+  },
+  items: Array<{ id: number; quantity: number }>
+) {
+  try {
+    return await executeCreateOrderWithClient(getTursoClient(), order, items);
+  } catch (error: any) {
+    const msg = String(error?.message || error);
+    if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
+      console.warn('[Turso auto-healing tursoCreateOrder]: Order transaction failed with auth error (400), seamlessly retrying with fallbackClient.');
+      primaryClientFailed = true;
+      return await executeCreateOrderWithClient(getFallbackClient(), order, items);
+    }
     throw error;
   }
 }
@@ -665,12 +737,12 @@ export async function tursoGetAllSettings(): Promise<Record<string, string>> {
 // -------------------------------------------------------------
 // GESTION DU STATUT DE COMMANDE (Admin)
 // -------------------------------------------------------------
-export async function tursoUpdateOrderStatus(
+async function executeUpdateOrderStatusWithClient(
+  client: Client,
   id: number,
   status?: string,
   trackingNumber?: string
 ): Promise<{ id: number; status: string; tracking_number: string }> {
-  const client = getTursoClient();
   const tx = await client.transaction('write');
 
   try {
@@ -729,8 +801,28 @@ export async function tursoUpdateOrderStatus(
       tracking_number: trackingNumber !== undefined ? trackingNumber.trim() : current.tracking_number,
     };
   } catch (err) {
-    await tx.rollback();
+    try {
+      await tx.rollback();
+    } catch {}
     throw err;
+  }
+}
+
+export async function tursoUpdateOrderStatus(
+  id: number,
+  status?: string,
+  trackingNumber?: string
+): Promise<{ id: number; status: string; tracking_number: string }> {
+  try {
+    return await executeUpdateOrderStatusWithClient(getTursoClient(), id, status, trackingNumber);
+  } catch (error: any) {
+    const msg = String(error?.message || error);
+    if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
+      console.warn('[Turso auto-healing tursoUpdateOrderStatus]: Update transaction failed with auth error (400), seamlessly retrying with fallbackClient.');
+      primaryClientFailed = true;
+      return await executeUpdateOrderStatusWithClient(getFallbackClient(), id, status, trackingNumber);
+    }
+    throw error;
   }
 }
 

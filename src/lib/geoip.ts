@@ -114,7 +114,8 @@ export function formatCarrierName(isp = '', org = '', as = '', asNumber = ''): s
     full.includes('spacetel') ||
     full.includes('mtn') ||
     full.includes('scancom') ||
-    full.includes('37149')
+    full.includes('37149') ||
+    full.includes('37424')
   ) {
     return 'MTN Bénin (4G/LTE)';
   }
@@ -316,7 +317,7 @@ export function parseUserAgent(ua: string | null | undefined): {
     browser = 'Edge';
   } else if (/SamsungBrowser/i.test(ua)) {
     browser = 'Samsung Internet';
-  } else if (/Chrome/i.test(ua)) {
+  } else if (/Chrome|CriOS/i.test(ua)) {
     browser = device === 'mobile' ? 'Chrome Mobile' : 'Google Chrome';
   } else if (/Safari/i.test(ua)) {
     browser = device === 'mobile' ? 'Safari Mobile' : 'Apple Safari';
@@ -402,7 +403,26 @@ export async function lookupGeoIp(
 
     // Raffinement béninois par quartier/commune si coordonnées présentes
     const refined = refineBeninLocation(finalLat, finalLon, baseCity, baseRegion, isRealGps);
-    const ispName = formatCarrierName('', '', '', edgeAsNumber);
+    let ispName = formatCarrierName('', '', '', edgeAsNumber);
+
+    // Si l'ASN Vercel n'a pas suffi à identifier un FAI précis, résolution réseau rapide
+    if (ispName === "Fournisseur d'Accès" || !ispName) {
+      try {
+        const ctrl = new AbortController();
+        const t = setTimeout(() => ctrl.abort(), 1500);
+        const res = await fetch(`http://ip-api.com/json/${encodeURIComponent(clean)}?fields=isp,org,as`, { signal: ctrl.signal });
+        clearTimeout(t);
+        if (res.ok) {
+          const d = await res.json();
+          const resolved = formatCarrierName(d.isp, d.org, d.as, edgeAsNumber);
+          if (resolved && resolved !== "Fournisseur d'Accès") {
+            ispName = resolved;
+          } else if (d.isp || d.org) {
+            ispName = d.isp || d.org;
+          }
+        }
+      } catch {}
+    }
 
     const result: GeoLocation = {
       ip: clean,

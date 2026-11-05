@@ -161,6 +161,42 @@ export default function ShopifyAnalyticsDashboard() {
     }
   };
 
+  const formatDurationMinHours = (totalSeconds: number): string => {
+    if (!totalSeconds || totalSeconds < 60) return '< 1 min';
+    let hours = Math.floor(totalSeconds / 3600);
+    let minutes = Math.round((totalSeconds % 3600) / 60);
+
+    if (minutes === 60) {
+      hours += 1;
+      minutes = 0;
+    }
+
+    if (hours === 0) return `${minutes} min`;
+    if (minutes === 0) return `${hours} h`;
+    return `${hours} h ${minutes} min`;
+  };
+
+  const formatRelativeMinHours = (totalSeconds: number): string => {
+    if (!totalSeconds || totalSeconds < 60) return 'Il y a < 1 min';
+    let hours = Math.floor(totalSeconds / 3600);
+    let minutes = Math.round((totalSeconds % 3600) / 60);
+
+    if (minutes === 60) {
+      hours += 1;
+      minutes = 0;
+    }
+
+    if (hours === 0) return `Il y a ${minutes} min`;
+    if (hours < 24) {
+      if (minutes === 0) return `Il y a ${hours} h`;
+      return `Il y a ${hours} h ${minutes} min`;
+    }
+    const days = Math.floor(hours / 24);
+    const remHours = hours % 24;
+    if (remHours === 0) return `Il y a ${days} j`;
+    return `Il y a ${days} j ${remHours} h`;
+  };
+
   const exportVisitorsCsv = (visitors: LiveVisitor[]) => {
     if (!visitors || visitors.length === 0) return;
     const headers = [
@@ -175,7 +211,7 @@ export default function ShopifyAnalyticsDashboard() {
       'Page consultée',
       'Source UTM',
       'Date / Heure',
-      'Durée (sec)',
+      'Durée',
       'Latitude',
       'Longitude',
     ];
@@ -191,7 +227,7 @@ export default function ShopifyAnalyticsDashboard() {
       v.path,
       v.utmSource || 'direct',
       v.createdAt,
-      v.durationSec,
+      formatDurationMinHours(v.durationSec),
       v.latitude || '',
       v.longitude || '',
     ]);
@@ -1288,7 +1324,13 @@ export default function ShopifyAnalyticsDashboard() {
           {/* Contrôles du direct */}
           <div className="flex items-center gap-3">
             <div className="text-[11px] text-slate-400 font-medium">
-              Actualisé il y a <span className="text-white font-bold tabular-nums">{lastRefreshedSec}s</span>
+              {lastRefreshedSec < 60 ? (
+                <span>Actualisé <strong className="text-emerald-400">à l&apos;instant</strong></span>
+              ) : (
+                <span>
+                  Actualisé il y a <strong className="text-white tabular-nums">{Math.floor(lastRefreshedSec / 60)} min</strong>
+                </span>
+              )}
             </div>
             <button
               onClick={() => setLiveAutoRefresh(!liveAutoRefresh)}
@@ -1370,8 +1412,8 @@ export default function ShopifyAnalyticsDashboard() {
                 })}
               </div>
               <div className="flex justify-between text-[9px] text-slate-400 mt-1 font-mono">
-                <span>Il y a 30m</span>
-                <span>Il y a 15m</span>
+                <span>Il y a 30 min</span>
+                <span>Il y a 15 min</span>
                 <span className="text-emerald-400 font-bold">Maintenant</span>
               </div>
             </div>
@@ -1496,7 +1538,7 @@ export default function ShopifyAnalyticsDashboard() {
                             <ExternalLink className="w-2.5 h-2.5" />
                           </a>
                         ) : (
-                          <span className="text-emerald-300 font-bold">{v.lastSeenSec}s</span>
+                          <span className="text-emerald-300 font-bold">{formatDurationMinHours(v.lastSeenSec)}</span>
                         )}
                       </div>
                     </div>
@@ -1669,13 +1711,7 @@ export default function ShopifyAnalyticsDashboard() {
                         ) : (
                           <div className="space-y-0.5">
                             <div className="text-[11px] text-slate-300 font-bold">
-                              {v.lastSeenSec < 60
-                                ? `Il y a ${v.lastSeenSec}s`
-                                : v.lastSeenSec < 3600
-                                  ? `Il y a ${Math.round(v.lastSeenSec / 60)} min`
-                                  : v.lastSeenSec < 86400
-                                    ? `Il y a ${Math.round(v.lastSeenSec / 3600)} h`
-                                    : `Il y a ${Math.round(v.lastSeenSec / 86400)} j`}
+                              {formatRelativeMinHours(v.lastSeenSec)}
                             </div>
                             <div className="text-[10px] text-slate-500 font-mono">
                               {v.lastHeartbeat || v.createdAt
@@ -1779,7 +1815,7 @@ export default function ShopifyAnalyticsDashboard() {
 
                       {/* Durée */}
                       <td className="py-3 px-3.5 whitespace-nowrap text-right font-mono font-bold text-slate-300">
-                        {v.durationSec < 60 ? `${v.durationSec}s` : `${Math.floor(v.durationSec / 60)}m ${v.durationSec % 60}s`}
+                        {formatDurationMinHours(v.durationSec)}
                       </td>
 
                       {/* Action : Supprimer la session */}

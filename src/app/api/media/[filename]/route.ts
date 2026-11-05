@@ -56,10 +56,12 @@ export async function GET(
   try {
     let fileRecord: { mime_type: string; data: string; size?: number } | null = null;
 
+    let debugError = '';
     if (isTursoEnabled()) {
       try {
         fileRecord = await tursoGetUploadedFile(filename);
-      } catch (tursoErr) {
+      } catch (tursoErr: any) {
+        debugError = String(tursoErr?.message || tursoErr);
         console.warn('[Turso Media fetch warning]:', tursoErr);
       }
     }
@@ -67,13 +69,24 @@ export async function GET(
     if (!fileRecord) {
       try {
         fileRecord = getUploadedFile(filename);
-      } catch (dbErr) {
+      } catch (dbErr: any) {
+        if (!debugError) debugError = String(dbErr?.message || dbErr);
         console.warn('[SQLite Media fetch warning]:', dbErr);
       }
     }
 
     if (!fileRecord || !fileRecord.data) {
-      return NextResponse.json({ error: 'Image introuvable.' }, { status: 404 });
+      return NextResponse.json(
+        { error: 'Image introuvable.', debug: { filename, tursoEnabled: isTursoEnabled(), debugError } },
+        {
+          status: 404,
+          headers: {
+            'x-debug-filename': encodeURIComponent(filename || ''),
+            'x-debug-turso-enabled': String(isTursoEnabled()),
+            'x-debug-error': encodeURIComponent(debugError || 'none'),
+          },
+        }
+      );
     }
 
     const buffer = Buffer.from(fileRecord.data, 'base64');

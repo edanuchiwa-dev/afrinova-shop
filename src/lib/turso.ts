@@ -784,20 +784,16 @@ export async function tursoGetUploadedFile(
   filename: string
 ): Promise<{ mime_type: string; data: string; size: number } | null> {
   const client = getTursoClient();
-  try {
-    const res = await client.execute({
-      sql: 'SELECT mime_type, data, size FROM uploaded_files WHERE filename = ?',
-      args: [filename],
-    });
-    if (res.rows.length === 0) return null;
-    const row = res.rows[0];
-    return {
-      mime_type: String(row.mime_type || 'image/webp'),
-      data: String(row.data || ''),
-      size: Number(row.size || 0),
-    };
-  } catch {
-    return null;
-  }
+  const res = await client.execute({
+    sql: 'SELECT mime_type, data, size FROM uploaded_files WHERE filename = ?',
+    args: [filename],
+  });
+  if (res.rows.length === 0) return null;
+  const row = res.rows[0];
+  return {
+    mime_type: String(row.mime_type || 'image/webp'),
+    data: String(row.data || ''),
+    size: Number(row.size || 0),
+  };
 }
 

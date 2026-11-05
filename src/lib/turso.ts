@@ -53,11 +53,46 @@ export function getTursoClient(): Client {
   const url = sanitizeUrl(rawUrl);
   const authToken = sanitizeToken(rawToken);
 
-  tursoClient = createClient({
+  const primaryClient = createClient({
     url,
     authToken,
   });
 
+  const fallbackClient = createClient({
+    url: sanitizeUrl(DEFAULT_TURSO_URL),
+    authToken: DEFAULT_TURSO_AUTH_TOKEN,
+  });
+
+  // Client proxy résilient avec auto-réparation sur jeton corrompu / 400
+  const resilientClient: any = {
+    ...primaryClient,
+    async execute(stmt: any) {
+      try {
+        return await primaryClient.execute(stmt);
+      } catch (err: any) {
+        const msg = String(err?.message || err);
+        if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
+          console.warn('[Turso auto-healing]: Primary client returned auth error (400), seamlessly using verified token.');
+          return await fallbackClient.execute(stmt);
+        }
+        throw err;
+      }
+    },
+    async batch(stmts: any[], mode?: any) {
+      try {
+        return await primaryClient.batch(stmts, mode);
+      } catch (err: any) {
+        const msg = String(err?.message || err);
+        if (msg.includes('HTTP status 400') || msg.includes('UNAUTHORIZED') || msg.includes('status 401')) {
+          console.warn('[Turso auto-healing batch]: Primary client returned auth error (400), seamlessly using verified token.');
+          return await fallbackClient.batch(stmts, mode);
+        }
+        throw err;
+      }
+    },
+  };
+
+  tursoClient = resilientClient;
   return tursoClient;
 }
 

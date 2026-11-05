@@ -50,33 +50,33 @@ export default function ProductCard({ product }: { product: Product }) {
         {/* Badges en superposition */}
         <div className="absolute top-3 left-3 flex flex-col gap-1.5 items-start z-10">
           {isPromo && (
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#16171A]/90 text-white backdrop-blur-md border border-white/15 shadow-sm">
-              <Sparkles className="w-2.5 h-2.5 text-[#E5A869]" />
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-[#16171A]/90 text-white backdrop-blur-md border border-white/15 shadow-sm">
+              <Sparkles className="w-3 h-3 text-[#E5A869]" />
               Offre Atelier
             </span>
           )}
 
           {discountBadge && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-[#C27835]/15 text-[#9E5A1C] border border-[#C27835]/30 backdrop-blur-md shadow-xs">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider bg-[#C27835]/15 text-[#9E5A1C] border border-[#C27835]/30 backdrop-blur-md shadow-xs">
               {discountBadge}
             </span>
           )}
 
           {/* Badge stock rare quand stock <= 5 */}
           {product.stock <= 0 ? (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-medium uppercase tracking-wider bg-stone-800/80 text-stone-300 border border-stone-700 backdrop-blur-md shadow-xs">
+            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider bg-stone-800/80 text-stone-300 border border-stone-700 backdrop-blur-md shadow-xs">
               Rupture temporaire
             </span>
           ) : product.stock <= 5 ? (
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium tracking-wide bg-amber-50/90 text-amber-900 border border-amber-200/80 backdrop-blur-md shadow-xs">
-              <Clock className="w-2.5 h-2.5 text-amber-700" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide bg-amber-50/90 text-amber-900 border border-amber-200/80 backdrop-blur-md shadow-xs">
+              <Clock className="w-3 h-3 text-amber-700" />
               Plus que {product.stock} en stock
             </span>
           ) : null}
         </div>
 
         {/* Badge catégorie discret */}
-        <span className="absolute bottom-3 right-3 bg-white/85 backdrop-blur-md text-[#54555A] text-[10px] font-medium px-2.5 py-0.5 rounded-full shadow-xs border border-black/5">
+        <span className="absolute bottom-3 right-3 bg-white/90 backdrop-blur-md text-[#54555A] text-xs font-semibold px-3 py-1 rounded-full shadow-xs border border-black/5">
           {product.category}
         </span>
       </Link>
@@ -88,20 +88,20 @@ export default function ProductCard({ product }: { product: Product }) {
             href={`/produit/${encodeURIComponent(product.slug)}`}
             className="group/title block"
           >
-            <h3 className="font-heading font-bold text-sm sm:text-base text-[#16171A] group-hover/title:text-[#C27835] transition-colors line-clamp-1 leading-snug">
+            <h3 className="font-heading font-bold text-base sm:text-lg text-[#16171A] group-hover/title:text-[#C27835] transition-colors line-clamp-1 leading-snug">
               {product.name}
             </h3>
           </Link>
           {/* Évaluation Social Proof Boutique */}
-          <div className="flex items-center gap-1.5 mt-1.5">
-            <div className="flex items-center text-amber-400 text-xs">
+          <div className="flex items-center gap-2 mt-1.5">
+            <div className="flex items-center text-amber-400 text-sm">
               ★★★★★
             </div>
-            <span className="text-[11px] font-extrabold text-[#16171A]">4.9</span>
-            <span className="text-[10px] text-emerald-700 font-semibold">• Boutique certifiée</span>
+            <span className="text-xs sm:text-sm font-extrabold text-[#16171A]">4.9</span>
+            <span className="text-xs text-emerald-700 font-semibold">• Boutique certifiée</span>
           </div>
           {product.description && (
-            <p className="mt-1 text-xs text-[#73737A] line-clamp-2 leading-relaxed">
+            <p className="mt-1 text-xs sm:text-sm text-[#54555A] line-clamp-2 leading-relaxed">
               {product.description}
             </p>
           )}
@@ -111,15 +111,15 @@ export default function ProductCard({ product }: { product: Product }) {
         <div className="pt-3 border-t border-[#F3F1EC] space-y-2.5">
           {/* Ligne Prix & Réassurance : flex-col sur mobile très étroit, row dès sm */}
           <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1">
-            <div className="flex items-baseline gap-1.5 sm:gap-2 flex-wrap">
-              <span className={`font-heading font-black text-base sm:text-lg tracking-tight whitespace-nowrap ${isPromo ? 'text-[#C27835]' : 'text-[#16171A]'}`}>
+            <div className="flex items-baseline gap-2 flex-wrap">
+              <span className={`font-heading font-black text-lg sm:text-xl tracking-tight whitespace-nowrap ${isPromo ? 'text-[#C27835]' : 'text-[#16171A]'}`}>
                 {formatFCFA(currentPrice)}
               </span>
-              <span className="text-[11px] sm:text-xs text-[#9C9CA4] line-through font-medium whitespace-nowrap">
+              <span className="text-xs sm:text-sm text-[#9C9CA4] line-through font-medium whitespace-nowrap">
                 {formatFCFA(originalPrice)}
               </span>
             </div>
-            <span className="text-[10px] text-emerald-700 font-bold flex items-center gap-1 shrink-0">
+            <span className="text-xs text-emerald-700 font-bold flex items-center gap-1 shrink-0">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
               <span>À la livraison</span>
             </span>
@@ -128,7 +128,7 @@ export default function ProductCard({ product }: { product: Product }) {
           {/* Bouton d'action pleine largeur style Shopify Prestige */}
           <Link
             href={`/produit/${encodeURIComponent(product.slug)}`}
-            className={`group/btn w-full min-h-[44px] py-2.5 px-4 rounded-xl font-heading font-bold text-xs uppercase tracking-wider flex items-center justify-center gap-2 border shadow-xs hover:shadow-md transition-all duration-300 active:scale-[0.98] ${
+            className={`group/btn w-full min-h-[46px] py-3 px-4 rounded-xl font-heading font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 border shadow-xs hover:shadow-md transition-all duration-300 active:scale-[0.98] ${
               isPromo
                 ? 'bg-[#C27835] hover:bg-[#a76428] text-white border-[#C27835]'
                 : 'bg-[#121316] hover:bg-[#C27835] text-white border-white/10 hover:border-[#C27835]'

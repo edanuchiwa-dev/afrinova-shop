@@ -515,31 +515,31 @@ function ProductDetailView() {
 
       {/* 1. EN-TÊTE ÉPURÉ & RESTRUCTURÉ (SANS GROS BOUTON REDONDANT, HAUTEUR RÉDUITE) */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-[#EAE8E2] shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-13 sm:h-14 flex items-center justify-between">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-14 sm:h-16 flex items-center justify-between">
           {/* LIEN RETOUR CATALOGUE */}
           <Link
             href="/"
-            className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#54555A] hover:text-[#16171A] transition py-1"
+            className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-[#54555A] hover:text-[#16171A] transition py-1"
           >
-            <span className="text-sm leading-none">←</span>
+            <span className="text-base leading-none">←</span>
             <span className="hidden sm:inline">Retour au catalogue</span>
-            <span className="sm:hidden text-[11px]">Catalogue</span>
+            <span className="sm:hidden text-xs">Catalogue</span>
           </Link>
 
           {/* LOGO AFRINOVA SHOP */}
           <Link href="/" className="flex flex-col items-center">
-            <span className="font-heading font-black text-sm sm:text-base tracking-tight text-[#16171A] uppercase leading-none">
+            <span className="font-heading font-black text-base sm:text-lg tracking-tight text-[#16171A] uppercase leading-none">
               AFRINOVA SHOP
             </span>
-            <span className="text-[8px] font-bold text-[#73737A] tracking-[0.2em] uppercase mt-0.5 leading-none">
+            <span className="text-[10px] font-bold text-[#73737A] tracking-[0.2em] uppercase mt-0.5 leading-none">
               Boutique Exclusive
             </span>
           </Link>
 
           {/* RÉASSURANCE DISCRÈTE (REMPLACE LE GROS BOUTON POUR ÉVITER LES RÉPÉTITIONS) */}
           <div className="flex items-center">
-            <span className="inline-flex items-center gap-1 text-[10px] sm:text-[11px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200/80">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/80">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
               <span className="hidden sm:inline">Paiement à la livraison</span>
               <span className="sm:hidden">Paiement livraison</span>
             </span>
@@ -554,33 +554,33 @@ function ProductDetailView() {
             <div className="w-16 h-16 bg-emerald-50 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-3xl font-black mb-4 border border-emerald-100">
               ✓
             </div>
-            <span className="inline-block bg-emerald-50 text-emerald-800 text-[10px] sm:text-xs font-bold uppercase tracking-wider px-3.5 py-1 rounded-full border border-emerald-200 mb-2">
+            <span className="inline-block bg-emerald-50 text-emerald-800 text-xs sm:text-sm font-bold uppercase tracking-wider px-3.5 py-1 rounded-full border border-emerald-200 mb-2">
               Commande Enregistrée avec Succès
             </span>
             <h1 className="text-xl sm:text-2xl font-heading font-extrabold text-[#16171A] mb-2">
               Merci pour votre commande !
             </h1>
-            <p className="text-xs sm:text-sm text-[#73737A] mb-6 max-w-md mx-auto leading-relaxed">
+            <p className="text-sm sm:text-base text-[#54555A] mb-6 max-w-md mx-auto leading-relaxed">
               Votre commande est bien enregistrée. Notre coursier prendra directement contact avec vous par téléphone avant son passage.
             </p>
 
             {orderConfirmed.phoneNotice && (
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs text-amber-900 text-left mb-6 font-semibold">
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-3.5 text-xs sm:text-sm text-amber-900 text-left mb-6 font-semibold">
                 ℹ️ {orderConfirmed.phoneNotice}
               </div>
             )}
 
-            <div className="bg-[#FAF9F6] rounded-2xl p-5 border border-[#EAE8E2] text-left space-y-3 mb-6 text-xs sm:text-sm">
+            <div className="bg-[#FAF9F6] rounded-2xl p-5 border border-[#EAE8E2] text-left space-y-3 mb-6 text-sm">
               <div className="flex justify-between border-b border-[#EAE8E2] pb-2">
-                <span className="text-[#73737A] font-medium">Numéro de commande :</span>
+                <span className="text-[#54555A] font-medium">Numéro de commande :</span>
                 <span className="font-mono font-bold text-[#16171A]">{orderConfirmed.orderNumber}</span>
               </div>
               <div className="flex justify-between border-b border-[#EAE8E2] pb-2">
-                <span className="text-[#73737A] font-medium">Article commandé :</span>
+                <span className="text-[#54555A] font-medium">Article commandé :</span>
                 <span className="font-bold text-[#16171A] text-right">{product.name} (x{orderQuantity})</span>
               </div>
               <div className="flex justify-between border-b border-[#EAE8E2] pb-2">
-                <span className="text-[#73737A] font-medium">Ville / Lieu :</span>
+                <span className="text-[#54555A] font-medium">Ville / Lieu :</span>
                 <span className="font-bold text-[#16171A]">{orderConfirmed.shippingCity}</span>
               </div>
               {orderConfirmed.savings !== undefined && orderConfirmed.savings > 0 && (
@@ -589,16 +589,16 @@ function ProductDetailView() {
                   <span>-{formatFCFA(orderConfirmed.savings)}</span>
                 </div>
               )}
-              <div className="flex justify-between pt-1 text-base">
+              <div className="flex justify-between pt-1 text-base sm:text-lg">
                 <span className="font-heading font-extrabold text-[#16171A]">Total à payer à la réception :</span>
-                <span className="font-heading font-black text-emerald-700 text-lg">{formatFCFA(orderConfirmed.totalPrice)}</span>
+                <span className="font-heading font-black text-emerald-700 text-lg sm:text-xl">{formatFCFA(orderConfirmed.totalPrice)}</span>
               </div>
             </div>
 
             {/* Note rassurante logistique Bénin */}
-            <div className="bg-emerald-50/70 border border-emerald-200/70 rounded-2xl p-4 text-xs text-emerald-950 text-left mb-6 space-y-1">
-              <div className="font-bold flex items-center gap-1.5 text-emerald-800">
-                <Phone className="w-3.5 h-3.5 text-emerald-700 shrink-0" />
+            <div className="bg-emerald-50/70 border border-emerald-200/70 rounded-2xl p-4 text-xs sm:text-sm text-emerald-950 text-left mb-6 space-y-1">
+              <div className="font-bold flex items-center gap-1.5 text-emerald-800 text-sm">
+                <Phone className="w-4 h-4 text-emerald-700 shrink-0" />
                 <span>Confirmation logistique</span>
               </div>
               <p className="leading-relaxed">
@@ -614,22 +614,22 @@ function ProductDetailView() {
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="w-full inline-flex items-center justify-center gap-2 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-xs sm:text-sm py-4 px-6 rounded-full shadow-md transition active:scale-[0.99] cursor-pointer"
+                className="w-full inline-flex items-center justify-center gap-2 bg-[#128C7E] hover:bg-[#075E54] text-white font-bold text-sm sm:text-base py-4 px-6 rounded-full shadow-md transition active:scale-[0.99] cursor-pointer"
               >
-                <MessageCircle className="w-4 h-4 text-white shrink-0" />
+                <MessageCircle className="w-5 h-5 text-white shrink-0" />
                 <span>Confirmer ma commande par WhatsApp</span>
-                <ArrowRight className="w-4 h-4 ml-1 shrink-0" />
+                <ArrowRight className="w-5 h-5 ml-1 shrink-0" />
               </a>
-              <p className="text-[11px] text-[#73737A]">
+              <p className="text-xs text-[#54555A]">
                 1 clic pour notifier immédiatement notre équipe et accélérer l&apos;expédition.
               </p>
             </div>
 
             <div className="flex flex-wrap justify-center gap-3">
-              <Link href="/suivi" className="btn-secondary text-xs">
+              <Link href="/suivi" className="btn-secondary text-xs sm:text-sm">
                 Suivre mon colis
               </Link>
-              <Link href="/" className="btn-primary text-xs">
+              <Link href="/" className="btn-primary text-xs sm:text-sm">
                 Retourner au catalogue
               </Link>
             </div>
@@ -666,23 +666,23 @@ function ProductDetailView() {
                     {/* Badges sur l'image */}
                     <div className="absolute top-3 sm:top-4 left-3 sm:left-4 flex flex-col gap-1.5 z-10">
                       {isPromoActive && (
-                        <span className="inline-flex items-center gap-1 bg-[#16171A]/90 text-white text-[10px] sm:text-[11px] font-bold px-2.5 sm:px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md border border-white/15 shadow-sm">
-                          <Sparkles className="w-3 h-3 text-[#E5A869]" />
+                        <span className="inline-flex items-center gap-1.5 bg-[#16171A]/90 text-white text-xs sm:text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md border border-white/15 shadow-sm">
+                          <Sparkles className="w-3.5 h-3.5 text-[#E5A869]" />
                           Offre Spéciale
                         </span>
                       )}
                       {discountBadge && !isPromoActive && (
-                        <span className="inline-flex items-center bg-[#C27835]/15 text-[#9E5A1C] border border-[#C27835]/30 text-[10px] sm:text-[11px] font-bold px-2.5 sm:px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md shadow-xs">
+                        <span className="inline-flex items-center bg-[#C27835]/15 text-[#9E5A1C] border border-[#C27835]/30 text-xs sm:text-sm font-bold px-3 py-1 rounded-full uppercase tracking-wider backdrop-blur-md shadow-xs">
                           {discountBadge}
                         </span>
                       )}
-                      <span className="bg-white/90 backdrop-blur-md text-[#54555A] text-[10px] font-semibold px-2.5 py-0.5 rounded-full shadow-xs border border-black/5 self-start">
+                      <span className="bg-white/95 backdrop-blur-md text-[#383A40] text-xs font-bold px-3 py-1 rounded-full shadow-xs border border-black/5 self-start">
                         {product.category}
                       </span>
                     </div>
 
-                    <span className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-black/60 hover:bg-black/80 text-white text-[10px] font-medium px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-full backdrop-blur-md flex items-center gap-1.5 transition">
-                      <ZoomIn className="w-3.5 h-3.5 text-white/90" />
+                    <span className="absolute bottom-3 sm:bottom-4 right-3 sm:right-4 bg-black/60 hover:bg-black/80 text-white text-xs font-semibold px-3 py-1.5 rounded-full backdrop-blur-md flex items-center gap-1.5 transition">
+                      <ZoomIn className="w-4 h-4 text-white/90" />
                       <span>Agrandir</span>
                     </span>
                   </div>
@@ -727,13 +727,13 @@ function ProductDetailView() {
                   
                   {/* 3.1 BADGE DE COLLECTION OU CATÉGORIE */}
                   <div>
-                    <span className="text-[10px] sm:text-[11px] font-extrabold uppercase tracking-widest text-[#C27835] bg-[#FBF4ED] px-3 py-1 rounded-full border border-[#F2DFCE] inline-block">
+                    <span className="text-xs sm:text-sm font-extrabold uppercase tracking-widest text-[#C27835] bg-[#FBF4ED] px-3.5 py-1.5 rounded-full border border-[#F2DFCE] inline-block">
                       AFRINOVA SHOP • {product.category}
                     </span>
                   </div>
 
                   {/* 3.2 NOM DU PRODUIT */}
-                  <h1 className="font-heading font-black text-xl sm:text-2xl lg:text-3xl text-[#16171A] leading-snug">
+                  <h1 className="font-heading font-black text-2xl sm:text-3xl lg:text-4xl text-[#16171A] leading-tight">
                     {product.name}
                   </h1>
 
@@ -741,15 +741,15 @@ function ProductDetailView() {
                   <div className="flex flex-wrap items-center gap-2 pt-0.5">
                     <a
                       href="#avis-clients"
-                      className="inline-flex items-center gap-1.5 group hover:opacity-85 transition"
+                      className="inline-flex items-center gap-2 group hover:opacity-85 transition"
                     >
                       <div className="flex items-center gap-0.5 text-amber-500">
                         {[1, 2, 3, 4, 5].map((s) => (
-                          <Star key={s} className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <Star key={s} className="w-4 h-4 fill-amber-400 text-amber-400" />
                         ))}
                       </div>
-                      <span className="font-extrabold text-xs text-[#16171A]">4.9/5</span>
-                      <span className="text-xs text-[#73737A] underline decoration-slate-300 underline-offset-2 group-hover:text-[#16171A]">
+                      <span className="font-extrabold text-sm sm:text-base text-[#16171A]">4.9/5</span>
+                      <span className="text-xs sm:text-sm text-[#54555A] underline decoration-slate-300 underline-offset-2 group-hover:text-[#16171A]">
                         ({reviews.length} avis vérifiés)
                       </span>
                     </a>
@@ -757,8 +757,8 @@ function ProductDetailView() {
 
                   {/* 3.4 BADGE « PAIEMENT À LA LIVRAISON » */}
                   <div>
-                    <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200/80">
-                      <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                    <span className="inline-flex items-center gap-2 text-xs sm:text-sm font-bold text-emerald-900 bg-emerald-50 px-3.5 py-1.5 rounded-full border border-emerald-200/80">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                       <span>Paiement à la livraison au Bénin</span>
                     </span>
                   </div>
@@ -767,7 +767,7 @@ function ProductDetailView() {
                   <div className="pt-2 border-t border-[#F3F1EC]">
                     {isPromoActive ? (
                       <div className="p-4 rounded-2xl bg-[#FDF9F4] border border-[#F5E6D3] space-y-2">
-                        <div className="inline-flex items-center gap-1 text-[10px] font-black uppercase tracking-wider text-[#C27835]">
+                        <div className="inline-flex items-center gap-1.5 text-xs font-black uppercase tracking-wider text-[#C27835]">
                           <span>⚡</span>
                           <span>TARIF PROMOTIONNEL EN COURS</span>
                         </div>
@@ -779,19 +779,19 @@ function ProductDetailView() {
                           </span>
 
                           {/* 3.6 ANCIEN PRIX BARRÉ */}
-                          <span className="text-base sm:text-lg text-[#9C9CA4] line-through font-semibold tabular-nums">
+                          <span className="text-lg sm:text-xl text-[#9C9CA4] line-through font-semibold tabular-nums">
                             {formatFCFA(regularReferencePrice)}
                           </span>
 
                           {/* 3.7 POURCENTAGE DE RÉDUCTION */}
                           {discountPercent > 0 && (
-                            <span className="bg-[#121316] text-white text-xs font-black px-2.5 py-0.5 rounded-full">
+                            <span className="bg-[#121316] text-white text-xs sm:text-sm font-black px-3 py-1 rounded-full">
                               -{discountPercent}%
                             </span>
                           )}
                         </div>
 
-                        <p className="text-[11px] text-emerald-800 font-bold">
+                        <p className="text-xs sm:text-sm text-emerald-800 font-bold">
                           ✓ Vous économisez {formatFCFA(regularReferencePrice - promo.promo_price)} par article
                         </p>
                       </div>
@@ -804,14 +804,14 @@ function ProductDetailView() {
 
                         {/* 3.6 ANCIEN PRIX BARRÉ */}
                         {regularReferencePrice > product.price && (
-                          <span className="text-base text-[#9C9CA4] line-through font-medium tabular-nums">
+                          <span className="text-base sm:text-lg text-[#9C9CA4] line-through font-medium tabular-nums">
                             {formatFCFA(regularReferencePrice)}
                           </span>
                         )}
 
                         {/* 3.7 POURCENTAGE DE RÉDUCTION */}
                         {discountBadge && (
-                          <span className="bg-[#121316] text-white text-xs font-black px-2.5 py-0.5 rounded-full">
+                          <span className="bg-[#121316] text-white text-xs sm:text-sm font-black px-3 py-1 rounded-full">
                             {discountBadge}
                           </span>
                         )}
@@ -822,7 +822,7 @@ function ProductDetailView() {
                   {/* 4. SECTION DES OFFRES PAR QUANTITÉ (BUNDLES) */}
                   <div className="pt-2">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-black uppercase tracking-wider text-[#16171A]">
+                      <span className="text-sm font-black uppercase tracking-wider text-[#16171A]">
                         Offres par quantité (Volume Discounts) :
                       </span>
                       {selectedBundle?.tag && (
@@ -832,7 +832,7 @@ function ProductDetailView() {
                             backgroundColor: `${activeAccentColor}14`,
                             borderColor: `${activeAccentColor}30`,
                           }}
-                          className="text-[10px] font-black uppercase tracking-wider px-2.5 py-0.5 rounded-full border"
+                          className="text-xs font-black uppercase tracking-wider px-3 py-1 rounded-full border"
                         >
                           ★ {selectedBundle.tag}
                         </span>
@@ -855,8 +855,8 @@ function ProductDetailView() {
                   {/* Ajusteur manuel de quantité synchronisé */}
                   <div className="pt-2 border-t border-[#F3F1EC] flex items-center justify-between">
                     <div>
-                      <span className="text-xs font-bold text-[#16171A] block">Quantité exacte :</span>
-                      <span className="text-[10px] text-[#73737A]">Ajustable librement (+ / −)</span>
+                      <span className="text-sm font-bold text-[#16171A] block">Quantité exacte :</span>
+                      <span className="text-xs text-[#54555A]">Ajustable librement (+ / −)</span>
                     </div>
                     <div className="flex items-center border border-[#EAE8E2] rounded-full bg-[#FAF9F6]">
                       <button
@@ -869,12 +869,12 @@ function ProductDetailView() {
                           else if (nextQ === 3) setSelectedBundleId('x3');
                         }}
                         disabled={orderQuantity <= 1}
-                        className="w-8 h-8 flex items-center justify-center font-bold text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
+                        className="w-9 h-9 flex items-center justify-center font-bold text-base text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
                         aria-label="Diminuer la quantité"
                       >
                         −
                       </button>
-                      <span className="w-8 text-center font-bold text-xs text-[#16171A] tabular-nums">
+                      <span className="w-9 text-center font-bold text-sm text-[#16171A] tabular-nums">
                         {orderQuantity}
                       </span>
                       <button
@@ -888,7 +888,7 @@ function ProductDetailView() {
                           else if (nextQ === 3) setSelectedBundleId('x3');
                         }}
                         disabled={orderQuantity >= Math.min(10, product.stock || 10)}
-                        className="w-8 h-8 flex items-center justify-center font-bold text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
+                        className="w-9 h-9 flex items-center justify-center font-bold text-base text-[#16171A] hover:bg-white rounded-full transition disabled:opacity-30 cursor-pointer"
                         aria-label="Augmenter la quantité"
                       >
                         +
@@ -902,26 +902,26 @@ function ProductDetailView() {
                 <div id="commandeDirecte" className="bg-white rounded-3xl p-5 sm:p-7 border border-[#EAE8E2] shadow-md space-y-4 scroll-mt-20">
                   
                   <div className="border-b border-[#F3F1EC] pb-3">
-                    <span className="text-xs font-heading font-black uppercase tracking-wider text-[#16171A] flex items-center gap-2">
+                    <span className="text-sm sm:text-base font-heading font-black uppercase tracking-wider text-[#16171A] flex items-center gap-2">
                       <span>⚡ Commande Express — Paiement à la réception</span>
                     </span>
-                    <p className="text-xs text-[#73737A] mt-1">
+                    <p className="text-xs sm:text-sm text-[#54555A] mt-1 leading-relaxed">
                       Remplissez vos 3 coordonnées. Vous réglez directement lors de la remise en main propre.
                     </p>
                   </div>
 
                   {errorMsg && (
-                    <div className="p-3 bg-[#FDF2F0] border border-[#F8D7DA] text-[#B85D3D] text-xs rounded-2xl font-bold flex items-center gap-2">
+                    <div className="p-3.5 bg-[#FDF2F0] border border-[#F8D7DA] text-[#B85D3D] text-xs sm:text-sm rounded-2xl font-bold flex items-center gap-2">
                       <span>⚠️</span>
                       <span>{errorMsg}</span>
                     </div>
                   )}
 
-                  <form onSubmit={handleOrderSubmit} className="space-y-3.5 text-xs sm:text-sm">
+                  <form onSubmit={handleOrderSubmit} className="space-y-4 text-sm sm:text-base">
                     
                     {/* CHAMP 1 : NOM COMPLET */}
                     <div>
-                      <label className="block text-[11px] font-bold text-[#54555A] mb-1">
+                      <label className="block text-sm font-bold text-[#16171A] mb-1.5">
                         Nom complet *
                       </label>
                       <input
@@ -931,17 +931,17 @@ function ProductDetailView() {
                         value={customerName}
                         onChange={(e) => setCustomerName(e.target.value)}
                         placeholder="ex: Jean Dossou"
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition"
+                        className="w-full px-4 py-3 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-base placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition"
                       />
                     </div>
 
                     {/* CHAMP 2 : TÉLÉPHONE BÉNIN */}
                     <div>
-                      <div className="flex justify-between items-center mb-1">
-                        <label className="block text-[11px] font-bold text-[#54555A]">
+                      <div className="flex justify-between items-center mb-1.5">
+                        <label className="block text-sm font-bold text-[#16171A]">
                           Numéro de téléphone *
                         </label>
-                        <span className="text-[10px] text-[#73737A] font-medium">Bénin (+229)</span>
+                        <span className="text-xs text-[#54555A] font-semibold">Bénin (+229)</span>
                       </div>
                       <input
                         type="tel"
@@ -949,14 +949,14 @@ function ProductDetailView() {
                         value={customerPhone}
                         onChange={(e) => setCustomerPhone(e.target.value)}
                         placeholder="01 97 00 11 22 ou 97 00 11 22"
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition"
+                        className="w-full px-4 py-3 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-base placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition font-medium"
                       />
                       {phoneValidation && (
-                        <div className="mt-1 text-[10px] font-semibold">
+                        <div className="mt-1.5 text-xs font-bold">
                           {phoneValidation.valid ? (
                             phoneValidation.isOldFormat ? (
                               <span className="text-amber-700 inline-flex items-center gap-1">
-                                <Info className="w-3 h-3 text-amber-600 shrink-0" />
+                                <Info className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                                 <span>{phoneValidation.message}</span>
                               </span>
                             ) : (
@@ -971,7 +971,7 @@ function ProductDetailView() {
 
                     {/* CHAMP 3 : VILLE / LIEU DE LIVRAISON */}
                     <div>
-                      <label className="block text-[11px] font-bold text-[#54555A] mb-1">
+                      <label className="block text-sm font-bold text-[#16171A] mb-1.5">
                         Ville / Lieu de livraison au Bénin *
                       </label>
                       <input
@@ -986,33 +986,33 @@ function ProductDetailView() {
                           } catch {}
                         }}
                         placeholder="ex: Cotonou, Calavi, Porto-Novo, Parakou..."
-                        className="w-full px-4 py-2.5 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-xs sm:text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition font-medium"
+                        className="w-full px-4 py-3 rounded-xl border border-[#EAE8E2] bg-[#FAF9F6] text-[#16171A] text-base placeholder:text-slate-400 focus:bg-white focus:outline-none focus:ring-2 focus:ring-[#C27835] transition font-medium"
                       />
                     </div>
 
                     {/* RÉCAPITULATIF DE LA FORMULE BUNDLE */}
                     <div className="pt-2 border-t border-[#F3F1EC]">
-                      <div className="flex items-center justify-between bg-[#FAF9F6] border border-[#EAE8E2] rounded-xl px-3.5 py-2.5">
-                        <div className="flex items-center gap-2">
+                      <div className="flex items-center justify-between bg-[#FAF9F6] border border-[#EAE8E2] rounded-xl px-4 py-3">
+                        <div className="flex items-center gap-2.5">
                           <span
                             style={{ backgroundColor: activeAccentColor }}
-                            className="text-[10px] font-black text-white px-2 py-0.5 rounded-full"
+                            className="text-xs font-black text-white px-2.5 py-1 rounded-full"
                           >
                             {selectedBundle?.badge || `${orderQuantity} art.`}
                           </span>
-                          <span className="text-xs font-bold text-[#16171A]">
+                          <span className="text-sm font-extrabold text-[#16171A]">
                             {selectedBundle?.title || `${orderQuantity} article${orderQuantity > 1 ? 's' : ''}`}
                           </span>
                         </div>
-                        <span className="text-[11px] font-bold text-[#73737A]">
+                        <span className="text-sm font-black text-[#16171A]">
                           {formatFCFA(currentSubtotal)}
                         </span>
                       </div>
                     </div>
 
                     {/* RÉCAPITULATIF TRANSPARENT DU TOTAL SÉLECTIONNÉ */}
-                    <div className="bg-[#FAF9F6] p-4 rounded-2xl border border-[#EAE8E2] space-y-2 text-xs">
-                      <div className="flex justify-between text-[#73737A]">
+                    <div className="bg-[#FAF9F6] p-4 sm:p-5 rounded-2xl border border-[#EAE8E2] space-y-2.5 text-sm">
+                      <div className="flex justify-between text-[#54555A]">
                         <span>Quantité sélectionnée :</span>
                         <span className="font-bold text-[#16171A]">{orderQuantity} article{orderQuantity > 1 ? 's' : ''} ({selectedBundle?.title || 'Standard'})</span>
                       </div>
@@ -1024,9 +1024,9 @@ function ProductDetailView() {
                         </div>
                       )}
 
-                      <div className="flex justify-between pt-2 border-t border-[#EAE8E2] font-heading font-black text-sm text-[#16171A]">
+                      <div className="flex justify-between pt-2.5 border-t border-[#EAE8E2] font-heading font-black text-base text-[#16171A]">
                         <span>TOTAL À LA RÉCEPTION :</span>
-                        <span className="text-[#C27835] text-base sm:text-lg">{formatFCFA(currentTotal)}</span>
+                        <span className="text-[#C27835] text-xl sm:text-2xl">{formatFCFA(currentTotal)}</span>
                       </div>
                     </div>
 
@@ -1046,7 +1046,7 @@ function ProductDetailView() {
                     <button
                       type="submit"
                       disabled={submitting}
-                      className="w-full btn-accent btn-cta-animated text-sm sm:text-base py-3.5 sm:py-4 px-6 min-h-[52px] shadow-lg cursor-pointer flex items-center justify-center gap-2 group"
+                      className="w-full btn-accent btn-cta-animated text-base sm:text-lg py-4 sm:py-4.5 px-6 min-h-[56px] shadow-lg cursor-pointer flex items-center justify-center gap-2 group"
                     >
                       {submitting ? (
                         <>
@@ -1058,12 +1058,12 @@ function ProductDetailView() {
                           <span className="font-heading font-black tracking-wide">
                             COMMANDER ({selectedBundle ? selectedBundle.title : `${orderQuantity} art.`}) • {formatFCFA(currentTotal)}
                           </span>
-                          <span className="btn-cta-nudge text-base sm:text-lg">→</span>
+                          <span className="btn-cta-nudge text-lg sm:text-xl">→</span>
                         </>
                       )}
                     </button>
 
-                    <p className="text-[11px] text-[#73737A] text-center font-medium">
+                    <p className="text-xs sm:text-sm text-[#54555A] text-center font-medium">
                       🔒 Règlement sécurisé à la réception • Aucun paiement en ligne requis
                     </p>
 
@@ -1080,21 +1080,21 @@ function ProductDetailView() {
               {/* 6.1 DESCRIPTION DÉTAILLÉE DU PRODUIT */}
               <section className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-4" aria-labelledby="desc-heading">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
+                  <div className="w-9 h-9 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
                     <Sparkles className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                    <span className="text-xs font-black uppercase tracking-widest text-[#C27835]">
                       Présentation
                     </span>
-                    <h2 id="desc-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                    <h2 id="desc-heading" className="font-heading font-black text-xl sm:text-2xl text-[#16171A]">
                       Description détaillée du produit
                     </h2>
                   </div>
                 </div>
 
-                <div className="text-xs sm:text-sm text-[#54555A] leading-relaxed space-y-3 pt-2">
-                  <p className="text-sm sm:text-base font-medium text-[#16171A]">
+                <div className="text-sm sm:text-base text-[#383A40] leading-relaxed space-y-3 pt-2">
+                  <p className="text-base sm:text-lg font-semibold text-[#16171A] leading-relaxed">
                     {product.description}
                   </p>
                   <p>
@@ -1109,14 +1109,14 @@ function ProductDetailView() {
               {/* 6.2 CARACTÉRISTIQUES TECHNIQUES */}
               <section className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-4" aria-labelledby="specs-heading">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
+                  <div className="w-9 h-9 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
                     <Package className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                    <span className="text-xs font-black uppercase tracking-widest text-[#C27835]">
                       Spécifications
                     </span>
-                    <h2 id="specs-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                    <h2 id="specs-heading" className="font-heading font-black text-xl sm:text-2xl text-[#16171A]">
                       Caractéristiques techniques
                     </h2>
                   </div>
@@ -1125,11 +1125,11 @@ function ProductDetailView() {
                 <div className="pt-2">
                   <div className="divide-y divide-[#EAE8E2] border border-[#EAE8E2] rounded-2xl overflow-hidden bg-[#FAF9F6]">
                     {specs.map((spec, i) => (
-                      <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 px-4 sm:px-5 gap-1 sm:gap-4 text-xs sm:text-sm">
+                      <div key={i} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 px-4 sm:px-5 gap-1.5 sm:gap-4 text-sm sm:text-base">
                         <span className="font-bold text-[#16171A] shrink-0 sm:w-1/3">
                           {spec.label}
                         </span>
-                        <span className="text-[#54555A] sm:w-2/3 sm:text-right">
+                        <span className="text-[#383A40] font-medium sm:w-2/3 sm:text-right">
                           {spec.value}
                         </span>
                       </div>
@@ -1141,46 +1141,46 @@ function ProductDetailView() {
               {/* 6.3 INFORMATIONS DE LIVRAISON */}
               <section className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-4" aria-labelledby="delivery-heading">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
+                  <div className="w-9 h-9 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
                     <Truck className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                    <span className="text-xs font-black uppercase tracking-widest text-[#C27835]">
                       Logistique Bénin
                     </span>
-                    <h2 id="delivery-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                    <h2 id="delivery-heading" className="font-heading font-black text-xl sm:text-2xl text-[#16171A]">
                       Informations de livraison
                     </h2>
                   </div>
                 </div>
 
                 <div className="grid sm:grid-cols-3 gap-3.5 pt-2">
-                  <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-1.5">
-                    <div className="font-heading font-bold text-xs sm:text-sm text-[#16171A] flex items-center gap-1.5">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-2">
+                    <div className="font-heading font-bold text-sm sm:text-base text-[#16171A] flex items-center gap-2">
                       <Clock className="w-4 h-4 text-[#C27835]" />
                       <span>Délais d&apos;expédition</span>
                     </div>
-                    <p className="text-xs text-[#54555A] leading-relaxed">
+                    <p className="text-sm text-[#383A40] leading-relaxed">
                       Livraison express sous <strong>24h à Cotonou et Calavi</strong>. Expédition sous 24h à 48h vers Porto-Novo, Parakou et l&apos;ensemble des communes du Bénin.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-1.5">
-                    <div className="font-heading font-bold text-xs sm:text-sm text-[#16171A] flex items-center gap-1.5">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-2">
+                    <div className="font-heading font-bold text-sm sm:text-base text-[#16171A] flex items-center gap-2">
                       <Phone className="w-4 h-4 text-[#C27835]" />
                       <span>Appel avant passage</span>
                     </div>
-                    <p className="text-xs text-[#54555A] leading-relaxed">
+                    <p className="text-sm text-[#383A40] leading-relaxed">
                       Notre coursier vous contacte toujours par appel ou message avant son déplacement afin de fixer l&apos;heure et le repère idéal de rendez-vous.
                     </p>
                   </div>
 
-                  <div className="p-4 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-1.5">
-                    <div className="font-heading font-bold text-xs sm:text-sm text-[#16171A] flex items-center gap-1.5">
+                  <div className="p-4 sm:p-5 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-2">
+                    <div className="font-heading font-bold text-sm sm:text-base text-[#16171A] flex items-center gap-2">
                       <Banknote className="w-4 h-4 text-[#C27835]" />
                       <span>Paiement en main propre</span>
                     </div>
-                    <p className="text-xs text-[#54555A] leading-relaxed">
+                    <p className="text-sm text-[#383A40] leading-relaxed">
                       Aucune avance n&apos;est exigée. Vous réglez directement en espèces ou par Mobile Money lors de la réception de votre article.
                     </p>
                   </div>
@@ -1190,36 +1190,36 @@ function ProductDetailView() {
               {/* 6.4 GARANTIES ET CONDITIONS DE RETOUR */}
               <section className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-4" aria-labelledby="warranty-heading">
                 <div className="flex items-center gap-2.5">
-                  <div className="w-8 h-8 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
+                  <div className="w-9 h-9 rounded-xl bg-[#FBF4ED] text-[#C27835] flex items-center justify-center shrink-0 border border-[#F2DFCE]">
                     <ShieldCheck className="w-4 h-4" />
                   </div>
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                    <span className="text-xs font-black uppercase tracking-widest text-[#C27835]">
                       Tranquillité d&apos;Achat
                     </span>
-                    <h2 id="warranty-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                    <h2 id="warranty-heading" className="font-heading font-black text-xl sm:text-2xl text-[#16171A]">
                       Garanties et conditions de retour
                     </h2>
                   </div>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-4 pt-2">
-                  <div className="p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200/60 space-y-2">
-                    <h3 className="font-heading font-bold text-sm text-emerald-950 flex items-center gap-1.5">
+                  <div className="p-5 sm:p-6 rounded-2xl bg-emerald-50/60 border border-emerald-200/70 space-y-2">
+                    <h3 className="font-heading font-bold text-base text-emerald-950 flex items-center gap-2">
                       <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                       <span>Contrôle libre du colis à l&apos;ouverture</span>
                     </h3>
-                    <p className="text-xs text-emerald-900 leading-relaxed">
+                    <p className="text-sm text-emerald-950 leading-relaxed font-medium">
                       Vous avez le droit légitime d&apos;ouvrir votre colis en présence du livreur pour vous assurer de la parfaite conformité de la commande avant d&apos;effectuer votre paiement.
                     </p>
                   </div>
 
-                  <div className="p-5 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-2">
-                    <h3 className="font-heading font-bold text-sm text-[#16171A] flex items-center gap-1.5">
+                  <div className="p-5 sm:p-6 rounded-2xl bg-[#FAF9F6] border border-[#EAE8E2] space-y-2">
+                    <h3 className="font-heading font-bold text-base text-[#16171A] flex items-center gap-2">
                       <RotateCcw className="w-4 h-4 text-[#C27835]" />
                       <span>Échange immédiat sous 48h</span>
                     </h3>
-                    <p className="text-xs text-[#54555A] leading-relaxed">
+                    <p className="text-sm text-[#383A40] leading-relaxed">
                       Si l&apos;article présente la moindre anomalie constatée dans les 48 heures suivant la réception, notre service client basé à Cotonou organise un échange gratuit sans délai.
                     </p>
                   </div>
@@ -1230,15 +1230,15 @@ function ProductDetailView() {
               <section id="avis-clients" className="bg-white rounded-3xl p-6 sm:p-10 border border-[#EAE8E2] shadow-xs space-y-6" aria-labelledby="reviews-heading">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[#EAE8E2] pb-6">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-base border border-amber-200/80 shrink-0">
+                    <div className="w-13 h-13 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center font-black text-lg border border-amber-200/80 shrink-0">
                       ★ 4.9
                     </div>
                     <div>
                       <div className="flex items-center gap-2">
-                        <h2 id="reviews-heading" className="font-heading font-black text-lg sm:text-xl text-[#16171A]">
+                        <h2 id="reviews-heading" className="font-heading font-black text-xl sm:text-2xl text-[#16171A]">
                           Avis clients vérifiés
                         </h2>
-                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
+                        <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200/60">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                           Certifiés réels
                         </span>
@@ -1252,7 +1252,7 @@ function ProductDetailView() {
                   <button
                     type="button"
                     onClick={() => setShowReviewModal(true)}
-                    className="btn-secondary text-xs py-2.5 px-4 self-start sm:self-auto cursor-pointer"
+                    className="btn-secondary text-xs sm:text-sm py-2.5 px-4 self-start sm:self-auto cursor-pointer"
                   >
                     Donner mon avis
                   </button>
@@ -1274,17 +1274,17 @@ function ProductDetailView() {
                               />
                             ))}
                           </div>
-                          <span className="text-[10px] text-[#73737A]">
+                          <span className="text-xs text-[#54555A] font-medium">
                             {formatReviewDate(rev.created_at)}
                           </span>
                         </div>
 
-                        <p className="text-xs text-[#16171A] leading-relaxed italic font-medium">
+                        <p className="text-sm sm:text-base text-[#16171A] leading-relaxed italic font-medium">
                           &ldquo;{rev.comment}&rdquo;
                         </p>
                       </div>
 
-                      <div className="pt-2 border-t border-[#EAE8E2]/60 flex items-center justify-between text-[11px]">
+                      <div className="pt-2 border-t border-[#EAE8E2]/60 flex items-center justify-between text-xs sm:text-sm font-medium">
                         <span className="font-bold text-[#16171A]">
                           {rev.customer_name}
                         </span>
@@ -1304,14 +1304,14 @@ function ProductDetailView() {
               <section className="pt-10 border-t border-[#EAE8E2]" aria-label="Articles similaires">
                 <div className="flex items-center justify-between mb-6">
                   <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835]">
+                    <span className="text-xs font-black uppercase tracking-widest text-[#C27835]">
                       Recommandations
                     </span>
-                    <h2 className="font-heading font-black text-xl sm:text-2xl text-[#16171A] mt-1">
+                    <h2 className="font-heading font-black text-2xl sm:text-3xl text-[#16171A] mt-1">
                       Vous aimerez aussi
                     </h2>
                   </div>
-                  <Link href="/" className="text-xs font-bold text-[#54555A] hover:text-[#16171A] transition">
+                  <Link href="/" className="text-sm font-bold text-[#54555A] hover:text-[#16171A] transition">
                     Voir tout le catalogue →
                   </Link>
                 </div>
@@ -1332,17 +1332,17 @@ function ProductDetailView() {
       {!orderConfirmed && (
         <div className="md:hidden fixed bottom-0 inset-x-0 bg-white/95 backdrop-blur-md border-t border-[#EAE8E2] px-4 py-2.5 z-30 shadow-xl flex items-center justify-between pb-[calc(0.75rem+env(safe-area-inset-bottom))]">
           <div className="space-y-0.5">
-            <div className="text-[9px] text-[#73737A] uppercase font-bold tracking-wider">
+            <div className="text-[11px] text-[#54555A] uppercase font-extrabold tracking-wider">
               TOTAL À LA RÉCEPTION
             </div>
-            <div className="text-base font-heading font-black text-[#16171A] tabular-nums">
+            <div className="text-lg font-heading font-black text-[#16171A] tabular-nums">
               {formatFCFA(currentTotal)}
             </div>
           </div>
           <button
             type="button"
             onClick={scrollToForm}
-            className="btn-accent btn-cta-animated text-xs py-2.5 px-5 min-h-[44px] flex items-center gap-1.5 cursor-pointer shadow-md"
+            className="btn-accent btn-cta-animated text-sm font-black py-3 px-5 min-h-[48px] flex items-center gap-1.5 cursor-pointer shadow-md"
           >
             <span className="font-heading font-black tracking-wide">Commander maintenant</span>
             <span className="btn-cta-nudge">↓</span>

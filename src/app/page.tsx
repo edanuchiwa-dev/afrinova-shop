@@ -338,7 +338,7 @@ export default function HomePage() {
                   pour votre quotidien.
                 </h1>
 
-                <p className="text-xs sm:text-base text-slate-300 max-w-xl leading-relaxed">
+                <p className="text-sm sm:text-base text-slate-200 max-w-xl leading-relaxed font-medium">
                   Chaque pièce est expédiée directement depuis notre atelier. 
                   Commandez en 1 clic sans barrière de carte bancaire, avec suivi de livraison en temps réel.
                 </p>
@@ -346,7 +346,7 @@ export default function HomePage() {
                 <div className="pt-2 flex flex-wrap items-center gap-3">
                   <a
                     href="#catalogue"
-                    className="inline-flex items-center gap-2 rounded-full bg-[#C27835] hover:bg-[#A56024] text-white px-6 py-3.5 text-xs sm:text-sm font-bold shadow-lg transition active:scale-95"
+                    className="inline-flex items-center gap-2 rounded-full bg-[#C27835] hover:bg-[#A56024] text-white px-6 py-3.5 text-sm sm:text-base font-bold shadow-lg transition active:scale-95"
                   >
                     <span>Explorer le catalogue</span>
                     <span>↓</span>
@@ -355,7 +355,7 @@ export default function HomePage() {
                     href={`https://wa.me/${(process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '22942520869').replace(/[\s\+]/g, '')}?text=${encodeURIComponent("Bonjour AFRINOVA SHOP, j'aimerais échanger avec votre service client.")}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 px-5 py-3.5 text-xs sm:text-sm font-bold transition active:scale-95"
+                    className="inline-flex items-center gap-2 rounded-full bg-white/10 hover:bg-white/20 text-white border border-white/20 px-5 py-3.5 text-sm sm:text-base font-bold transition active:scale-95"
                   >
                     <MessageCircle className="w-4 h-4 text-[#25D366] shrink-0" />
                     <span>Discuter sur WhatsApp</span>
@@ -380,7 +380,7 @@ export default function HomePage() {
                   {/* Badge Flottant en haut à gauche */}
                   <div className="absolute top-4 left-4 bg-[#121316]/80 backdrop-blur-md rounded-full px-3.5 py-1.5 border border-white/20 shadow-lg flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span className="text-[11px] font-bold text-white tracking-wide">
+                    <span className="text-xs font-bold text-white tracking-wide">
                       Service Client Bénin 7j/7
                     </span>
                   </div>
@@ -388,14 +388,14 @@ export default function HomePage() {
                   {/* Floating Glassmorphic Welcome Card en bas */}
                   <div className="absolute bottom-3 left-3 right-3 sm:bottom-4 sm:left-4 sm:right-4 bg-[#121316]/85 backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-white/15 shadow-xl">
                     <div className="flex items-center justify-between gap-2 mb-1">
-                      <span className="text-xs font-heading font-black text-white">
+                      <span className="text-sm font-heading font-black text-white">
                         « Bienvenue chez AFRINOVA SHOP »
                       </span>
-                      <span className="text-[10px] font-bold text-[#C27835] bg-[#C27835]/15 px-2 py-0.5 rounded-full border border-[#C27835]/30">
+                      <span className="text-xs font-bold text-[#C27835] bg-[#C27835]/15 px-2.5 py-0.5 rounded-full border border-[#C27835]/30">
                         Cotonou & Régions
                       </span>
                     </div>
-                    <p className="text-[11px] text-slate-300 leading-snug">
+                    <p className="text-xs sm:text-sm text-slate-200 leading-relaxed font-medium">
                       Paiement en espèces à la livraison. Vérifiez chaque détail de votre commande avec le coursier.
                     </p>
                   </div>
@@ -409,10 +409,10 @@ export default function HomePage() {
 
         {/* 2. SPLIT-TEXT MASK REVEAL (Animation 2) */}
         <section id="philosophie" ref={maskRef} className="my-10 sm:my-16 text-center max-w-3xl mx-auto px-4" aria-label="Notre philosophie">
-          <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] sm:text-xs font-extrabold uppercase tracking-widest text-blue-600 border border-blue-100">
+          <span className="rounded-full bg-blue-50 px-3 py-1 text-xs sm:text-sm font-extrabold uppercase tracking-wider text-blue-600 border border-blue-100">
             Notre Philosophie Directe
           </span>
-          <h2 className="mt-4 text-lg sm:text-2xl lg:text-3xl font-black text-slate-900 leading-snug">
+          <h2 className="mt-4 text-xl sm:text-2xl lg:text-3xl font-black text-slate-900 leading-snug">
             <span className="mask-wrap">
               <span className={`mask-elem ${revealed ? 'revealed' : ''}`}>
                 Des articles bien pensés,
@@ -434,14 +434,14 @@ export default function HomePage() {
         {/* 3. WORD-BY-WORD SCROLL HIGHLIGHT (Animation 1) */}
         <section ref={highlightRef} className="max-w-4xl mx-auto my-8 sm:my-12 px-4" aria-label="Engagement direct">
           <div className="rounded-2xl border border-slate-200 bg-white p-5 sm:p-8 shadow-xs">
-            <div className="mb-3 flex items-center justify-between gap-2 text-[10px] sm:text-xs font-extrabold uppercase tracking-wider text-slate-400">
+            <div className="mb-3 flex items-center justify-between gap-2 text-xs font-extrabold uppercase tracking-wider text-slate-400">
               <span className="flex items-center gap-1.5">
                 <span className="text-blue-600">✦</span>
                 <span>Engagement Qualité & Circuit Court</span>
               </span>
               <span className="text-blue-600 font-extrabold">Scrollez pour allumer ↓</span>
             </div>
-            <p className="text-sm sm:text-xl font-semibold leading-relaxed">
+            <p className="text-base sm:text-xl font-semibold leading-relaxed text-[#16171A]">
               {PROMISE_TOKENS.map((word, index) => (
                 <span
                   key={index}
@@ -467,7 +467,7 @@ export default function HomePage() {
             <h2 className="mt-2 text-xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Prêts à être expédiés chez vous aujourd&apos;hui
             </h2>
-            <p className="text-xs sm:text-sm text-slate-500 mt-1">
+            <p className="text-sm sm:text-base text-slate-600 mt-1">
               Sélectionnez un article pour voir les détails et passer commande en 30 secondes.
             </p>
           </div>
@@ -483,14 +483,14 @@ export default function HomePage() {
                   type="button"
                   onClick={() => setCategory(cat)}
                   aria-pressed={isActive}
-                  className={`whitespace-nowrap rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer min-h-[38px] flex items-center gap-1.5 ${
+                  className={`whitespace-nowrap rounded-full px-4.5 py-2.5 text-xs sm:text-sm font-bold transition-all cursor-pointer min-h-[42px] flex items-center gap-1.5 ${
                     isActive
                       ? 'bg-[#121316] text-white shadow-xs'
                       : 'border border-[#EAE8E2] bg-white text-[#54555A] hover:border-[#C27835] hover:text-[#16171A]'
                   }`}
                 >
                   <span>{cat}</span>
-                  <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-[#F4F3F0] text-[#73737A]'}`}>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${isActive ? 'bg-white/20 text-white' : 'bg-[#F4F3F0] text-[#73737A]'}`}>
                     {count}
                   </span>
                 </button>
@@ -525,13 +525,13 @@ export default function HomePage() {
             {/* En-tête de section */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-[#F3F1EC] pb-6">
               <div>
-                <span className="text-[10px] font-extrabold uppercase tracking-widest text-[#C27835] bg-[#FBF4ED] px-3.5 py-1 rounded-full border border-[#F2DFCE] inline-block mb-2">
+                <span className="text-xs font-black uppercase tracking-widest text-[#C27835] bg-[#FBF4ED] px-3.5 py-1.5 rounded-full border border-[#F2DFCE] inline-block mb-2">
                   Retours d'expérience
                 </span>
                 <h2 className="font-heading font-black text-2xl sm:text-3xl text-[#16171A]">
                   Avis de nos clients au Bénin
                 </h2>
-                <p className="text-xs sm:text-sm text-[#73737A] mt-1.5">
+                <p className="text-sm sm:text-base text-[#54555A] mt-1.5">
                   Témoignages de clients ayant commandé sur notre boutique avec paiement à la réception.
                 </p>
               </div>
@@ -540,15 +540,15 @@ export default function HomePage() {
                 {/* Note globale */}
                 <div className="flex items-center gap-2 bg-[#FAF9F6] border border-[#EAE8E2] rounded-2xl px-4 py-2">
                   <div className="flex text-amber-500 text-sm">★★★★★</div>
-                  <span className="font-black text-sm text-[#16171A]">4.9 / 5</span>
-                  <span className="text-[11px] text-[#73737A]">({reviews.length} avis)</span>
+                  <span className="font-black text-base text-[#16171A]">4.9 / 5</span>
+                  <span className="text-xs sm:text-sm text-[#54555A]">({reviews.length} avis)</span>
                 </div>
 
                 {/* Bouton Donner mon avis */}
                 <button
                   type="button"
                   onClick={() => setShowReviewModal(true)}
-                  className="bg-[#121316] hover:bg-black text-white text-xs font-bold px-4 py-2.5 rounded-full transition shadow-xs cursor-pointer flex items-center gap-2 active:scale-95"
+                  className="bg-[#121316] hover:bg-black text-white text-xs sm:text-sm font-bold px-4.5 py-2.5 rounded-full transition shadow-xs cursor-pointer flex items-center gap-2 active:scale-95"
                 >
                   <Plus className="w-3.5 h-3.5" />
                   <span>Donner mon avis</span>
@@ -591,13 +591,13 @@ export default function HomePage() {
                     </div>
 
                     {/* Avis en 1 ligne max */}
-                    <p className="text-xs text-[#2D2E32] leading-snug line-clamp-1 font-medium pl-2 border-l-2 border-[#C27835]/30">
+                    <p className="text-sm text-[#16171A] leading-relaxed line-clamp-2 font-medium pl-2.5 border-l-2 border-[#C27835]">
                       {rev.comment}
                     </p>
                   </div>
 
                   {/* Badge de réassurance bas de carte */}
-                  <div className="flex items-center justify-between text-[10px] text-[#8C8C94] pt-2 border-t border-[#F5F3ED]">
+                  <div className="flex items-center justify-between text-xs text-[#54555A] pt-2 border-t border-[#F5F3ED]">
                     <span className="flex items-center gap-1 text-emerald-800 font-semibold">
                       <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
                       <span>Achat vérifié</span>
@@ -745,8 +745,8 @@ export default function HomePage() {
                 <Truck className="w-6 h-6 stroke-[1.75]" />
               </div>
               <div>
-                <h4 className="text-sm font-heading font-black text-[#16171A]">Expédition Rapide sous 24h</h4>
-                <p className="text-xs text-[#73737A] mt-0.5">Coursiers express & transporteurs régionaux avec suivi direct.</p>
+                <h4 className="text-base font-heading font-black text-[#16171A]">Expédition Rapide sous 24h</h4>
+                <p className="text-sm text-[#383A40] mt-1 leading-relaxed">Coursiers express & transporteurs régionaux avec suivi direct.</p>
               </div>
             </div>
             <div className="pt-4 md:pt-0 md:px-4 flex items-center gap-4">
@@ -754,8 +754,8 @@ export default function HomePage() {
                 <Package className="w-6 h-6 stroke-[1.75]" />
               </div>
               <div>
-                <h4 className="text-sm font-heading font-black text-[#16171A]">Emballage Antichoc Certifié</h4>
-                <p className="text-xs text-[#73737A] mt-0.5">Protection renforcée pour garantir l&apos;intégrité de vos articles.</p>
+                <h4 className="text-base font-heading font-black text-[#16171A]">Emballage Antichoc Certifié</h4>
+                <p className="text-sm text-[#383A40] mt-1 leading-relaxed">Protection renforcée pour garantir l&apos;intégrité de vos articles.</p>
               </div>
             </div>
             <div className="pt-4 md:pt-0 md:px-4 flex items-center gap-4">
@@ -763,8 +763,8 @@ export default function HomePage() {
                 <ShieldCheck className="w-6 h-6 stroke-[1.75]" />
               </div>
               <div>
-                <h4 className="text-sm font-heading font-black text-[#16171A]">Paiement à la Livraison</h4>
-                <p className="text-xs text-[#73737A] mt-0.5">Zéro carte bancaire requise. Vérifiez votre colis avant de régler.</p>
+                <h4 className="text-base font-heading font-black text-[#16171A]">Paiement à la Livraison</h4>
+                <p className="text-sm text-[#383A40] mt-1 leading-relaxed">Zéro carte bancaire requise. Vérifiez votre colis avant de régler.</p>
               </div>
             </div>
           </div>
@@ -772,7 +772,7 @@ export default function HomePage() {
 
 
         {/* 9. PIED DE PAGE COMPLET SHOPIFY PRESTIGE */}
-        <footer className="border-t border-[#EAE8E2] pt-14 pb-8 text-[#54555A] text-xs">
+        <footer className="border-t border-[#EAE8E2] pt-14 pb-8 text-[#54555A] text-sm">
           <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-12">
             
             {/* Colonne 1 : À propos */}
@@ -780,7 +780,7 @@ export default function HomePage() {
               <span className="font-heading font-black text-base text-[#16171A] uppercase tracking-tight block">
                 AFRINOVA SHOP
               </span>
-              <p className="text-xs text-[#73737A] leading-relaxed">
+              <p className="text-sm text-[#383A40] leading-relaxed">
                 Boutique en ligne exclusive et tendance au Bénin. Nous proposons des articles sélectionnés avec rigueur, expédiés directement chez vous sans intermédiaire.
               </p>
               <div className="pt-1 text-[11px] text-[#73737A]">
@@ -807,7 +807,7 @@ export default function HomePage() {
               <h4 className="font-heading font-bold text-xs uppercase tracking-wider text-[#16171A]">
                 Service Clientèle
               </h4>
-              <p className="text-xs text-[#73737A] leading-relaxed">
+              <p className="text-sm text-[#54555A] leading-relaxed">
                 Une question sur une commande ou un article ? Nos conseillers sont à votre écoute 7j/7.
               </p>
               <a
@@ -1006,7 +1006,7 @@ export default function HomePage() {
       <FloatingWhatsApp />
 
       {/* NAVIGATION BASSE MOBILE STICKY */}
-      <nav aria-label="Navigation mobile" className="md:hidden fixed bottom-0 inset-x-0 z-40 flex justify-around border-t border-[#EAE8E2] bg-white/95 px-6 py-2 text-[10px] font-bold text-[#73737A] shadow-lg backdrop-blur-md">
+      <nav aria-label="Navigation mobile" className="md:hidden fixed bottom-0 inset-x-0 z-40 flex justify-around border-t border-[#EAE8E2] bg-white/95 px-6 py-2.5 text-xs font-bold text-[#54555A] shadow-lg backdrop-blur-md pb-[calc(0.75rem+env(safe-area-inset-bottom))] font-heading">
         <Link href="/" className="flex flex-col items-center gap-1 text-[#C27835]">
           <Home className="w-4 h-4 stroke-[2]" />
           <span>Accueil</span>

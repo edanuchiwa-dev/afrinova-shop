@@ -246,14 +246,14 @@ export default function BundleSelector({
                 {/* Centre : Titre en gras + pastille d'accent + sous-titre */}
                 <div className="flex flex-col">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-heading font-black text-xs sm:text-sm text-[#16171A]">
+                    <span className="font-heading font-black text-sm sm:text-base text-[#16171A]">
                       {bundle.title}
                     </span>
 
                     {bundle.badge && (
                       <span
                         style={{ backgroundColor: accent }}
-                        className="text-[10px] sm:text-[11px] font-bold text-white px-2 py-0.5 rounded-full whitespace-nowrap leading-tight"
+                        className="text-xs sm:text-sm font-bold text-white px-2.5 py-0.5 rounded-full whitespace-nowrap leading-tight"
                       >
                         {bundle.badge}
                       </span>
@@ -261,7 +261,7 @@ export default function BundleSelector({
                   </div>
 
                   {bundle.subtitle && (
-                    <span className="text-[11px] sm:text-xs text-[#73737A] font-medium leading-tight mt-0.5">
+                    <span className="text-xs sm:text-sm text-[#54555A] font-medium leading-tight mt-0.5">
                       {bundle.subtitle}
                     </span>
                   )}
@@ -272,13 +272,13 @@ export default function BundleSelector({
               <div className="text-right shrink-0">
                 <span
                   style={{ color: isSelected ? accent : '#16171A' }}
-                  className="font-heading font-black text-xs sm:text-sm block tabular-nums"
+                  className="font-heading font-black text-base sm:text-lg block tabular-nums"
                 >
                   {formatPrice(bundle.price)}
                 </span>
 
                 {hasDiscount && (
-                  <span className="text-[10px] sm:text-[11px] text-[#9C9CA4] line-through block tabular-nums font-semibold leading-tight">
+                  <span className="text-xs sm:text-sm text-[#9C9CA4] line-through block tabular-nums font-semibold leading-tight">
                     {formatPrice(bundle.comparePrice!)}
                   </span>
                 )}
@@ -310,7 +310,7 @@ export default function BundleSelector({
               {bundle.tag && (
                 <div
                   style={{ backgroundColor: accent }}
-                  className="absolute -top-2.5 inset-x-3 z-10 text-[9px] font-black uppercase tracking-wider text-white py-0.5 rounded-full shadow-xs text-center"
+                  className="absolute -top-3 inset-x-3 z-10 text-xs font-black uppercase tracking-wider text-white py-1 rounded-full shadow-xs text-center"
                 >
                   ★ {bundle.tag}
                 </div>
@@ -341,17 +341,17 @@ export default function BundleSelector({
                         backgroundColor: isSelected ? accent : '#F3F4F6',
                         color: isSelected ? '#FFFFFF' : '#4B5563',
                       }}
-                      className="text-[10px] font-bold px-2.5 py-0.5 rounded-full"
+                      className="text-xs font-bold px-3 py-1 rounded-full"
                     >
                       {bundle.badge || `${bundle.quantity} art.`}
                     </span>
                   </div>
 
-                  <h4 className="font-heading font-black text-sm text-[#16171A]">
+                  <h4 className="font-heading font-black text-base text-[#16171A]">
                     {bundle.title}
                   </h4>
 
-                  <span className="text-[11px] text-[#73737A] block mt-0.5">
+                  <span className="text-xs sm:text-sm text-[#54555A] font-medium block mt-0.5">
                     {formatPrice(unitPrice)} / unité
                   </span>
                 </div>
@@ -359,12 +359,12 @@ export default function BundleSelector({
                 <div className="pt-3 mt-3 border-t border-slate-100">
                   <span
                     style={{ color: isSelected ? accent : '#16171A' }}
-                    className="font-heading font-black text-base block tabular-nums"
+                    className="font-heading font-black text-base sm:text-lg block tabular-nums"
                   >
                     {formatPrice(bundle.price)}
                   </span>
                   {hasDiscount && (
-                    <span className="text-[10px] text-[#9C9CA4] line-through block tabular-nums font-semibold">
+                    <span className="text-xs sm:text-sm text-[#9C9CA4] line-through block tabular-nums font-semibold">
                       {formatPrice(bundle.comparePrice!)}
                     </span>
                   )}
@@ -419,23 +419,23 @@ export default function BundleSelector({
                   }}
                   className="w-4 h-4 rounded-full border flex items-center justify-center shrink-0"
                 >
-                  {isSelected && <span className="text-white text-[9px] font-black">✓</span>}
+                  {isSelected && <span className="text-white text-xs font-black">✓</span>}
                 </div>
 
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-bold text-xs text-[#16171A]">
+                  <span className="font-bold text-sm text-[#16171A]">
                     {bundle.title}
                   </span>
                   {bundle.badge && (
                     <span
                       style={{ backgroundColor: accent }}
-                      className="text-[9px] font-bold text-white px-1.5 py-0.2 rounded"
+                      className="text-xs font-bold text-white px-2 py-0.5 rounded"
                     >
                       {bundle.badge}
                     </span>
                   )}
                   {bundle.tag && (
-                    <span className="text-[9px] font-bold text-amber-700 bg-amber-50 px-1.5 py-0.2 rounded border border-amber-200">
+                    <span className="text-xs font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
                       ★ {bundle.tag}
                     </span>
                   )}
@@ -445,12 +445,12 @@ export default function BundleSelector({
               <div className="text-right shrink-0">
                 <span
                   style={{ color: isSelected ? accent : '#16171A' }}
-                  className="font-bold text-xs block tabular-nums"
+                  className="font-bold text-sm sm:text-base block tabular-nums"
                 >
                   {formatPrice(bundle.price)}
                 </span>
                 {hasDiscount && (
-                  <span className="text-[10px] text-slate-400 line-through block tabular-nums">
+                  <span className="text-xs text-slate-400 line-through block tabular-nums">
                     {formatPrice(bundle.comparePrice!)}
                   </span>
                 )}
@@ -504,27 +504,27 @@ export default function BundleSelector({
                   className="w-12 h-12 rounded-xl text-white font-black flex flex-col items-center justify-center shrink-0 shadow-xs leading-none"
                 >
                   <span className="text-sm">x{bundle.quantity}</span>
-                  <span className="text-[8px] uppercase tracking-tighter opacity-90 mt-0.5">
+                  <span className="text-[10px] uppercase tracking-tighter opacity-90 mt-0.5">
                     {bundle.badge || 'Pack'}
                   </span>
                 </div>
 
                 <div>
                   <div className="flex items-center gap-1.5 flex-wrap">
-                    <span className="font-heading font-black text-sm text-[#16171A]">
+                    <span className="font-heading font-black text-sm sm:text-base text-[#16171A]">
                       {bundle.title}
                     </span>
                     {bundle.tag && (
-                      <span className="text-[9px] font-black uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                      <span className="text-xs font-black uppercase text-amber-700 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
                         ★ {bundle.tag}
                       </span>
                     )}
                   </div>
-                  <span className="text-xs text-[#73737A] block mt-0.5">
+                  <span className="text-xs sm:text-sm text-[#54555A] block mt-0.5">
                     {bundle.subtitle || 'Offre dégressive'}
                   </span>
                   {savings > 0 && (
-                    <span className="text-[11px] text-emerald-700 font-extrabold block mt-0.5">
+                    <span className="text-xs sm:text-sm text-emerald-700 font-extrabold block mt-0.5">
                       Économisez {formatPrice(savings)} !
                     </span>
                   )}
@@ -539,7 +539,7 @@ export default function BundleSelector({
                   {formatPrice(bundle.price)}
                 </span>
                 {hasDiscount && (
-                  <span className="text-[11px] text-[#9C9CA4] line-through block tabular-nums font-semibold">
+                  <span className="text-xs sm:text-sm text-[#9C9CA4] line-through block tabular-nums font-semibold">
                     {formatPrice(bundle.comparePrice!)}
                   </span>
                 )}
@@ -574,7 +574,7 @@ export default function BundleSelector({
             {bundle.tag && (
               <div
                 style={{ backgroundColor: accent }}
-                className="absolute -top-3 right-4 z-10 text-[10px] font-black uppercase tracking-wider text-white px-3 py-0.5 rounded-md shadow-xs flex items-center gap-1"
+                className="absolute -top-3 right-4 z-10 text-xs font-black uppercase tracking-wider text-white px-3 py-1 rounded-md shadow-xs flex items-center gap-1"
               >
                 ★ {bundle.tag}
               </div>
@@ -612,14 +612,14 @@ export default function BundleSelector({
                         className="w-full h-full object-cover"
                       />
                     ) : (
-                      <span className="text-[10px] font-bold text-slate-400">Lot</span>
+                      <span className="text-xs font-bold text-slate-400">Lot</span>
                     )}
                   </div>
 
                   {/* Centre : Titre en gras + pastille arrondie + sous-titre */}
                   <div className="flex flex-col">
                     <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-heading font-black text-xs sm:text-sm text-[#16171A]">
+                      <span className="font-heading font-black text-sm sm:text-base text-[#16171A]">
                         {bundle.title}
                       </span>
 
@@ -629,7 +629,7 @@ export default function BundleSelector({
                             backgroundColor: accent,
                             color: '#FFFFFF',
                           }}
-                          className="text-[10px] sm:text-[11px] font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap leading-tight shadow-2xs"
+                          className="text-xs sm:text-sm font-bold px-2.5 py-0.5 rounded-full whitespace-nowrap leading-tight shadow-2xs"
                         >
                           {bundle.badge}
                         </span>
@@ -637,7 +637,7 @@ export default function BundleSelector({
                     </div>
 
                     {bundle.subtitle && (
-                      <span className="text-[11px] sm:text-xs text-[#73737A] font-medium leading-tight mt-0.5">
+                      <span className="text-xs sm:text-sm text-[#54555A] font-medium leading-tight mt-0.5">
                         {bundle.subtitle}
                       </span>
                     )}
@@ -648,13 +648,13 @@ export default function BundleSelector({
                 <div className="text-right shrink-0">
                   <span
                     style={{ color: isSelected ? accent : '#16171A' }}
-                    className="font-heading font-black text-xs sm:text-sm block tabular-nums"
+                    className="font-heading font-black text-base sm:text-lg block tabular-nums"
                   >
                     {formatPrice(bundle.price)}
                   </span>
 
                   {hasDiscount && (
-                    <span className="text-[10px] sm:text-[11px] text-[#9C9CA4] line-through block tabular-nums font-semibold leading-tight">
+                    <span className="text-xs sm:text-sm text-[#9C9CA4] line-through block tabular-nums font-semibold leading-tight">
                       {formatPrice(bundle.comparePrice!)}
                     </span>
                   )}
@@ -666,7 +666,7 @@ export default function BundleSelector({
               {showGiftBar && (
                 <div
                   style={{ backgroundColor: accent }}
-                  className="w-full py-1.5 px-3 sm:px-4 text-white text-[11px] sm:text-xs font-bold flex items-center justify-between gap-2 transition-all animate-in fade-in"
+                  className="w-full py-1.5 px-3 sm:px-4 text-white text-xs sm:text-sm font-bold flex items-center justify-between gap-2 transition-all animate-in fade-in"
                 >
                   <div className="flex items-center gap-1.5 truncate">
                     <span>🎁 +</span>
@@ -684,7 +684,7 @@ export default function BundleSelector({
                     <span className="truncate">{bundle.freeGift}</span>
                   </div>
 
-                  <div className="shrink-0 font-mono tracking-wider text-[10px] sm:text-[11px] bg-black/20 px-2 py-0.5 rounded-full">
+                  <div className="shrink-0 font-mono tracking-wider text-xs sm:text-sm bg-black/20 px-2.5 py-0.5 rounded-full">
                     ⏱ {formatTimer(remainingTime)}
                   </div>
                 </div>

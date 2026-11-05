@@ -2193,10 +2193,10 @@ export default function AdminDashboard() {
                     {/* Nuancier de palettes rapides + Custom Picker */}
                     <div className="flex flex-wrap items-center gap-2 pt-1">
                       {[
-                        { name: 'Rose Flash (Screenshot 1)', hex: '#E91E63' },
-                        { name: 'Bleu Indigo (Screenshot 2)', hex: '#4F46E5' },
+                        { name: 'Rose Fuchsia', hex: '#E91E63' },
+                        { name: 'Bleu Indigo', hex: '#4F46E5' },
                         { name: 'Or Atelier', hex: '#C27835' },
-                        { name: 'Vert Polaris', hex: '#008060' },
+                        { name: 'Vert Émeraude', hex: '#008060' },
                         { name: 'Bleu Royal', hex: '#2563EB' },
                         { name: 'Noir Ébène', hex: '#121316' },
                         { name: 'Rouge Flash', hex: '#DC2626' },
@@ -2392,9 +2392,9 @@ export default function AdminDashboard() {
                     </p>
                     <div className="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-2xl flex-wrap">
                       {[
-                        { id: 'card', label: '1. Cartes (Image 2)' },
-                        { id: 'pill', label: '2. Pilules (Image 1)' },
-                        { id: 'grid', label: '3. Grille' },
+                        { id: 'card', label: '1. Cartes Prestige' },
+                        { id: 'pill', label: '2. Pilules Arrondies' },
+                        { id: 'grid', label: '3. Grille 3 Colonnes' },
                         { id: 'compact', label: '4. Minimaliste' },
                         { id: 'badge_stack', label: '5. Flash Promo' },
                       ].map((st) => (

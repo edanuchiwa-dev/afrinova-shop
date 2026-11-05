@@ -1096,7 +1096,7 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-snug">
-                      Miniature photo, ruban d&apos;angle & bandeau cadeau timer (Style Capture 2).
+                      Miniature photo, ruban d&apos;angle & bandeau compte à rebours timer.
                     </p>
                   </div>
                   <div
@@ -1132,7 +1132,7 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-500 leading-snug">
-                      Formes ultra-arrondies, boutons radio & pastilles pleines (Style Capture 1).
+                      Formes ultra-arrondies, boutons radio & pastilles pleines aux accents vifs.
                     </p>
                   </div>
                   <div
@@ -1269,10 +1269,10 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
 
                 <div className="flex flex-wrap items-center gap-2 pt-1">
                   {[
-                    { name: 'Rose Flash (Screenshot 1)', hex: '#E91E63' },
-                    { name: 'Bleu Indigo (Screenshot 2)', hex: '#4F46E5' },
+                    { name: 'Rose Fuchsia', hex: '#E91E63' },
+                    { name: 'Bleu Indigo', hex: '#4F46E5' },
                     { name: 'Or Atelier', hex: '#C27835' },
-                    { name: 'Vert Polaris', hex: '#008060' },
+                    { name: 'Vert Émeraude', hex: '#008060' },
                     { name: 'Bleu Royal', hex: '#2563EB' },
                     { name: 'Noir Ébène', hex: '#121316' },
                     { name: 'Rouge Flash', hex: '#DC2626' },

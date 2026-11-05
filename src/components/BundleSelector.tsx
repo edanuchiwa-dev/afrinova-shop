@@ -570,7 +570,7 @@ export default function BundleSelector({
             key={bundle.id}
             className="relative"
           >
-            {/* Ruban / Tag posé sur la carte en haut à droite (Style Screenshot 2) */}
+            {/* Ruban / Tag posé sur la carte en haut à droite (Style Cartes Prestige) */}
             {bundle.tag && (
               <div
                 style={{ backgroundColor: accent }}

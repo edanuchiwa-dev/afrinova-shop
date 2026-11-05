@@ -365,9 +365,14 @@ export default function ShopifyAnalyticsDashboard() {
         v.ipAddress.toLowerCase().includes(q) ||
         v.city.toLowerCase().includes(q) ||
         (v.region && v.region.toLowerCase().includes(q)) ||
+        (v.country && v.country.toLowerCase().includes(q)) ||
         (v.isp && v.isp.toLowerCase().includes(q)) ||
         v.path.toLowerCase().includes(q) ||
+        (v.title && v.title.toLowerCase().includes(q)) ||
         (v.browser && v.browser.toLowerCase().includes(q)) ||
+        (v.device && v.device.toLowerCase().includes(q)) ||
+        (v.createdAt && v.createdAt.toLowerCase().includes(q)) ||
+        (v.lastHeartbeat && v.lastHeartbeat.toLowerCase().includes(q)) ||
         (v.utmSource && v.utmSource.toLowerCase().includes(q))
       );
     });
@@ -1607,17 +1612,41 @@ export default function ShopifyAnalyticsDashboard() {
                   const isLive = v.lastSeenSec <= 180;
                   return (
                     <tr key={v.sessionId + i} className="hover:bg-slate-800/50 transition group">
-                      {/* Statut / Récence */}
+                      {/* Statut / Récence & Horodatage précis */}
                       <td className="py-3 px-3.5 whitespace-nowrap">
                         {isLive ? (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] font-black text-emerald-300 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-700/60 shadow-xs">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-                            <span>En direct</span>
-                          </span>
+                          <div className="space-y-0.5">
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-black text-emerald-300 bg-emerald-950/70 px-2.5 py-0.5 rounded-full border border-emerald-700/60 shadow-xs">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
+                              <span>En direct</span>
+                            </span>
+                            <div className="text-[10px] text-emerald-400/80 font-mono pl-1">
+                              Actif maintenant
+                            </div>
+                          </div>
                         ) : (
-                          <span className="text-[11px] text-slate-400 font-medium">
-                            Il y a {v.lastSeenSec < 60 ? `${v.lastSeenSec}s` : `${Math.round(v.lastSeenSec / 60)} min`}
-                          </span>
+                          <div className="space-y-0.5">
+                            <div className="text-[11px] text-slate-300 font-bold">
+                              {v.lastSeenSec < 60
+                                ? `Il y a ${v.lastSeenSec}s`
+                                : v.lastSeenSec < 3600
+                                  ? `Il y a ${Math.round(v.lastSeenSec / 60)} min`
+                                  : v.lastSeenSec < 86400
+                                    ? `Il y a ${Math.round(v.lastSeenSec / 3600)} h`
+                                    : `Il y a ${Math.round(v.lastSeenSec / 86400)} j`}
+                            </div>
+                            <div className="text-[10px] text-slate-500 font-mono">
+                              {v.lastHeartbeat || v.createdAt
+                                ? new Date(v.lastHeartbeat || v.createdAt).toLocaleString('fr-FR', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric',
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })
+                                : '—'}
+                            </div>
+                          </div>
                         )}
                       </td>
 

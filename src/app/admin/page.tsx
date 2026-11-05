@@ -266,6 +266,7 @@ export default function AdminDashboard() {
     const q = paletteQuery.trim().toLowerCase();
     const navModules = [
       { id: 'analytics' as const, title: 'Analyses & Vue d\'ensemble', desc: 'Chiffre d\'affaires, tunnel de vente et conversions', icon: BarChart3 },
+      { id: 'analytics' as const, title: 'Journal des Visiteurs & Audit IP', desc: 'Adresses IP réelles, villes (Cotonou), opérateurs et terminaux connectés', icon: Globe },
       { id: 'orders' as const, title: 'Gestion des Commandes', desc: `${orders.length} commande(s) dont ${pendingOrdersCount} nouvelle(s)`, icon: ShoppingBag },
       { id: 'products' as const, title: 'Produits & Liens Publicités', desc: `${products.length} article(s) au catalogue physique`, icon: Package },
       { id: 'promotions' as const, title: 'Promotions Flash & Lots', desc: `${promotions.length} offre(s) promotionnelle(s)`, icon: Sparkles },
@@ -911,6 +912,26 @@ export default function AdminDashboard() {
                   </div>
                 </button>
 
+                {/* 1b. Journal des Visiteurs */}
+                <button
+                  onClick={() => {
+                    handleTabChange('analytics');
+                    setTimeout(() => {
+                      const el = document.getElementById('journal-visiteurs');
+                      if (el) el.scrollIntoView({ behavior: 'smooth' });
+                    }, 100);
+                  }}
+                  className="w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl text-xs lg:text-sm font-bold text-slate-300 hover:bg-slate-800/70 hover:text-white transition cursor-pointer"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Globe className="w-4 h-4 text-cyan-400" />
+                    <span>Journal Visiteurs & IP</span>
+                  </div>
+                  <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-cyan-950 text-cyan-300 border border-cyan-800">
+                    Audit
+                  </span>
+                </button>
+
                 {/* 2. Commandes */}
                 <button
                   onClick={() => handleTabChange('orders')}
@@ -1124,9 +1145,15 @@ export default function AdminDashboard() {
           <div className="flex items-center gap-2">
             {/* Badge Live Visitors */}
             <button
-              onClick={() => handleTabChange('analytics')}
+              onClick={() => {
+                handleTabChange('analytics');
+                setTimeout(() => {
+                  const el = document.getElementById('journal-visiteurs');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              }}
               className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-xs font-bold transition cursor-pointer"
-              title="Acheteurs en direct sur le site (cliquez pour ouvrir les analyses)"
+              title="Acheteurs en direct sur le site (cliquez pour ouvrir le journal des visiteurs)"
             >
               <span className="relative flex h-2 w-2">
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
@@ -1266,6 +1293,22 @@ export default function AdminDashboard() {
               <span>Vue d&apos;ensemble</span>
               <span className="bg-emerald-100 text-emerald-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
                 Shopify
+              </span>
+            </button>
+            <button
+              onClick={() => {
+                handleTabChange('analytics');
+                setTimeout(() => {
+                  const el = document.getElementById('journal-visiteurs');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }, 100);
+              }}
+              className="pb-3.5 px-4 lg:px-5 text-xs lg:text-sm font-black transition border-b-2 flex items-center gap-2.5 shrink-0 cursor-pointer border-transparent text-slate-500 hover:text-slate-800 hover:border-slate-300"
+            >
+              <Globe className="w-4 h-4 text-cyan-600" />
+              <span>Journal Visiteurs & IP</span>
+              <span className="bg-cyan-100 text-cyan-800 text-[10px] font-extrabold px-2 py-0.5 rounded-full">
+                Audit
               </span>
             </button>
             <button

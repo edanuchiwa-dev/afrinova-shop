@@ -3,6 +3,7 @@ import { parseBeninPhone } from './phone.ts';
 import { calculateServerShippingCost } from './shipping.ts';
 import { sendOrderNotification } from './notifications.ts';
 import { priceFor } from './bundles.ts';
+import type { LiveVisitor, LiveVisitorStats } from './db.ts';
 
 let tursoClient: Client | null = null;
 
@@ -833,6 +834,166 @@ export async function tursoGetUploadedFile(
     mime_type: String(row.mime_type || 'image/webp'),
     data: String(row.data || ''),
     size: Number(row.size || 0),
+  };
+}
+
+// -------------------------------------------------------------
+// ANALYTICS & AUDIT DES VISITEURS EN DIRECT (TURSO CLOUD)
+// -------------------------------------------------------------
+export async function tursoGetLiveVisitorsData(windowMinutes = 3): Promise<LiveVisitorStats> {
+  const client = getTursoClient();
+
+  // 1. Récupération de tous les logs de visites récents
+  const [rawRowsRes, todayRes] = await Promise.all([
+    client.execute({
+      sql: `
+        SELECT 
+          session_id, path, title, device_type, ip_address, city, region, country, isp,
+          latitude, longitude, user_agent, browser, utm_source, created_at, last_heartbeat,
+          CAST((strftime('%s', 'now') - strftime('%s', created_at)) AS INTEGER) as duration_sec,
+          CAST((strftime('%s', 'now') - strftime('%s', last_heartbeat)) AS INTEGER) as last_seen_sec
+        FROM page_views
+        ORDER BY last_heartbeat DESC
+        LIMIT 1000
+      `,
+      args: [],
+    }),
+    client.execute(`
+      SELECT 
+        COUNT(DISTINCT session_id) as visitors,
+        COUNT(*) as views
+      FROM page_views
+      WHERE date(created_at) = date('now')
+    `),
+  ]);
+
+  const rawRows = rawRowsRes.rows;
+  const seenSessions = new Set<string>();
+  const activeVisitors: LiveVisitor[] = [];
+  const recentVisitors: LiveVisitor[] = [];
+  const pageCounts: Record<string, number> = {};
+  const devices = { mobile: 0, desktop: 0, tablet: 0 };
+  const windowSec = windowMinutes * 60;
+
+  for (const r of rawRows) {
+    const sId = String(r.session_id || '');
+    if (!seenSessions.has(sId)) {
+      seenSessions.add(sId);
+      const lastSeen = Math.max(0, Number(r.last_seen_sec) || 0);
+      const isLive = lastSeen <= windowSec;
+
+      const visitor: LiveVisitor = {
+        sessionId: sId,
+        path: String(r.path || '/'),
+        title: String(r.title || r.path || '/'),
+        device: String(r.device_type || 'mobile'),
+        ipAddress: String(r.ip_address || '127.0.0.1 (Local)'),
+        city: String(r.city || 'Cotonou'),
+        region: String(r.region || 'Littoral'),
+        country: String(r.country || 'Bénin'),
+        isp: String(r.isp || 'Opérateur Réseau'),
+        latitude: r.latitude != null ? Number(r.latitude) : null,
+        longitude: r.longitude != null ? Number(r.longitude) : null,
+        userAgent: r.user_agent ? String(r.user_agent) : undefined,
+        browser: String(r.browser || 'Web'),
+        utmSource: String(r.utm_source || 'direct'),
+        createdAt: String(r.created_at || ''),
+        lastHeartbeat: String(r.last_heartbeat || ''),
+        durationSec: Math.max(0, Number(r.duration_sec) || 0),
+        lastSeenSec: lastSeen,
+      };
+
+      recentVisitors.push(visitor);
+
+      if (isLive) {
+        activeVisitors.push(visitor);
+        const dev = visitor.device.toLowerCase();
+        if (dev === 'desktop') devices.desktop++;
+        else if (dev === 'tablet') devices.tablet++;
+        else devices.mobile++;
+
+        pageCounts[visitor.path] = (pageCounts[visitor.path] || 0) + 1;
+      }
+    }
+  }
+
+  const activeCount = activeVisitors.length;
+
+  const pageTitleMap: Record<string, string> = {
+    '/': 'Page d\'accueil (Vitrine)',
+    '/suivi': 'Suivi de commande',
+    '/produit/montre-chronographe': 'Montre Chronographe',
+    '/produit/sacoche-cuir': 'Sacoche Cuir',
+    '/produit/casque-audio-sans-fil': 'Casque Audio Sans Fil',
+    '/produit/portefeuille-rfid': 'Portefeuille RFID',
+  };
+
+  const activePages = Object.entries(pageCounts)
+    .map(([path, count]) => ({
+      path,
+      label: pageTitleMap[path] || (path.startsWith('/produit/') ? path.replace('/produit/', 'Produit : ') : path),
+      count,
+      percentage: activeCount > 0 ? Math.round((count / activeCount) * 100) : 0,
+    }))
+    .sort((a, b) => b.count - a.count);
+
+  // Activité des 30 dernières minutes (tranches de 2 minutes)
+  const last30Minutes: Array<{ minuteLabel: string; visitors: number }> = [];
+  const now = new Date();
+  for (let i = 28; i >= 0; i -= 2) {
+    const t = new Date(now.getTime() - i * 60 * 1000);
+    const mLabel = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
+    const minSec = i * 60;
+    const maxSec = (i + 2) * 60;
+
+    const countInSlice = rawRows.filter((r) => {
+      const ls = Number(r.last_seen_sec) || 99999;
+      return ls >= minSec && ls < maxSec;
+    }).length;
+
+    last30Minutes.push({
+      minuteLabel: mLabel,
+      visitors: countInSlice,
+    });
+  }
+
+  const todayRow = todayRes.rows[0];
+
+  return {
+    activeCount,
+    activeVisitors,
+    recentVisitors,
+    activePages,
+    deviceBreakdown: devices,
+    last30Minutes,
+    todayVisitorsCount: Number(todayRow?.visitors) || 0,
+    todayPageViewsCount: Number(todayRow?.views) || 0,
+  };
+}
+
+export async function tursoGetAnalyticsRawData(): Promise<{
+  allOrders: any[];
+  allItems: any[];
+  allProducts: any[];
+  allPageViews: any[];
+}> {
+  const client = getTursoClient();
+  const [ordersRes, itemsRes, productsRes, pageViewsRes] = await Promise.all([
+    client.execute(
+      "SELECT id, order_number, customer_name, customer_phone, total_price, shipping_city, carrier, status, payment_method, utm_source, utm_campaign, created_at FROM orders ORDER BY created_at ASC"
+    ),
+    client.execute(
+      "SELECT oi.order_id, oi.product_id, oi.product_name, oi.product_price, oi.quantity FROM order_items oi JOIN orders o ON oi.order_id = o.id WHERE o.status != 'annulee'"
+    ),
+    client.execute("SELECT id, name, slug, price, stock, image_url FROM products"),
+    client.execute("SELECT session_id, path, created_at FROM page_views ORDER BY created_at ASC"),
+  ]);
+
+  return {
+    allOrders: ordersRes.rows as any[],
+    allItems: itemsRes.rows as any[],
+    allProducts: productsRes.rows as any[],
+    allPageViews: pageViewsRes.rows as any[],
   };
 }
 

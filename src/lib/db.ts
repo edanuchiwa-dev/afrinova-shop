@@ -1188,7 +1188,7 @@ export function getLiveVisitorsData(windowMinutes = 3): LiveVisitorStats {
 
   const activeCount = activeVisitors.length;
 
-  // 1b. Récupération des visiteurs récents (les 50 dernières sessions)
+  // 1b. Récupération de tous les visiteurs de l'historique
   const recentRows = db.prepare(`
     SELECT 
       session_id, path, title, device_type, ip_address, city, region, country, isp,
@@ -1197,7 +1197,7 @@ export function getLiveVisitorsData(windowMinutes = 3): LiveVisitorStats {
       CAST((strftime('%s', 'now') - strftime('%s', last_heartbeat)) AS INTEGER) as last_seen_sec
     FROM page_views
     ORDER BY last_heartbeat DESC
-    LIMIT 200
+    LIMIT 1000
   `).all() as typeof rawRows;
 
   const seenRecent = new Set<string>();
@@ -1225,7 +1225,7 @@ export function getLiveVisitorsData(windowMinutes = 3): LiveVisitorStats {
         durationSec: Math.max(0, row.duration_sec),
         lastSeenSec: Math.max(0, row.last_seen_sec),
       });
-      if (recentVisitors.length >= 50) break;
+      if (recentVisitors.length >= 1000) break;
     }
   }
 

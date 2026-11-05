@@ -1,7 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getDb } from '@/lib/db';
+import { isTursoEnabled, tursoGetAnalyticsRawData } from '@/lib/turso';
 
 export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 type OrderRow = {
   id: number;
@@ -30,28 +33,54 @@ export async function GET(request: NextRequest) {
   const { searchParams } = new URL(request.url);
   const range = searchParams.get('range') || '7d'; // 'today' | '7d' | '30d' | '90d' | 'ytd'
 
-  const db = getDb();
-  const allOrders = db.prepare(`
-    SELECT id, order_number, customer_name, customer_phone, total_price, shipping_city, carrier, status, payment_method, utm_source, utm_campaign, created_at 
-    FROM orders 
-    ORDER BY created_at ASC
-  `).all() as OrderRow[];
-
-  const allItems = db.prepare(`
-    SELECT oi.order_id, oi.product_id, oi.product_name, oi.product_price, oi.quantity 
-    FROM order_items oi
-    JOIN orders o ON oi.order_id = o.id
-    WHERE o.status != 'annulee'
-  `).all() as ItemRow[];
-
-  const allProducts = db.prepare('SELECT id, name, slug, price, stock, image_url FROM products').all() as Array<{
+  let allOrders: OrderRow[] = [];
+  let allItems: ItemRow[] = [];
+  let allProducts: Array<{
     id: number;
     name: string;
     slug: string;
     price: number;
     stock: number;
     image_url: string | null;
-  }>;
+  }> = [];
+  let allPageViews: Array<{ session_id: string; path: string; created_at: string }> = [];
+
+  if (isTursoEnabled()) {
+    const raw = await tursoGetAnalyticsRawData();
+    allOrders = raw.allOrders as OrderRow[];
+    allItems = raw.allItems as ItemRow[];
+    allProducts = raw.allProducts as any[];
+    allPageViews = raw.allPageViews as any[];
+  } else {
+    const db = getDb();
+    allOrders = db.prepare(`
+      SELECT id, order_number, customer_name, customer_phone, total_price, shipping_city, carrier, status, payment_method, utm_source, utm_campaign, created_at 
+      FROM orders 
+      ORDER BY created_at ASC
+    `).all() as OrderRow[];
+
+    allItems = db.prepare(`
+      SELECT oi.order_id, oi.product_id, oi.product_name, oi.product_price, oi.quantity 
+      FROM order_items oi
+      JOIN orders o ON oi.order_id = o.id
+      WHERE o.status != 'annulee'
+    `).all() as ItemRow[];
+
+    allProducts = db.prepare('SELECT id, name, slug, price, stock, image_url FROM products').all() as Array<{
+      id: number;
+      name: string;
+      slug: string;
+      price: number;
+      stock: number;
+      image_url: string | null;
+    }>;
+
+    allPageViews = db.prepare(`
+      SELECT session_id, path, created_at 
+      FROM page_views 
+      ORDER BY created_at ASC
+    `).all() as Array<{ session_id: string; path: string; created_at: string }>;
+  }
 
   // Calcul strict des dates
   const now = new Date();
@@ -183,13 +212,7 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Requête des visites (page_views)
-  const allPageViews = db.prepare(`
-    SELECT session_id, path, created_at 
-    FROM page_views 
-    ORDER BY created_at ASC
-  `).all() as Array<{ session_id: string; path: string; created_at: string }>;
-
+  // Traitement des visites (page_views)
   const currentVisitorSessions = new Set<string>();
   const prevVisitorSessions = new Set<string>();
   let currentPageViews = 0;

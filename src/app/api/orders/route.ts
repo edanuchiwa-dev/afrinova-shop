@@ -26,6 +26,8 @@ const createOrderSchema = z.object({
   customerNotes: z.string().trim().max(500).optional().nullable().or(z.literal('')),
   paymentMethod: z.enum(['cod', 'mobile_money']).optional().default('cod'),
   items: z.array(orderItemSchema).min(1, 'Au moins un produit').max(20, 'Trop d’articles'),
+  bundleId: z.string().trim().max(50).optional().nullable(),
+  quantity: z.number().int().min(1).max(20).optional(),
   website: z.string().optional(), // Honeypot anti-bot
   utm_source: z.string().trim().max(100).optional().default(''),
   utm_medium: z.string().trim().max(100).optional().default(''),
@@ -105,6 +107,8 @@ export async function POST(request: Request) {
           utm_medium: data.utm_medium,
           utm_campaign: data.utm_campaign,
           referrer: data.referrer,
+          bundleId: data.bundleId,
+          quantity: data.quantity,
         },
         data.items
       );
@@ -125,6 +129,8 @@ export async function POST(request: Request) {
           utm_medium: data.utm_medium,
           utm_campaign: data.utm_campaign,
           referrer: data.referrer,
+          bundleId: data.bundleId,
+          quantity: data.quantity,
         },
         data.items
       );
@@ -149,11 +155,23 @@ export async function POST(request: Request) {
 
   // 7. Notification push smartphone ntfy.sh
   try {
+    const bundleName = data.bundleId
+      ? data.bundleId === 'x1'
+        ? '1 article'
+        : data.bundleId === 'x2'
+          ? 'Lot 2 articles'
+          : data.bundleId === 'x3'
+            ? 'Lot 3 articles'
+            : `Lot ${data.bundleId.toUpperCase()}`
+      : undefined;
+
     void sendOrderNotification({
       orderNumber: result.orderNumber,
       customerName: data.customerName,
       shippingCity: data.shippingCity,
       totalPrice: result.totalPrice,
+      bundleTitle: bundleName,
+      quantity: data.quantity || data.items[0]?.quantity || 1,
     });
   } catch (err) {
     console.error('Échec envoi notification ntfy :', err instanceof Error ? err.message : 'Erreur');

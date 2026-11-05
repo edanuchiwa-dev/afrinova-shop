@@ -2,6 +2,7 @@ import { createClient, type Client } from '@libsql/client';
 import { parseBeninPhone } from './phone.ts';
 import { calculateServerShippingCost } from './shipping.ts';
 import { sendOrderNotification } from './notifications.ts';
+import { priceFor } from './bundles.ts';
 
 let tursoClient: Client | null = null;
 
@@ -78,6 +79,7 @@ export type TursoProduct = {
   seo_description?: string | null;
   variants?: string | null;
   sales_channels?: string | null;
+  bundle_style?: 'pill' | 'card' | string;
   status: string;
   created_at: string;
 };
@@ -97,6 +99,8 @@ export type TursoOrder = {
   shipping_country: string;
   carrier: string;
   payment_method: string;
+  bundle_id?: string | null;
+  quantity?: number;
   total_price: number;
   shipping_cost: number;
   status: string;
@@ -195,6 +199,8 @@ export async function tursoCreateOrder(
     utm_medium?: string;
     utm_campaign?: string;
     referrer?: string;
+    bundleId?: string | null;
+    quantity?: number;
   },
   items: Array<{ id: number; quantity: number }>
 ) {
@@ -308,6 +314,24 @@ export async function tursoCreateOrder(
       }
     }
 
+    const totalOrderQuantity = order.quantity || Array.from(quantities.values()).reduce((sum, q) => sum + q, 0);
+
+    // Recalcul strict côté serveur si un lot (bundleId) est sélectionné
+    if (order.bundleId && quantities.size === 1) {
+      const [firstProductId] = quantities.keys();
+      const prodRes = await tx.execute({
+        sql: "SELECT * FROM products WHERE id = ? AND status = 'active'",
+        args: [firstProductId],
+      });
+      const prod = prodRes.rows[0] as unknown as TursoProduct | undefined;
+      if (prod) {
+        const bundlePrice = priceFor(prod, order.bundleId);
+        subtotal = bundlePrice;
+        const regularTotal = Math.round(prod.price) * totalOrderQuantity;
+        savings = Math.max(0, regularTotal - bundlePrice);
+      }
+    }
+
     const totalPrice = subtotal + shippingCost;
     const now = new Date();
     const dateStr = now.toISOString().slice(0, 10).replace(/-/g, '');
@@ -321,9 +345,10 @@ export async function tursoCreateOrder(
           shipping_city, neighborhood, landmark, location_url, shipping_address,
           shipping_postal_code, shipping_country, carrier, payment_method,
           total_price, shipping_cost, customer_notes,
-          utm_source, utm_medium, utm_campaign, referrer
+          utm_source, utm_medium, utm_campaign, referrer,
+          bundle_id, quantity
         )
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `,
       args: [
         orderNumber,
@@ -346,6 +371,8 @@ export async function tursoCreateOrder(
         order.utm_medium || '',
         order.utm_campaign || '',
         order.referrer || '',
+        order.bundleId ?? null,
+        totalOrderQuantity,
       ],
     });
 

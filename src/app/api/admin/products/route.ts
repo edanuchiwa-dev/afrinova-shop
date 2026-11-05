@@ -67,6 +67,7 @@ export async function POST(request: Request) {
     seo_description,
     variants,
     sales_channels,
+    bundle_style,
     status,
   } = body as Record<string, unknown>;
 
@@ -134,9 +135,10 @@ export async function POST(request: Request) {
   const cleanSeoTitle = typeof seo_title === 'string' ? seo_title.trim() : '';
   const cleanSeoDesc = typeof seo_description === 'string' ? seo_description.trim() : '';
 
-  // Variants & Sales Channels
+  // Variants & Sales Channels & Bundle Style
   const cleanVariants = typeof variants === 'string' ? variants : JSON.stringify(variants || []);
   const cleanSalesChannels = typeof sales_channels === 'string' ? sales_channels : JSON.stringify(sales_channels || ['online_store', 'whatsapp', 'ads']);
+  const cleanBundleStyle = bundle_style === 'pill' ? 'pill' : 'card';
 
   const prodStatus = typeof status === 'string' && productStatuses.has(status) ? status : 'active';
 
@@ -158,9 +160,9 @@ export async function POST(request: Request) {
       name, slug, description, price, compare_at_price, cost_per_item,
       stock, sku, barcode, track_quantity, continue_selling_out_of_stock,
       category, image_url, media_urls, weight_kg, is_physical, vendor,
-      tags, seo_title, seo_description, variants, sales_channels, status
+      tags, seo_title, seo_description, variants, sales_channels, bundle_style, status
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `).run(
     name.trim(),
     finalSlug,
@@ -184,6 +186,7 @@ export async function POST(request: Request) {
     cleanSeoDesc,
     cleanVariants,
     cleanSalesChannels,
+    cleanBundleStyle,
     prodStatus
   );
 
@@ -227,6 +230,7 @@ export async function PUT(request: Request) {
     seo_description,
     variants,
     sales_channels,
+    bundle_style,
     status,
     statut,
   } = body as Record<string, unknown>;
@@ -398,6 +402,11 @@ export async function PUT(request: Request) {
     const cleanSalesChannels = typeof sales_channels === 'string' ? sales_channels : JSON.stringify(sales_channels);
     fields.push('sales_channels = ?');
     values.push(cleanSalesChannels);
+  }
+
+  if (bundle_style !== undefined) {
+    fields.push('bundle_style = ?');
+    values.push(bundle_style === 'pill' ? 'pill' : 'card');
   }
 
   if (newStatus !== undefined) {

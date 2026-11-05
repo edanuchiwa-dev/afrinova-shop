@@ -23,6 +23,7 @@ export type Product = {
   weight_kg?: number;
   status?: string;
   created_at?: string;
+  bundle_style?: 'pill' | 'card' | string;
   promotion?: ProductPromotion | null;
 };
 

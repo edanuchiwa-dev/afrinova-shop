@@ -2,8 +2,8 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useParams } from 'next/navigation';
-import { useEffect, useMemo, useState } from 'react';
+import { useParams, useSearchParams } from 'next/navigation';
+import { useEffect, useMemo, useState, Suspense } from 'react';
 import {
   Truck,
   Banknote,
@@ -30,6 +30,8 @@ import AnnouncementBar from '@/components/AnnouncementBar';
 import ProductCard from '@/components/ProductCard';
 import FloatingWhatsApp from '@/components/FloatingWhatsApp';
 import QuantityBreaksWidget from '@/components/QuantityBreaksWidget';
+import BundleSelector from '@/components/BundleSelector';
+import { getBundles, type Bundle } from '@/lib/bundles';
 import { formatFCFA } from '@/lib/format';
 import { captureUtmParams } from '@/lib/utm';
 import { parseBeninPhone } from '@/lib/phone';
@@ -112,16 +114,32 @@ function formatReviewDate(dateStr: string): string {
   }
 }
 
-export default function ProductPage() {
+function ProductDetailView() {
   const params = useParams<{ slug: string }>();
+  const searchParams = useSearchParams();
   const slug = params?.slug || '';
+  const urlBundleParam = searchParams?.get('bundle') || null;
 
   const [product, setProduct] = useState<Product | null>(() => fallbackCatalog[slug] || null);
   const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(!fallbackCatalog[slug]);
   const [selectedImage, setSelectedImage] = useState<string>('');
   const [isZoomOpen, setIsZoomOpen] = useState(false);
-  const [orderQuantity, setOrderQuantity] = useState(1);
+  const [orderQuantity, setOrderQuantity] = useState(2); // 2 articles présélectionné par défaut
+  const [selectedBundleId, setSelectedBundleId] = useState<string>(() => {
+    if (urlBundleParam) {
+      return urlBundleParam.startsWith('x') ? urlBundleParam : `x${urlBundleParam}`;
+    }
+    return 'x2'; // Lot « 2 articles » présélectionné
+  });
+
+  // Mise à jour si le paramètre d'URL ?bundle= change
+  useEffect(() => {
+    if (urlBundleParam) {
+      const normalized = urlBundleParam.startsWith('x') ? urlBundleParam : `x${urlBundleParam}`;
+      setSelectedBundleId(normalized);
+    }
+  }, [urlBundleParam]);
   const [reviews, setReviews] = useState<Review[]>(fallbackReviews);
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [reviewForm, setReviewForm] = useState({
@@ -265,16 +283,42 @@ export default function ProductPage() {
     return Math.round(((regularReferencePrice - promo.promo_price) / regularReferencePrice) * 100);
   }, [promo, regularReferencePrice]);
 
+  // Calcul dynamique des offres de lots (Bundles)
+  const bundles = useMemo(() => {
+    return getBundles(product);
+  }, [product]);
+
+  const selectedBundle = useMemo(() => {
+    return bundles.find((b) => b.id === selectedBundleId) || bundles[1] || bundles[0];
+  }, [bundles, selectedBundleId]);
+
+  // Synchronisation de la quantité avec le lot sélectionné
+  useEffect(() => {
+    if (selectedBundle) {
+      setOrderQuantity(selectedBundle.quantity);
+    }
+  }, [selectedBundle]);
+
+  const bundleVariant: 'pill' | 'card' = (product?.bundle_style as 'pill' | 'card') || 'card';
+
   const currentSubtotal = useMemo(() => {
     if (!product) return 0;
+    if (selectedBundle) {
+      return selectedBundle.price;
+    }
     if (!isPromoActive) return product.price * orderQuantity;
     return promoUnitsInOrder * promoUnitPrice + normalUnitsInOrder * normalUnitPrice;
-  }, [product, isPromoActive, promoUnitsInOrder, promoUnitPrice, normalUnitsInOrder, normalUnitPrice, orderQuantity]);
+  }, [product, selectedBundle, isPromoActive, promoUnitsInOrder, promoUnitPrice, normalUnitsInOrder, normalUnitPrice, orderQuantity]);
 
   const totalSavings = useMemo(() => {
-    if (!product || !isPromoActive || promoUnitsInOrder <= 0) return 0;
+    if (!product) return 0;
+    if (selectedBundle) {
+      const normalTotal = Math.round(product.price) * selectedBundle.quantity;
+      return Math.max(0, normalTotal - selectedBundle.price);
+    }
+    if (!isPromoActive || promoUnitsInOrder <= 0) return 0;
     return (regularReferencePrice - promoUnitPrice) * promoUnitsInOrder;
-  }, [product, isPromoActive, promoUnitsInOrder, regularReferencePrice, promoUnitPrice]);
+  }, [product, selectedBundle, isPromoActive, promoUnitsInOrder, regularReferencePrice, promoUnitPrice]);
 
   const currentShippingCost = 0; // Remise en main propre / livraison gérée avec le client
 
@@ -361,6 +405,8 @@ export default function ProductPage() {
           shippingCity: shippingCity.trim(),
           carrier: 'Livraison directe à convenir avec le client',
           items: [{ id: product.id, quantity: orderQuantity }],
+          bundleId: selectedBundleId,
+          quantity: orderQuantity,
           website: honeypot,
           utm_source: utm.utm_source,
           utm_medium: utm.utm_medium,
@@ -766,24 +812,31 @@ export default function ProductPage() {
                     )}
                   </div>
 
-                  {/* 4. SECTION DES OFFRES PAR QUANTITÉ (SHOPIFY VOLUME DISCOUNTS STYLE) */}
-                  {qbSettings.enabled && (
-                    <div className="pt-2">
-                      <QuantityBreaksWidget
-                        currentQuantity={orderQuantity}
-                        onSelectQuantity={(q) => setOrderQuantity(q)}
-                        productPrice={product.price}
-                        originalPrice={regularReferencePrice}
-                        promoPrice={promo?.promo_price}
-                        promoRemainingQuota={promo?.remaining_quota}
-                        stock={product.stock}
-                        popularTier={qbSettings.popularTier}
-                        template={qbSettings.template}
-                        accentColor={qbSettings.accentColor}
-                        customLabels={qbSettings.customLabels}
-                      />
+                  {/* 4. SECTION DES OFFRES PAR QUANTITÉ (BUNDLES) */}
+                  <div className="pt-2">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-black uppercase tracking-wider text-[#16171A]">
+                        Offres par quantité (Volume Discounts) :
+                      </span>
+                      {selectedBundle?.tag && (
+                        <span className="text-[10px] font-black uppercase tracking-wider text-[#C27835] bg-[#FBF4ED] px-2.5 py-0.5 rounded-full border border-[#F2DFCE]">
+                          ★ {selectedBundle.tag}
+                        </span>
+                      )}
                     </div>
-                  )}
+
+                    <BundleSelector
+                      bundles={bundles}
+                      value={selectedBundleId}
+                      onChange={(b) => {
+                        setSelectedBundleId(b.id);
+                        setOrderQuantity(b.quantity);
+                      }}
+                      variant={bundleVariant}
+                      accent="#C27835"
+                      image={product.image_url}
+                    />
+                  </div>
 
                   {/* Ajusteur manuel de quantité */}
                   <div className="pt-2 border-t border-[#F3F1EC] flex items-center justify-between">
@@ -904,11 +957,37 @@ export default function ProductPage() {
                       />
                     </div>
 
+                    {/* CHOIX DE LA FORMULE BUNDLE */}
+                    <div className="space-y-2 pt-2 border-t border-[#F3F1EC]">
+                      <div className="flex items-center justify-between">
+                        <span className="text-[11px] font-bold text-[#54555A]">
+                          Formule sélectionnée :
+                        </span>
+                        {selectedBundle?.badge && (
+                          <span className="text-[10px] font-black text-[#C27835] bg-[#FBF4ED] px-2 py-0.5 rounded-full border border-[#F2DFCE]">
+                            {selectedBundle.badge}
+                          </span>
+                        )}
+                      </div>
+
+                      <BundleSelector
+                        bundles={bundles}
+                        value={selectedBundleId}
+                        onChange={(b) => {
+                          setSelectedBundleId(b.id);
+                          setOrderQuantity(b.quantity);
+                        }}
+                        variant={bundleVariant}
+                        accent="#C27835"
+                        image={product.image_url}
+                      />
+                    </div>
+
                     {/* RÉCAPITULATIF TRANSPARENT DU TOTAL SÉLECTIONNÉ */}
                     <div className="bg-[#FAF9F6] p-4 rounded-2xl border border-[#EAE8E2] space-y-2 text-xs">
                       <div className="flex justify-between text-[#73737A]">
                         <span>Quantité sélectionnée :</span>
-                        <span className="font-bold text-[#16171A]">{orderQuantity} article{orderQuantity > 1 ? 's' : ''}</span>
+                        <span className="font-bold text-[#16171A]">{orderQuantity} article{orderQuantity > 1 ? 's' : ''} ({selectedBundle?.title || 'Standard'})</span>
                       </div>
 
                       {totalSavings > 0 && (
@@ -950,7 +1029,7 @@ export default function ProductPage() {
                       ) : (
                         <>
                           <span className="font-heading font-black tracking-wide">
-                            COMMANDER MAINTENANT
+                            COMMANDER ({selectedBundle ? selectedBundle.title : `${orderQuantity} art.`}) • {formatFCFA(currentTotal)}
                           </span>
                           <span className="btn-cta-nudge text-base sm:text-lg">→</span>
                         </>
@@ -1380,5 +1459,13 @@ export default function ProductPage() {
       {/* BOUTON FLOTTANT WHATSAPP */}
       <FloatingWhatsApp productName={product.name} />
     </div>
+  );
+}
+
+export default function ProductPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center"><div className="w-8 h-8 border-3 border-[#C27835] border-t-transparent rounded-full animate-spin" /></div>}>
+      <ProductDetailView />
+    </Suspense>
   );
 }

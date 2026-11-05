@@ -69,6 +69,7 @@ export type ProductData = {
     sku: string;
   }> | string;
   sales_channels?: string[] | string;
+  bundle_style?: 'pill' | 'card' | string;
   status: 'active' | 'draft' | 'archived';
 };
 
@@ -173,6 +174,9 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
   const [customSlug, setCustomSlug] = useState(initialData?.slug || '');
 
   // Colonne latérale
+  const [bundleStyle, setBundleStyle] = useState<'card' | 'pill'>(
+    (initialData?.bundle_style as 'card' | 'pill') || 'card'
+  );
   const [status, setStatus] = useState<'active' | 'draft' | 'archived'>(initialData?.status || 'active');
   const [category, setCategory] = useState(initialData?.category || 'Maroquinerie');
   const [vendor, setVendor] = useState(initialData?.vendor || 'AFRINOVA SHOP');
@@ -435,6 +439,7 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
         salesChannels.whatsapp && 'whatsapp',
         salesChannels.ads && 'ads',
       ].filter(Boolean),
+      bundle_style: bundleStyle,
       status,
     };
 
@@ -936,6 +941,120 @@ export default function ShopifyProductForm({ initialData, isEdit = false }: Shop
                   <Info className="w-3.5 h-3.5 shrink-0" />
                   <span>Les clients ne verront pas votre coût de revient ni vos marges.</span>
                 </p>
+              </div>
+            </section>
+
+            {/* CARD: STYLE DES LOTS (BUNDLES) */}
+            <section className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 shadow-2xs space-y-4">
+              <div>
+                <h2 className="text-sm font-black text-slate-900 flex items-center gap-2">
+                  <span>Style des offres de lots (Bundles)</span>
+                  <span className="text-[10px] uppercase font-black tracking-wider px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">
+                    Fiche produit
+                  </span>
+                </h2>
+                <p className="text-xs text-slate-500 mt-1">
+                  Choisissez l&apos;apparence visuelle des remises dégressives (1, 2 ou 3 articles) pour ce produit.
+                </p>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Option 1: Style Cartes (Card) */}
+                <button
+                  type="button"
+                  onClick={() => setBundleStyle('card')}
+                  className={`text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                    bundleStyle === 'card'
+                      ? 'border-[#C27835] bg-[#FDF9F4] ring-2 ring-[#C27835]/15'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-black text-slate-900">
+                        Style Cartes (Card) — Défaut
+                      </span>
+                      <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        bundleStyle === 'card' ? 'border-[#C27835]' : 'border-slate-300'
+                      }`}>
+                        {bundleStyle === 'card' && <span className="w-2 h-2 rounded-full bg-[#C27835]" />}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-tight">
+                      Cartes complètes avec miniature de l&apos;article, ruban populaire et barre cadeau animée.
+                    </p>
+                  </div>
+
+                  {/* Aperçu miniature Card */}
+                  <div className="mt-4 p-2.5 rounded-xl bg-slate-50 border border-slate-200 relative pt-3">
+                    <span className="absolute -top-2 right-2 text-[8px] font-black bg-[#C27835] text-white px-1.5 py-0.5 rounded-full">
+                      ★ Populaire
+                    </span>
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <div className="w-7 h-7 rounded-lg bg-white border border-slate-200 shrink-0 flex items-center justify-center text-[9px] text-slate-400">
+                          📦
+                        </div>
+                        <div>
+                          <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1">
+                            <span>2 articles</span>
+                            <span className="text-[9px] text-[#C27835] bg-[#C27835]/10 px-1 rounded">-10%</span>
+                          </div>
+                          <span className="text-[9px] text-slate-400">Économie max</span>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-black text-[#C27835]">
+                        {formatFCFA(Math.round(Number(price || 15000) * 1.8))}
+                      </span>
+                    </div>
+                  </div>
+                </button>
+
+                {/* Option 2: Style Pilules (Pill) */}
+                <button
+                  type="button"
+                  onClick={() => setBundleStyle('pill')}
+                  className={`text-left p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                    bundleStyle === 'pill'
+                      ? 'border-[#C27835] bg-[#FDF9F4] ring-2 ring-[#C27835]/15'
+                      : 'border-slate-200 bg-white hover:border-slate-300'
+                  }`}
+                >
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-black text-slate-900">
+                        Style Pilules (Pill)
+                      </span>
+                      <span className={`w-4 h-4 rounded-full border-2 flex items-center justify-center ${
+                        bundleStyle === 'pill' ? 'border-[#C27835]' : 'border-slate-300'
+                      }`}>
+                        {bundleStyle === 'pill' && <span className="w-2 h-2 rounded-full bg-[#C27835]" />}
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-slate-500 leading-tight">
+                      Lignes ultra-arrondies épurées, bouton radio intégré et pastille colorée de remise.
+                    </p>
+                  </div>
+
+                  {/* Aperçu miniature Pill */}
+                  <div className="mt-4 p-2.5 rounded-[20px] bg-white border-2 border-[#C27835] flex items-center justify-between gap-2 shadow-2xs">
+                    <div className="flex items-center gap-2">
+                      <div className="w-3.5 h-3.5 rounded-full border-2 border-[#C27835] flex items-center justify-center shrink-0">
+                        <span className="w-1.5 h-1.5 rounded-full bg-[#C27835]" />
+                      </div>
+                      <div>
+                        <div className="text-[11px] font-bold text-slate-900 flex items-center gap-1">
+                          <span>Duo</span>
+                          <span className="text-[8px] text-white bg-[#C27835] px-1 rounded-full font-bold">2 art.</span>
+                        </div>
+                        <span className="text-[9px] text-slate-400">-10% économie</span>
+                      </div>
+                    </div>
+                    <span className="text-[11px] font-black text-[#C27835]">
+                      {formatFCFA(Math.round(Number(price || 15000) * 1.8))}
+                    </span>
+                  </div>
+                </button>
               </div>
             </section>
 

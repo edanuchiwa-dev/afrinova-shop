@@ -5,6 +5,7 @@ import { mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { calculateServerShippingCost } from './shipping.ts';
 import { parseBeninPhone } from './phone.ts';
+import { priceFor } from './bundles.ts';
 
 const require = createRequire(import.meta.url);
 
@@ -32,6 +33,7 @@ export type Product = {
   seo_description?: string | null;
   variants?: string | null;
   sales_channels?: string | null;
+  bundle_style?: 'pill' | 'card' | string;
   status: string;
   created_at: string;
 };
@@ -54,6 +56,8 @@ export type OrderInput = {
   utm_medium?: string;
   utm_campaign?: string;
   referrer?: string;
+  bundleId?: string | null;
+  quantity?: number;
 };
 
 export type PromotionStatus = 'draft' | 'active' | 'paused' | 'ended';
@@ -223,6 +227,8 @@ function runMigrations(db: Database.Database) {
   addColumnIfNotExists('utm_medium', "TEXT DEFAULT ''");
   addColumnIfNotExists('utm_campaign', "TEXT DEFAULT ''");
   addColumnIfNotExists('referrer', "TEXT DEFAULT ''");
+  addColumnIfNotExists('bundle_id', "TEXT DEFAULT NULL");
+  addColumnIfNotExists('quantity', "INTEGER DEFAULT 1");
 
   const orderItemsCols = db.prepare('PRAGMA table_info(order_items)').all() as Array<{ name: string }>;
   const orderItemsColNames = new Set(orderItemsCols.map((c) => c.name));
@@ -252,6 +258,7 @@ function runMigrations(db: Database.Database) {
   addProductColumnIfNotExists('media_urls', "TEXT DEFAULT '[]'");
   addProductColumnIfNotExists('variants', "TEXT DEFAULT '[]'");
   addProductColumnIfNotExists('sales_channels', "TEXT DEFAULT '[\"online_store\",\"whatsapp\",\"ads\"]'");
+  addProductColumnIfNotExists('bundle_style', "TEXT DEFAULT 'card'");
 
   // 2c. Migration des colonnes IP & Géolocalisation dans page_views
   const pageViewsCols = db.prepare('PRAGMA table_info(page_views)').all() as Array<{ name: string }>;
@@ -651,9 +658,10 @@ export function createOrder(
         shipping_city, neighborhood, landmark, location_url, shipping_address,
         shipping_postal_code, shipping_country, carrier, payment_method,
         total_price, shipping_cost, customer_notes,
-        utm_source, utm_medium, utm_campaign, referrer
+        utm_source, utm_medium, utm_campaign, referrer,
+        bundle_id, quantity
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     const insertItem = db.prepare(`
       INSERT INTO order_items (order_id, product_id, product_name, product_price, quantity, promo_id)
@@ -721,6 +729,20 @@ export function createOrder(
       }
     }
 
+    const totalOrderQuantity = order.quantity || Array.from(quantities.values()).reduce((sum, q) => sum + q, 0);
+
+    // Recalcul strict côté serveur si un lot (bundleId) est sélectionné
+    if (order.bundleId && quantities.size === 1) {
+      const [firstProductId] = quantities.keys();
+      const product = findProduct.get(firstProductId) as Product | undefined;
+      if (product) {
+        const bundlePrice = priceFor(product, order.bundleId);
+        subtotalFCFA = bundlePrice;
+        const regularTotal = Math.round(product.price) * totalOrderQuantity;
+        totalSavings = Math.max(0, regularTotal - bundlePrice);
+      }
+    }
+
     const totalPrice = subtotalFCFA + shippingCost;
     if (!Number.isSafeInteger(subtotalFCFA) || !Number.isSafeInteger(totalPrice) || totalPrice <= 0) {
       throw new Error('Montant de commande invalide.');
@@ -762,7 +784,9 @@ export function createOrder(
       order.utm_source ?? '',
       order.utm_medium ?? '',
       order.utm_campaign ?? '',
-      order.referrer ?? ''
+      order.referrer ?? '',
+      order.bundleId ?? null,
+      totalOrderQuantity
     );
 
     // Décrémentation atomique des stocks et des quotas promo

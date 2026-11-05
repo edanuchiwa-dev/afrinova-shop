@@ -3,6 +3,8 @@ type OrderNotification = {
   customerName: string;
   shippingCity: string;
   totalPrice: number;
+  bundleTitle?: string;
+  quantity?: number;
 };
 
 export async function sendOrderNotification(
@@ -19,8 +21,13 @@ export async function sendOrderNotification(
     `Commande : ${order.orderNumber}`,
     `Client : ${firstName}`,
     `Ville : ${order.shippingCity}`,
+    order.bundleTitle
+      ? `Offre : ${order.bundleTitle} (x${order.quantity ?? 1})`
+      : order.quantity && order.quantity > 1
+        ? `Quantité : x${order.quantity}`
+        : null,
     `Montant : ${order.totalPrice.toLocaleString('fr-FR')} FCFA`,
-  ].join('\n');
+  ].filter(Boolean).join('\n');
 
   const headers: Record<string, string> = {
     Title: 'Nouvelle commande reçue !',

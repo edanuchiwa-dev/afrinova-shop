@@ -1,4 +1,5 @@
 import { getSetting, setSetting } from './db.ts';
+import { isTursoEnabled, tursoGetAllSettings, tursoSetSetting } from './turso.ts';
 
 export interface WhatsAppConfig {
   enabled: boolean;
@@ -99,6 +100,75 @@ export function getWhatsAppConfig(): WhatsAppConfig {
   };
 }
 
+export async function getWhatsAppConfigAsync(): Promise<WhatsAppConfig> {
+  const defaultPhone = process.env.NEXT_PUBLIC_WHATSAPP_PHONE || '2290197000000';
+  let enabledStr = '1';
+  let phone = defaultPhone;
+  let provider: 'callmebot' | 'greenapi' | 'webhook' = 'callmebot';
+  let apiKey = '';
+  let idInstance = '';
+  let webhookUrl = '';
+  let rawTemplate = '';
+  let foundInTurso = false;
+
+  if (isTursoEnabled()) {
+    try {
+      const allSettings = await tursoGetAllSettings();
+      if (allSettings.whatsapp_notify_enabled !== undefined) {
+        enabledStr = allSettings.whatsapp_notify_enabled;
+        foundInTurso = true;
+      }
+      if (allSettings.whatsapp_notify_phone) {
+        phone = allSettings.whatsapp_notify_phone;
+      }
+      if (allSettings.whatsapp_notify_provider) {
+        provider = allSettings.whatsapp_notify_provider as any;
+      }
+      if (allSettings.whatsapp_notify_apikey) {
+        apiKey = allSettings.whatsapp_notify_apikey;
+      }
+      if (allSettings.whatsapp_notify_id_instance) {
+        idInstance = allSettings.whatsapp_notify_id_instance;
+      }
+      if (allSettings.whatsapp_notify_webhook_url) {
+        webhookUrl = allSettings.whatsapp_notify_webhook_url;
+      }
+      if (allSettings.whatsapp_notify_template) {
+        rawTemplate = allSettings.whatsapp_notify_template;
+      }
+    } catch (err) {
+      console.warn('[WhatsApp Config] Échec lecture Turso, bascule SQLite :', err);
+    }
+  }
+
+  // Fallback SQLite si Turso n'a pas été configuré ou si les clés critiques sont vides
+  if (!foundInTurso || (!apiKey && !idInstance)) {
+    try {
+      enabledStr = getSetting('whatsapp_notify_enabled', enabledStr);
+      phone = getSetting('whatsapp_notify_phone', phone);
+      provider = (getSetting('whatsapp_notify_provider', provider) as any) || provider;
+      apiKey = getSetting('whatsapp_notify_apikey', apiKey);
+      idInstance = getSetting('whatsapp_notify_id_instance', idInstance);
+      webhookUrl = getSetting('whatsapp_notify_webhook_url', webhookUrl);
+      rawTemplate = getSetting('whatsapp_notify_template', rawTemplate);
+    } catch {
+      // Tolérance SQLite
+    }
+  }
+
+  const template = rawTemplate && rawTemplate.trim() ? rawTemplate : DEFAULT_WHATSAPP_TEMPLATE;
+
+  return {
+    enabled: enabledStr === '1',
+    phone: sanitizePhoneForWhatsApp(phone),
+    provider,
+    apiKey,
+    idInstance,
+    webhookUrl,
+    template,
+  };
+}
+
 export function saveWhatsAppConfig(config: Partial<WhatsAppConfig>): void {
   if (config.enabled !== undefined) {
     setSetting('whatsapp_notify_enabled', config.enabled ? '1' : '0');
@@ -120,6 +190,56 @@ export function saveWhatsAppConfig(config: Partial<WhatsAppConfig>): void {
   }
   if (config.template !== undefined) {
     setSetting('whatsapp_notify_template', config.template.trim());
+  }
+}
+
+export async function saveWhatsAppConfigAsync(config: Partial<WhatsAppConfig>): Promise<void> {
+  // Persister d'abord en SQLite local
+  saveWhatsAppConfig(config);
+
+  // Persister dans le Cloud Turso si activé (essentiel sur Vercel Serverless)
+  if (isTursoEnabled()) {
+    try {
+      if (config.enabled !== undefined) {
+        await tursoSetSetting('whatsapp_notify_enabled', config.enabled ? '1' : '0');
+      }
+      if (config.phone !== undefined) {
+        await tursoSetSetting('whatsapp_notify_phone', sanitizePhoneForWhatsApp(config.phone));
+      }
+      if (config.provider !== undefined) {
+        await tursoSetSetting('whatsapp_notify_provider', config.provider);
+      }
+      if (config.apiKey !== undefined) {
+        await tursoSetSetting('whatsapp_notify_apikey', config.apiKey.trim());
+      }
+      if (config.idInstance !== undefined) {
+        await tursoSetSetting('whatsapp_notify_id_instance', config.idInstance.trim());
+      }
+      if (config.webhookUrl !== undefined) {
+        await tursoSetSetting('whatsapp_notify_webhook_url', config.webhookUrl.trim());
+      }
+      if (config.template !== undefined) {
+        await tursoSetSetting('whatsapp_notify_template', config.template.trim());
+      }
+    } catch (err) {
+      console.error('[WhatsApp Config] Erreur sauvegarde Turso :', err);
+    }
+  }
+}
+
+export async function recordWhatsAppStatus(status: string, timestamp?: string): Promise<void> {
+  try {
+    setSetting('whatsapp_notify_last_status', status);
+    if (timestamp) setSetting('whatsapp_notify_last_sent_at', timestamp);
+  } catch {}
+
+  if (isTursoEnabled()) {
+    try {
+      await tursoSetSetting('whatsapp_notify_last_status', status);
+      if (timestamp) await tursoSetSetting('whatsapp_notify_last_sent_at', timestamp);
+    } catch (err) {
+      console.warn('[WhatsApp Status] Échec synchro statut Turso :', err);
+    }
   }
 }
 
@@ -147,7 +267,7 @@ export function formatWhatsAppMessage(template: string, data: WhatsAppOrderData)
     minute: '2-digit',
   });
 
-  const adminBaseUrl = data.adminBaseUrl || process.env.APP_URL || 'http://localhost:3000';
+  const adminBaseUrl = data.adminBaseUrl || process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || 'https://afrinova-shop.vercel.app';
   const adminUrl = `${adminBaseUrl}/admin?search=${encodeURIComponent(data.orderNumber)}`;
 
   return template
@@ -173,21 +293,21 @@ export async function sendWhatsAppMessage(
   message: string,
   overrideConfig?: Partial<WhatsAppConfig>
 ): Promise<{ success: boolean; status: string; directUrl: string }> {
-  const currentConfig = getWhatsAppConfig();
+  const currentConfig = await getWhatsAppConfigAsync();
   const config = { ...currentConfig, ...overrideConfig };
   const targetPhone = sanitizePhoneForWhatsApp(phone || config.phone);
   const directUrl = `https://wa.me/${targetPhone}?text=${encodeURIComponent(message)}`;
 
   if (!targetPhone) {
     const errorMsg = 'Numéro WhatsApp manquant ou invalide.';
-    setSetting('whatsapp_notify_last_status', `Erreur: ${errorMsg}`);
+    await recordWhatsAppStatus(`Erreur: ${errorMsg}`);
     return { success: false, status: errorMsg, directUrl };
   }
 
   if (config.provider === 'callmebot') {
     if (!config.apiKey) {
       const errorMsg = "Clé API CallMeBot non configurée. Utilisez le lien direct WhatsApp ou configurez l'API key.";
-      setSetting('whatsapp_notify_last_status', `Attention: ${errorMsg}`);
+      await recordWhatsAppStatus(`Attention: ${errorMsg}`);
       return { success: false, status: errorMsg, directUrl };
     }
 
@@ -199,7 +319,7 @@ export async function sendWhatsAppMessage(
 
       const response = await fetch(endpoint, {
         method: 'GET',
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(6000),
       });
 
       const responseText = await response.text();
@@ -213,8 +333,7 @@ export async function sendWhatsAppMessage(
         ? 'Message WhatsApp transmis avec succès à CallMeBot.'
         : `Réponse CallMeBot: ${responseText.replace(/<[^>]*>?/gm, '').trim() || `Code ${response.status}`}`;
 
-      setSetting('whatsapp_notify_last_status', statusDetail);
-      setSetting('whatsapp_notify_last_sent_at', new Date().toISOString());
+      await recordWhatsAppStatus(statusDetail, new Date().toISOString());
 
       return {
         success: isSuccess || response.ok,
@@ -223,7 +342,7 @@ export async function sendWhatsAppMessage(
       };
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Erreur réseau CallMeBot';
-      setSetting('whatsapp_notify_last_status', `Erreur réseau: ${errorMsg}`);
+      await recordWhatsAppStatus(`Erreur réseau: ${errorMsg}`);
       return { success: false, status: `Erreur: ${errorMsg}`, directUrl };
     }
   }
@@ -231,7 +350,7 @@ export async function sendWhatsAppMessage(
   if (config.provider === 'greenapi') {
     if (!config.idInstance || !config.apiKey) {
       const errorMsg = 'ID Instance ou Clé API Token Green-API manquante.';
-      setSetting('whatsapp_notify_last_status', `Erreur: ${errorMsg}`);
+      await recordWhatsAppStatus(`Erreur: ${errorMsg}`);
       return { success: false, status: errorMsg, directUrl };
     }
 
@@ -244,7 +363,7 @@ export async function sendWhatsAppMessage(
           chatId: `${targetPhone}@c.us`,
           message,
         }),
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(6000),
       });
 
       const data = (await response.json().catch(() => ({}))) as Record<string, unknown>;
@@ -253,13 +372,12 @@ export async function sendWhatsAppMessage(
         ? `Message WhatsApp transmis via Green-API (ID: ${data.idMessage})`
         : `Échec Green-API: ${JSON.stringify(data) || `Code ${response.status}`}`;
 
-      setSetting('whatsapp_notify_last_status', statusDetail);
-      setSetting('whatsapp_notify_last_sent_at', new Date().toISOString());
+      await recordWhatsAppStatus(statusDetail, new Date().toISOString());
 
       return { success: isSuccess, status: statusDetail, directUrl };
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Erreur réseau Green-API';
-      setSetting('whatsapp_notify_last_status', `Erreur Green-API: ${errorMsg}`);
+      await recordWhatsAppStatus(`Erreur Green-API: ${errorMsg}`);
       return { success: false, status: `Erreur: ${errorMsg}`, directUrl };
     }
   }
@@ -267,7 +385,7 @@ export async function sendWhatsAppMessage(
   if (config.provider === 'webhook') {
     if (!config.webhookUrl) {
       const errorMsg = 'URL du Webhook non renseignée.';
-      setSetting('whatsapp_notify_last_status', `Erreur: ${errorMsg}`);
+      await recordWhatsAppStatus(`Erreur: ${errorMsg}`);
       return { success: false, status: errorMsg, directUrl };
     }
 
@@ -284,7 +402,7 @@ export async function sendWhatsAppMessage(
           message,
           timestamp: new Date().toISOString(),
         }),
-        signal: AbortSignal.timeout(8000),
+        signal: AbortSignal.timeout(6000),
       });
 
       const isSuccess = response.ok;
@@ -292,13 +410,12 @@ export async function sendWhatsAppMessage(
         ? `Webhook notifié avec succès (${response.status})`
         : `Échec Webhook (code HTTP ${response.status})`;
 
-      setSetting('whatsapp_notify_last_status', statusDetail);
-      setSetting('whatsapp_notify_last_sent_at', new Date().toISOString());
+      await recordWhatsAppStatus(statusDetail, new Date().toISOString());
 
       return { success: isSuccess, status: statusDetail, directUrl };
     } catch (err: unknown) {
       const errorMsg = err instanceof Error ? err.message : 'Erreur réseau Webhook';
-      setSetting('whatsapp_notify_last_status', `Erreur Webhook: ${errorMsg}`);
+      await recordWhatsAppStatus(`Erreur Webhook: ${errorMsg}`);
       return { success: false, status: `Erreur: ${errorMsg}`, directUrl };
     }
   }
@@ -309,7 +426,7 @@ export async function sendWhatsAppMessage(
 export async function sendWhatsAppOrderNotification(
   data: WhatsAppOrderData
 ): Promise<{ success: boolean; status: string; directUrl: string }> {
-  const config = getWhatsAppConfig();
+  const config = await getWhatsAppConfigAsync();
   if (!config.enabled) {
     const directUrl = `https://wa.me/${config.phone}?text=${encodeURIComponent(
       formatWhatsAppMessage(config.template, data)

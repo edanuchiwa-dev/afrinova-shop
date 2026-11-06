@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { createOrder, getDb } from '@/lib/db';
 import { isTursoEnabled, tursoCreateOrder } from '@/lib/turso';
 import { sendOrderNotification } from '@/lib/notifications';
-import { sendWhatsAppOrderNotification, formatWhatsAppMessage, getWhatsAppConfig } from '@/lib/whatsapp';
+import { sendWhatsAppOrderNotification, formatWhatsAppMessage, getWhatsAppConfigAsync } from '@/lib/whatsapp';
 import { parseBeninPhone } from '@/lib/phone';
 import { checkRateLimit, getClientIp } from '@/lib/rate-limit';
 
@@ -88,6 +88,7 @@ export async function POST(request: Request) {
     normalizedPhone: string;
     subtotal: number;
     savings: number;
+    items?: Array<{ name: string; price: number; quantity: number }>;
   };
   try {
     if (isTursoEnabled()) {
@@ -180,12 +181,15 @@ export async function POST(request: Request) {
   // 8. Notification WhatsApp automatique sur mesure au commerçant
   let whatsappDirectUrl = '';
   try {
-    const waConfig = getWhatsAppConfig();
-    const waItems = data.items.map((it) => ({
-      name: `Article #${it.id}`,
-      quantity: it.quantity,
-      price: Math.round(result.subtotal / Math.max(1, data.items.length)),
-    }));
+    const waConfig = await getWhatsAppConfigAsync();
+    const waItems =
+      result.items && result.items.length > 0
+        ? result.items
+        : data.items.map((it) => ({
+            name: `Article #${it.id}`,
+            quantity: it.quantity,
+            price: Math.round(result.subtotal / Math.max(1, data.items.length)),
+          }));
 
     const orderNotificationPayload = {
       orderNumber: result.orderNumber,
@@ -200,15 +204,21 @@ export async function POST(request: Request) {
       subtotal: result.subtotal,
       paymentMethod: data.paymentMethod,
       customerNotes: data.customerNotes || undefined,
+      adminBaseUrl: process.env.APP_URL || 'https://afrinova-shop.vercel.app',
     };
 
     const waMessage = formatWhatsAppMessage(waConfig.template, orderNotificationPayload);
     whatsappDirectUrl = `https://wa.me/${waConfig.phone}?text=${encodeURIComponent(waMessage)}`;
 
-    // Envoi asynchrone non-bloquant
-    void sendWhatsAppOrderNotification(orderNotificationPayload).catch((err) => {
+    // Envoi de la notification WhatsApp (attente pour sécuriser l'exécution sur Vercel Serverless)
+    try {
+      const waSendRes = await sendWhatsAppOrderNotification(orderNotificationPayload);
+      if (!waSendRes.success) {
+        console.warn('[WhatsApp Notification Notice]:', waSendRes.status);
+      }
+    } catch (err) {
       console.error('Échec envoi WhatsApp automatique :', err instanceof Error ? err.message : 'Erreur');
-    });
+    }
   } catch (err) {
     console.error('Erreur préparation alerte WhatsApp :', err instanceof Error ? err.message : 'Erreur');
   }

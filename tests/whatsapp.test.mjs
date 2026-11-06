@@ -5,6 +5,7 @@ import {
   formatWhatsAppMessage,
   DEFAULT_WHATSAPP_TEMPLATE,
   getWhatsAppConfig,
+  getWhatsAppConfigAsync,
   saveWhatsAppConfig,
 } from '../src/lib/whatsapp.ts';
 
@@ -95,5 +96,12 @@ test('▶ Module WhatsApp — Tests Unitaires & Formatage sur mesure', async (t)
     } finally {
       saveWhatsAppConfig(original);
     }
+  });
+
+  await t.test('5. Relecture asynchrone getWhatsAppConfigAsync et persistance cloud', async () => {
+    const config = await getWhatsAppConfigAsync();
+    assert.ok(typeof config.enabled === 'boolean');
+    assert.ok(typeof config.phone === 'string');
+    assert.ok(['callmebot', 'greenapi', 'webhook'].includes(config.provider));
   });
 });

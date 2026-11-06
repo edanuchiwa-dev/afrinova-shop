@@ -1,14 +1,32 @@
 import { NextResponse } from 'next/server';
-import { getWhatsAppConfig, saveWhatsAppConfig, DEFAULT_WHATSAPP_TEMPLATE } from '@/lib/whatsapp';
+import {
+  getWhatsAppConfigAsync,
+  saveWhatsAppConfigAsync,
+  DEFAULT_WHATSAPP_TEMPLATE,
+} from '@/lib/whatsapp';
 import { getSetting } from '@/lib/db';
+import { isTursoEnabled, tursoGetAllSettings } from '@/lib/turso';
 
 export const runtime = 'nodejs';
 
-export function GET() {
+export async function GET() {
   try {
-    const config = getWhatsAppConfig();
-    const lastStatus = getSetting('whatsapp_notify_last_status', 'Aucun envoi récent');
-    const lastSentAt = getSetting('whatsapp_notify_last_sent_at', '');
+    const config = await getWhatsAppConfigAsync();
+    let lastStatus = 'Aucun envoi récent';
+    let lastSentAt = '';
+
+    if (isTursoEnabled()) {
+      try {
+        const settings = await tursoGetAllSettings();
+        lastStatus = settings.whatsapp_notify_last_status || lastStatus;
+        lastSentAt = settings.whatsapp_notify_last_sent_at || lastSentAt;
+      } catch {}
+    } else {
+      try {
+        lastStatus = getSetting('whatsapp_notify_last_status', lastStatus);
+        lastSentAt = getSetting('whatsapp_notify_last_sent_at', lastSentAt);
+      } catch {}
+    }
 
     return NextResponse.json({
       ...config,
@@ -31,7 +49,7 @@ export async function POST(request: Request) {
 
     const { enabled, phone, provider, apiKey, idInstance, webhookUrl, template } = body;
 
-    saveWhatsAppConfig({
+    await saveWhatsAppConfigAsync({
       enabled: enabled !== undefined ? Boolean(enabled) : undefined,
       phone: typeof phone === 'string' ? phone : undefined,
       provider: provider === 'webhook' ? 'webhook' : provider === 'greenapi' ? 'greenapi' : 'callmebot',
@@ -41,7 +59,7 @@ export async function POST(request: Request) {
       template: typeof template === 'string' ? template : undefined,
     });
 
-    const updated = getWhatsAppConfig();
+    const updated = await getWhatsAppConfigAsync();
     return NextResponse.json({
       success: true,
       config: updated,

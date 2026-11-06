@@ -665,6 +665,7 @@ async function executeCreateOrderWithClient(
       normalizedPhone,
       subtotal,
       savings,
+      items: linesToInsert.map((l) => ({ name: l.name, price: l.price, quantity: l.quantity })),
     };
   } catch (error) {
     try {
@@ -732,6 +733,25 @@ export async function tursoGetAllSettings(): Promise<Record<string, string>> {
     out[row.key] = row.value;
   }
   return out;
+}
+
+export async function tursoGetSetting(key: string, defaultValue = ''): Promise<string> {
+  const client = getTursoClient();
+  const res = await client.execute({
+    sql: 'SELECT value FROM settings WHERE key = ?',
+    args: [key],
+  });
+  const row = res.rows[0] as any;
+  return row?.value !== undefined && row?.value !== null ? String(row.value) : defaultValue;
+}
+
+export async function tursoSetSetting(key: string, value: string): Promise<void> {
+  const client = getTursoClient();
+  await client.execute({
+    sql: `INSERT INTO settings (key, value) VALUES (?, ?)
+          ON CONFLICT(key) DO UPDATE SET value = excluded.value`,
+    args: [key, value],
+  });
 }
 
 // -------------------------------------------------------------

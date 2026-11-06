@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 import { getAllSettings, setSetting } from '@/lib/db';
+import { isTursoEnabled, tursoGetAllSettings, tursoSetSetting } from '@/lib/turso';
 
 export const runtime = 'nodejs';
 
-export function GET() {
+export async function GET() {
   try {
-    const raw = getAllSettings();
+    const raw = isTursoEnabled() ? await tursoGetAllSettings() : getAllSettings();
     return NextResponse.json({
       qb_enabled: raw.qb_enabled ?? '1',
       qb_popular_tier: raw.qb_popular_tier ?? '2',
@@ -51,6 +52,11 @@ export async function POST(request: Request) {
     for (const key of allowedKeys) {
       if (key in body && typeof body[key] === 'string') {
         setSetting(key, body[key]);
+        if (isTursoEnabled()) {
+          await tursoSetSetting(key, body[key]).catch((err) => {
+            console.error(`[Settings] Erreur synchro Turso pour ${key}:`, err);
+          });
+        }
       }
     }
 

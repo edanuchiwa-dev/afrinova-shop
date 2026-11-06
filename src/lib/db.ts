@@ -850,6 +850,24 @@ export function createOrder(
       }
     }
 
+    const resolvedItems: Array<{ name: string; price: number; quantity: number }> = [];
+    for (const line of lines) {
+      if (line.promoUnits > 0 && line.promoId && line.promoPrice) {
+        resolvedItems.push({
+          name: line.promoUnits === line.quantity ? `${line.product.name} (Offre Promotionnelle)` : `${line.product.name} (Tarif Promo)`,
+          price: line.promoPrice,
+          quantity: line.promoUnits,
+        });
+      }
+      if (line.normalUnits > 0) {
+        resolvedItems.push({
+          name: line.promoUnits > 0 ? `${line.product.name} (Tarif Normal)` : line.product.name,
+          price: line.unitPrice,
+          quantity: line.normalUnits,
+        });
+      }
+    }
+
     return {
       success: true as const,
       orderNumber,
@@ -858,6 +876,7 @@ export function createOrder(
       normalizedPhone,
       subtotal: subtotalFCFA,
       savings: totalSavings,
+      items: resolvedItems,
     };
   })();
 }
